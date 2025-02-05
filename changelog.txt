@@ -1,0 +1,5 @@
+0.1.0 "initial release"
+* works if you know what you're doing and are very careful with inputs
+* Windows-only
+
+GitHub: https://github.com/tanksdude/automated-reddit-video-tool-gui
