@@ -21,7 +21,7 @@ struct ImageData {
 	inline std::string get_font_size_input() const { return std::string(font_size_input); }
 	inline std::string get_font_color_input() const { return std::string(font_color_input); }
 	inline std::string get_background_color_input() const { return std::string(background_color_input); }
-	inline std::string get_paragraph_separator_input() const { return std::string(paragraph_separator_input); }
+	std::string get_paragraph_separator() const; //escapes quotes and backslashes (TODO: Linux probably handles things differently, might have to make this a "newline count" instead of anything)
 
 	ImageData() {
 		strcpy(image_width_input, "960");

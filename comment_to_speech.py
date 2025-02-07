@@ -59,7 +59,7 @@ IMAGE_HEIGHT = int(args.image_height_input) - 2*IMAGE_H_BORDER
 IMAGE_FONT_SIZE = args.font_size_input
 IMAGE_TEXT_COLOR = args.font_color_input
 IMAGE_BACKGROUND_COLOR = args.background_color_input
-IMAGE_NEW_PARAGRAPH_SEP = args.paragraph_separator_input.replace("\\n", "\n") # TODO: properly escape every character
+IMAGE_NEW_PARAGRAPH_SEP = args.paragraph_separator_input.replace("\\n", "\n").replace("\\t", "\t")
 IMAGE_FORMAT = args.imageFormat
 # evaluated image parameters:
 IMAGE_SIZE = str(IMAGE_WIDTH) + "x" + str(IMAGE_HEIGHT)

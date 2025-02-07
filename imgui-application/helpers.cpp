@@ -144,23 +144,6 @@ int call_comment_splitter(const char* path, const char* output) {
 }
 
 int call_comment_test_image(const char* textPath, const char* output, const ImageData& idata) {
-
-	//TODO: move this to the ImageData struct
-	std::string paragraph_separator = idata.get_paragraph_separator_input();
-	const std::vector<std::pair<std::string, std::string>> escapeCharacterTranslation = {
-		{ "\"", "\\\"" },
-		{ "\'", "\\\'" },
-		//TODO: rest?
-		//DO NOT escape \n or \t, that's handled by Python
-	};
-	for (const std::pair<std::string, std::string>& lookup : escapeCharacterTranslation) {
-		size_t pos = paragraph_separator.find(lookup.first);
-		while (pos != std::string::npos) {
-			paragraph_separator.replace(pos, lookup.first.size(), lookup.second);
-			pos = paragraph_separator.find(lookup.first, pos + lookup.second.size());
-		}
-	}
-
 	std::string command = "python ../comment_test_image.py " + std::string(textPath) + " " + std::string(output) + " " +
 		idata.get_image_width_input() + " " +
 		idata.get_image_height_input() + " " +
@@ -169,7 +152,7 @@ int call_comment_test_image(const char* textPath, const char* output, const Imag
 		idata.get_font_size_input() + " " +
 		"\"" + idata.get_font_color_input() + "\" " +
 		"\"" + idata.get_background_color_input() + "\" " +
-		"\"" + paragraph_separator + "\" ";
+		"\"" + idata.get_paragraph_separator() + "\" ";
 
 	#if defined(WIN32) || defined(_WIN32)
 	if (command.size() > 4000) {
@@ -184,22 +167,6 @@ int call_comment_to_speech(const char* path, const char* output, const ImageData
 
 	//TODO: paths can have spaces
 
-	//TODO: move this to the ImageData struct
-	std::string paragraph_separator = idata.get_paragraph_separator_input();
-	const std::vector<std::pair<std::string, std::string>> escapeCharacterTranslation = {
-		{ "\"", "\\\"" },
-		{ "\'", "\\\'" },
-		//TODO: rest?
-		//DO NOT escape \n or \t, that's handled by Python
-	};
-	for (const std::pair<std::string, std::string>& lookup : escapeCharacterTranslation) {
-		size_t pos = paragraph_separator.find(lookup.first);
-		while (pos != std::string::npos) {
-			paragraph_separator.replace(pos, lookup.first.size(), lookup.second);
-			pos = paragraph_separator.find(lookup.first, pos + lookup.second.size());
-		}
-	}
-
 	std::string command = "python ../comment_to_speech.py " + std::string(path) + " " + std::string(output) + " " +
 		idata.get_image_width_input() + " " +
 		idata.get_image_height_input() + " " +
@@ -208,7 +175,7 @@ int call_comment_to_speech(const char* path, const char* output, const ImageData
 		idata.get_font_size_input() + " " +
 		"\"" + idata.get_font_color_input() + "\" " +
 		"\"" + idata.get_background_color_input() + "\" " +
-		"\"" + paragraph_separator + "\" " +
+		"\"" + idata.get_paragraph_separator() + "\" " +
 
 		"\"" + vdata.get_video_replacement_numbers_input() + "\" " + //TODO: should this have -n?
 		(vdata.audio_only_option_input ? "-a " : "") +

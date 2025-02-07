@@ -2,7 +2,7 @@
 @set OUT_DIR=Debug
 @set OUT_EXE=example_glfw_opengl3
 @set INCLUDES=/I.\libs\glfw\include
-@set SOURCES=main.cpp helpers.cpp audio_data.cpp imgui\imgui_impl_glfw.cpp imgui\imgui_impl_opengl3.cpp imgui\imgui*.cpp
+@set SOURCES=main.cpp helpers.cpp audio_data.cpp image_data.cpp imgui\imgui_impl_glfw.cpp imgui\imgui_impl_opengl3.cpp imgui\imgui*.cpp
 @set LIBS=/LIBPATH:libs\glfw\lib-vc2022-64 glfw3.lib opengl32.lib gdi32.lib shell32.lib
 Taskkill /IM example_glfw_opengl3.exe /F
 mkdir %OUT_DIR%
