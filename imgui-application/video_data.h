@@ -21,10 +21,18 @@ struct VideoData {
 	const char* imageFormatArray[6] = { ".png", ".jpg", ".avif", ".webp", ".tiff", ".bmp" };
 	int imageFormatArray_current = 0;
 
+	/* Passing codec information to the Python script:
+	 * The Python script will read the string character for character. It will
+	 * interpret "H.265 / HEVC" as H.265.
+	 */
 	const char* videoEncoderArray[5] = { "H.264", "H.265 / HEVC", "VP8", "VP9", "AV1" }; //TODO: fill based on the hashmap above?
 	int videoEncoderArray_current = 0;
 
-	//TODO: either separate preset array or dynamically change this
+	/* Passing preset information to the Python script:
+	 * The Python script will ignore everything after the first space. This
+	 * means "medium (default)" will be interpreted the same as "medium".
+	 */
+	//TODO: either separate preset array or dynamically change this based on the codec
 	const char* videoPresetArray[10] = { "ultrafast", "superfast", "veryfast", "faster", "fast", "medium (default)" , "slow", "slower", "veryslow", "placebo (not recommended)" };
 	int videoPresetArray_current = 5;
 
@@ -46,10 +54,10 @@ struct VideoData {
 	std::int8_t crf_max = 63;
 
 	inline std::string get_video_replacement_numbers_input() const { return std::string(video_replacement_numbers_input); }
-	inline std::string get_imageFormat() const { return imageFormatArray[imageFormatArray_current]; }
-	inline std::string get_videoEncoder() const { return videoEncoderArray[videoEncoderArray_current]; }
-	inline std::string get_videoPreset() const { return videoPresetArray[videoPresetArray_current]; }
-	inline std::string get_videoContainer() const { return videoContainerArray[videoContainerArray_current]; }
+	inline std::string get_imageFormat() const { return std::string(imageFormatArray[imageFormatArray_current]); }
+	inline std::string get_videoEncoder() const { return std::string(videoEncoderArray[videoEncoderArray_current]); }
+	inline std::string get_videoPreset() const { return std::string(videoPresetArray[videoPresetArray_current]); }
+	inline std::string get_videoContainer() const { return std::string(videoContainerArray[videoContainerArray_current]); }
 
 	VideoData() {
 		strcpy(video_replacement_numbers_input, "");

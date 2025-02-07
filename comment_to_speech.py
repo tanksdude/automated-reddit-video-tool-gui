@@ -5,10 +5,21 @@ import time
 
 # python comment_to_speech.py input_text.txt [-s input_speech] output_speech/vid_$.mp4 [-n replace] [-a] VIDEO_PARAMTERS
 
-"""
-{ "libx264", "libx265", "libvpx", "libvpx-vp9", "libaom-av1" }
-{ "copy", "aac", "libopus", "flac", "libvorbis" };
-"""
+audioCodecLookup = {
+	"copy":   "copy",
+	"AAC":    "aac",
+	"Opus":   "libopus",
+	"FLAC":   "flac",
+	"Vorbis": "libvorbis",
+}
+
+videoCodecLookup = {
+	"H.264":        "libx264",
+	"H.265 / HEVC": "libx265",
+	"VP8":          "libvpx",
+	"VP9":          "libvpx-vp9",
+	"AV1":          "libaom-av1",
+}
 
 #print(sys.argv[1:]);
 
@@ -56,12 +67,13 @@ IMAGE_SIZE_EXTENDED = str(IMAGE_WIDTH + 2*IMAGE_W_BORDER) + "x" + str(IMAGE_HEIG
 
 # Video parameters:
 AUDIO_VOICE = args.voice
-AUDIO_CODEC = args.audioEncoder #TODO
+AUDIO_CODEC = audioCodecLookup[args.audioEncoder]
 VIDEO_FPS = args.fps #TODO
 VIDEO_VID_CRF = args.crf
 VIDEO_AUD_BITRATE = "256k" #TODO
-VIDEO_VID_CODEC = "libx264" #TODO
-# video size controlled by the image size
+VIDEO_VID_CODEC = videoCodecLookup[args.videoEncoder]
+VIDEO_VID_PRESET = args.videoPreset.split(' ')[0]
+VIDEO_VID_FASTSTART = int(args.faststart_flag)
 
 input_image_text_file_path = args.input_text_file
 output_vid_file_path = args.output_mp4_files
@@ -76,13 +88,32 @@ def text_to_speech_func(wav_file_name, text_file_name):
 	return subprocess.run(["../balcon", "-n", AUDIO_VOICE, "-enc", "utf8", "-w", wav_file_name, "-f", text_file_name])
 	# Linux espeak: subprocess.run(["espeak", "-v", "english+f4", "-w", wav_file_name, "-f", text_file_name])
 
-def text_to_image_func(img_file_name, text_file_name, img_size, font_size, back_color, text_color, img_extended_size):
-	#return subprocess.run(["magick", "-size", img_size, "-background", back_color, "-fill", text_color, "-family", "Times New Roman", "-pointsize", font_size, "pango:@" + text_file_name, "-gravity", "center", "-extent", img_extended_size, img_file_name])
-	return subprocess.run(["magick", "-size", img_size, "-background", back_color, "-fill", text_color, "-font", "Verdana", "-pointsize", font_size, "pango:@" + text_file_name, "-gravity", "center", "-extent", img_extended_size, img_file_name])
+def text_to_image_func(img_file_name, text_file_name):
+	#return subprocess.run(["magick", "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_TEXT_COLOR, "-family", "Times New Roman", "-pointsize", IMAGE_FONT_SIZE, "pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])
+	return subprocess.run(["magick", "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_TEXT_COLOR, "-font", "Verdana", "-pointsize", IMAGE_FONT_SIZE, "pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])
 	# https://imagemagick.org/Usage/text/#caption
 
-def speech_and_image_to_vid_func(vid_file_name, wav_file_name, img_file_name, framerate, vid_crf, aud_bitrate):
-	return subprocess.run(["ffmpeg", "-i", wav_file_name, "-i", img_file_name, "-c:v", VIDEO_VID_CODEC, "-c:a", AUDIO_CODEC, "-r", framerate, "-crf", vid_crf, "-b:a", aud_bitrate, "-movflags", "+faststart", "-loglevel", "error", "-y", vid_file_name])
+def speech_and_image_to_vid_func(vid_file_name, wav_file_name, img_file_name):
+	# TODO: these args should be in a global list to avoid remaking the list every time, since only the input files change
+	# Main args
+	command_args = ["ffmpeg", "-i", wav_file_name, "-i", img_file_name]
+
+	# Video args
+	command_args.extend(["-c:v", VIDEO_VID_CODEC, "-preset", VIDEO_VID_PRESET])
+	command_args.extend(["-r", VIDEO_FPS, "-crf", VIDEO_VID_CRF])
+	if VIDEO_VID_FASTSTART:
+		command_args.extend(["-movflags", "+faststart"])
+
+	# Audio args
+	command_args.extend(["-c:a", AUDIO_CODEC])
+	if AUDIO_CODEC != "copy":
+		# bitrate is ignored when the codec is copy, so this check is unnecessary
+		command_args.extend(["-b:a", VIDEO_AUD_BITRATE])
+
+	# Other args
+	command_args.extend(["-loglevel", "error", "-y", vid_file_name])
+
+	return subprocess.run(command_args)
 	# loglevels: quiet, fatal, error, warning
 	# https://ffmpeg.org/ffmpeg.html#Main-options
 
@@ -162,11 +193,11 @@ for i in range(len(image_text_file_lines)):
 			output_file.write(curr_text_file_read)
 			output_file.close()
 
-			result = text_to_image_func(gen_output_img_file_path(files_count), gen_output_img_file_path(files_count)+".temp", IMAGE_SIZE, IMAGE_FONT_SIZE, IMAGE_BACKGROUND_COLOR, IMAGE_TEXT_COLOR, IMAGE_SIZE_EXTENDED)
+			result = text_to_image_func(gen_output_img_file_path(files_count), gen_output_img_file_path(files_count)+".temp")
 			os.remove(gen_output_img_file_path(files_count)+".temp")
 
 			# video:
-			result = speech_and_image_to_vid_func(gen_output_vid_file_path(files_count), gen_output_wav_file_path(files_count), gen_output_img_file_path(files_count), VIDEO_FPS, VIDEO_VID_CRF, VIDEO_AUD_BITRATE)
+			result = speech_and_image_to_vid_func(gen_output_vid_file_path(files_count), gen_output_wav_file_path(files_count), gen_output_img_file_path(files_count))
 
 			# cleanup:
 			os.remove(gen_output_wav_file_path(files_count))

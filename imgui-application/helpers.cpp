@@ -216,8 +216,8 @@ int call_comment_to_speech(const char* path, const char* output, const ImageData
 		vdata.get_imageFormat() + " " +
 		adata.get_voiceEngine() + " " +
 		"\"" + adata.get_voice() + "\" " +
-		adata.get_audioEncoder() + " " +
-		vdata.get_videoEncoder() + " " +
+		"\"" + adata.get_audioEncoder() + "\" " +
+		"\"" + vdata.get_videoEncoder() + "\" " +
 		"\"" + vdata.get_videoPreset() + "\" " +
 		std::to_string(vdata.faststart_flag) + " " +
 
@@ -230,6 +230,7 @@ int call_comment_to_speech(const char* path, const char* output, const ImageData
 	}
 	#endif
 
+	//TODO: need to exit early if there's an error
 	return system_helper(command.c_str(), false);
 }
 

@@ -2,6 +2,9 @@
 input_comments/
 input_splits/
 output_speech/
+imgui-application/Debug
+imgui-application/imgui.ini
+imgui-application/*.pdb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

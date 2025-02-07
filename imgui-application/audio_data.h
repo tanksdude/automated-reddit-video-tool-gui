@@ -16,10 +16,15 @@ struct AudioData {
 	int voiceArray_current;
 	int voiceArray_length;
 
+	/* Passing codec information to the Python script:
+	 * The Python script will read the string character for character. It will
+	 * translate each codec name to the correct library.
+	 */
 	//TODO: maybe this goes in VideoData?
 	const char* audioEncoderArray[5] = { "copy", "AAC", "Opus", "FLAC", "Vorbis" };
 	int audioEncoderArray_current = 0;
 
+	//TODO: this should probably be a slider input, [60,300] step=4
 	char audio_bitrate_input[32]; //used only if codec is not copy
 
 	inline std::string get_voiceEngine() const { return std::string(voiceEngineArray[voiceEngineArray_current]); }
