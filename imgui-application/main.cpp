@@ -406,6 +406,8 @@ int main(int, char**)
 
 						ImGui::SeparatorText("Speech Text (optional)");
 
+						ImGui::Checkbox("Use Speech Text", &vdata.use_speech_text);
+
 						ImGui::InputText("##Input Split 2 Path", evaluated_input_split_2, IM_ARRAYSIZE(evaluated_input_split_2), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 						ImGui::SameLine();
 						if (ImGui::Button("Refresh##Input Split 2")) {
@@ -509,7 +511,8 @@ int main(int, char**)
 
 						if (ImGui::Button("GO!", ImVec2(-FLT_MIN, 0.0f))) {
 							//TODO: progress bar and async
-							ARVT::call_comment_to_speech(evaluated_input_split_1, ARVT::inputFileName_toCommentToSpeechPath(the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current]).c_str(),
+							ARVT::call_comment_to_speech(evaluated_input_split_1, evaluated_input_split_2,
+								ARVT::inputFileName_toCommentToSpeechPath(the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current]).c_str(),
 								idata, adata, vdata);
 						}
 						if (ImGui::Button("Reveal in File Explorer##final video", ImVec2(-FLT_MIN, 0.0f))) {

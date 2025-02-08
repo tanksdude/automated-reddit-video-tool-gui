@@ -15,6 +15,7 @@ struct VideoData {
 	};
 	*/
 
+	bool use_speech_text = false;
 	char video_replacement_numbers_input[64];
 	bool audio_only_option_input = false;
 

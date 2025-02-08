@@ -163,11 +163,12 @@ int call_comment_test_image(const char* textPath, const char* output, const Imag
 	return system_helper(command.c_str(), false);
 }
 
-int call_comment_to_speech(const char* path, const char* output, const ImageData& idata, const AudioData& adata, const VideoData& vdata) {
+int call_comment_to_speech(const char* textPath, const char* speechPath, const char* output, const ImageData& idata, const AudioData& adata, const VideoData& vdata) {
 
 	//TODO: paths can have spaces
 
-	std::string command = "python ../comment_to_speech.py " + std::string(path) + " " + std::string(output) + " " +
+	std::string command = "python ../comment_to_speech.py " + std::string(textPath) + " " + std::string(output) + " " +
+		(vdata.use_speech_text ? "-s " + std::string(speechPath) + " " : "") +
 		idata.get_image_width_input() + " " +
 		idata.get_image_height_input() + " " +
 		idata.get_image_w_border_input() + " " +
