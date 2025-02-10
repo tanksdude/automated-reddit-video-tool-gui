@@ -87,6 +87,11 @@ ImageData idata;
 AudioData adata;
 VideoData vdata;
 
+const char* imageDeleteAgeList[] = { "1 day", "2 weeks", "1 month", "6 months" };
+const int imageDeleteAgeList_values[] = { 1, 14, 30, 180 };
+static_assert(IM_ARRAYSIZE(imageDeleteAgeList) == IM_ARRAYSIZE(imageDeleteAgeList_values));
+int imageDeleteAgeList_current = 0;
+
 
 
 #define _CRT_SECURE_NO_WARNINGS
@@ -586,7 +591,17 @@ int main(int, char**)
 
 						ImGui::SeparatorText("Misc");
 
-						ImGui::Text("TODO: cleanup button with combo for date range");
+						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
+						ImGui::Combo("File Delete Age", &imageDeleteAgeList_current, imageDeleteAgeList, IM_ARRAYSIZE(imageDeleteAgeList));
+						ImGui::PopItemWidth();
+						ImGui::SameLine();
+						if (ImGui::Button("Delete files")) {
+							int result = ARVT::deleteAllOldFiles(ARVT::OUTPUT_SPEECH.c_str(), imageDeleteAgeList_values[imageDeleteAgeList_current]);
+							if (result) {
+								//TODO
+							}
+						}
+
 						ImGui::Text("TODO: reset all to default button");
 
 						ImGui::EndTable();

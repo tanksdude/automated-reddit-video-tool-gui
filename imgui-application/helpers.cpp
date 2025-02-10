@@ -136,6 +136,28 @@ int revealFileExplorer(const char* path) {
 	#endif
 }
 
+int deleteAllOldFiles(const char* dir, int dayCount) {
+	//TODO: this needs to have some kind of guarantee that the path is somewhere inside this project's root folder
+	//it does work though, but I'm not pushing it until there's safety
+	return 0;
+
+	/*
+	if (dayCount <= 0) [[unlikely]] {
+		return 0;
+	}
+	//TODO: this should print a list for confirmation
+	auto nowTime = std::chrono::file_clock::now();
+	for (const auto& file : std::filesystem::directory_iterator(dir)) {
+		std::filesystem::file_time_type ftime = std::filesystem::last_write_time(file);
+		auto duration = nowTime - ftime;
+		if (duration > std::chrono::hours(24 * dayCount)) {
+			std::filesystem::remove(file);
+		}
+	}
+	return 0;
+	*/
+}
+
 
 
 int call_comment_splitter(const char* path, const char* output) {

@@ -31,6 +31,7 @@ int copyFileToCStr(const char* path, char* dest, int buf_size);
 
 int copy_file(const char* path, const char* newPath);
 int revealFileExplorer(const char* path); //note: this also checks for existence using <filesystem>
+int deleteAllOldFiles(const char* dir, int dayCount);
 
 int call_comment_splitter(const char* path, const char* output);
 int call_comment_test_image(const char* textPath, const char* output, const ImageData& idata);
