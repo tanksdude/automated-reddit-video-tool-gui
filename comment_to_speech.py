@@ -27,7 +27,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument("input_text_file", help="text to show on screen")
 parser.add_argument("-s", "--input_speech_file", metavar="input_speech_file", required=False, help="text to read aloud")
 parser.add_argument("output_mp4_files", help="output video files (needs a '$' in its name)")
-parser.add_argument("-n", "--video_number", metavar="video_number", required=False, help="update/generate a specific video", type=int) #maybe try action="extend"
 parser.add_argument("-a", "--audio_only", required=False, help="only output audio files, no video", action="store_true")
 
 parser.add_argument("image_width_input")
@@ -40,12 +39,12 @@ parser.add_argument("background_color_input")
 parser.add_argument("paragraph_separator_input")
 parser.add_argument("imageFormat")
 
-parser.add_argument("video_replacement_numbers") #TODO: "3-" should go from 3 to the end
+parser.add_argument("-n", "--video_replacement_numbers", metavar="video_replacement_numbers", required=False, help="update/generate a specific video")
 parser.add_argument("speechEngine")
 parser.add_argument("voice")
 parser.add_argument("audioEncoder")
 parser.add_argument("videoEncoder")
-parser.add_argument("videoPreset")
+parser.add_argument("videoPreset") #TODO: "default" option that doesn't provide a -preset arg
 parser.add_argument("faststart_flag")
 parser.add_argument("fps")
 parser.add_argument("crf")
@@ -80,7 +79,6 @@ output_vid_file_path = args.output_mp4_files
 if output_vid_file_path.find('$') == -1:
 	sys.exit("Bad output vid file names")
 input_speech_text_file_path = args.input_speech_file
-replace_video_number = args.video_number
 audio_only = args.audio_only
 
 def text_to_speech_func(wav_file_name, text_file_name):
@@ -167,6 +165,36 @@ else:
 if len(image_text_file_lines) != len(speech_text_file_lines):
 	sys.exit("Lines in image text file and speech text file don't match")
 
+video_replacement_set = set() # {} is a dictionary
+for nums in args.video_replacement_numbers.split(","):
+	numRange = nums.split("-")
+	if len(numRange) > 2:
+		sys.exit("Bad video replacement list")
+	if len(numRange) == 1:
+		# no hyphen
+		try:
+			video_replacement_set.add(int(numRange[0]))
+		except (TypeError, ValueError):
+			pass
+	else:
+		lowerBound = upperBound = None
+		try:
+			lowerBound = int(numRange[0])
+		except (TypeError, ValueError):
+			lowerBound = 1
+		try:
+			upperBound = int(numRange[1])
+		except (TypeError, ValueError):
+			upperBound = len(image_text_file_lines) # this can go over the actual number of video files, but it doesn't matter
+
+		for i in range(lowerBound, upperBound+1):
+			# not necessary to check for existence in a set before adding to it
+			video_replacement_set.add(i)
+if len(video_replacement_set) == 0:
+	# empty arg, so replace/make every video
+	for i in range(1, len(image_text_file_lines)+1):
+		video_replacement_set.add(i)
+
 files_count = 0 # for the vid_$.mp4 file; the file number won't match the line number
 curr_text_file_read = ""
 
@@ -182,7 +210,7 @@ for i in range(len(image_text_file_lines)):
 
 	files_count += 1
 
-	if (replace_video_number == None) or (replace_video_number == files_count):
+	if files_count in video_replacement_set:
 		# speech file:
 		output_file = open(gen_output_wav_file_path(files_count)+".temp", "w", encoding="utf8")
 		output_file.write(speech_line)
@@ -207,13 +235,6 @@ for i in range(len(image_text_file_lines)):
 			os.remove(gen_output_wav_file_path(files_count))
 			os.remove(gen_output_img_file_path(files_count))
 
-		# break early if only one video is being updated:
-		if (replace_video_number != None):
-			break
-
 end_time = time.time()
-#TODO: make this better
-if replace_video_number == None:
-	print("Made " + str(files_count) + " videos in " + str(end_time - start_time) + "s")
-else:
-	print("Replaced video " + str(replace_video_number) + " in " + str(end_time - start_time) + "s")
+#TODO: make this better (and figure out a good way to state which videos were replaced)
+print("Made " + str(files_count) + " videos in " + str(end_time - start_time) + "s")
