@@ -136,13 +136,13 @@ int revealFileExplorer(const char* path) {
 	#endif
 }
 
-int deleteAllOldFiles(const char* dir, int dayCount) {
+int deleteAllOldFiles(const char* dir, int hourCount) {
 	//TODO: this needs to have some kind of guarantee that the path is somewhere inside this project's root folder
 	//it does work though, but I'm not pushing it until there's safety
 	return 0;
 
 	/*
-	if (dayCount <= 0) [[unlikely]] {
+	if (hourCount <= 0) [[unlikely]] {
 		return 0;
 	}
 	//TODO: this should print a list for confirmation
@@ -150,7 +150,7 @@ int deleteAllOldFiles(const char* dir, int dayCount) {
 	for (const auto& file : std::filesystem::directory_iterator(dir)) {
 		std::filesystem::file_time_type ftime = std::filesystem::last_write_time(file);
 		auto duration = nowTime - ftime;
-		if (duration > std::chrono::hours(24 * dayCount)) {
+		if (duration > std::chrono::hours(hourCount)) {
 			std::filesystem::remove(file);
 		}
 	}
@@ -199,11 +199,11 @@ int call_comment_to_speech(const char* textPath, const char* speechPath, const c
 		"\"" + idata.get_font_color_input() + "\" " +
 		"\"" + idata.get_background_color_input() + "\" " +
 		"\"" + idata.get_paragraph_separator() + "\" " +
+		idata.get_imageFormat() + " " +
 
 		"\"" + vdata.get_video_replacement_numbers_input() + "\" " + //TODO: should this have -n?
 		(vdata.audio_only_option_input ? "-a " : "") +
 
-		vdata.get_imageFormat() + " " +
 		adata.get_voiceEngine() + " " +
 		"\"" + adata.get_voice() + "\" " +
 		"\"" + adata.get_audioEncoder() + "\" " +

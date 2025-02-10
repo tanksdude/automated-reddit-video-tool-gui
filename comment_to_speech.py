@@ -38,9 +38,9 @@ parser.add_argument("font_size_input")
 parser.add_argument("font_color_input")
 parser.add_argument("background_color_input")
 parser.add_argument("paragraph_separator_input")
+parser.add_argument("imageFormat")
 
 parser.add_argument("video_replacement_numbers") #TODO: "3-" should go from 3 to the end
-parser.add_argument("imageFormat")
 parser.add_argument("speechEngine")
 parser.add_argument("voice")
 parser.add_argument("audioEncoder")
@@ -67,9 +67,9 @@ IMAGE_SIZE_EXTENDED = str(IMAGE_WIDTH + 2*IMAGE_W_BORDER) + "x" + str(IMAGE_HEIG
 
 # Video parameters:
 AUDIO_VOICE = args.voice
-AUDIO_CODEC = audioCodecLookup[args.audioEncoder]
 VIDEO_FPS = args.fps #TODO
 VIDEO_VID_CRF = args.crf
+VIDEO_AUD_CODEC = audioCodecLookup[args.audioEncoder]
 VIDEO_AUD_BITRATE = "256k" #TODO
 VIDEO_VID_CODEC = videoCodecLookup[args.videoEncoder]
 VIDEO_VID_PRESET = args.videoPreset.split(' ')[0]
@@ -81,7 +81,7 @@ if output_vid_file_path.find('$') == -1:
 	sys.exit("Bad output vid file names")
 input_speech_text_file_path = args.input_speech_file
 replace_video_number = args.video_number
-audio_only = args.audio_only # TODO: make output name ".wav", not ".mp4.wav"
+audio_only = args.audio_only
 
 def text_to_speech_func(wav_file_name, text_file_name):
 	# make sure to do -w arg before the -f arg, because sometimes it just won't write to a wav file otherwise
@@ -105,8 +105,8 @@ def speech_and_image_to_vid_func(vid_file_name, wav_file_name, img_file_name):
 		command_args.extend(["-movflags", "+faststart"])
 
 	# Audio args
-	command_args.extend(["-c:a", AUDIO_CODEC])
-	if AUDIO_CODEC != "copy":
+	command_args.extend(["-c:a", VIDEO_AUD_CODEC])
+	if VIDEO_AUD_CODEC != "copy":
 		# bitrate is ignored when the codec is copy, so this check is unnecessary
 		command_args.extend(["-b:a", VIDEO_AUD_BITRATE])
 
@@ -120,11 +120,15 @@ def speech_and_image_to_vid_func(vid_file_name, wav_file_name, img_file_name):
 def gen_output_vid_file_path(num):
 	return output_vid_file_path.replace("$", str(num))
 
-def gen_output_wav_file_path(num):
-	return gen_output_vid_file_path(num) + ".wav"
+def gen_output_wav_file_path_audio_only(num):
+	return output_vid_file_path.replace("$", str(num)) # if it's audio-only, then ".wav" is in the file path
+def gen_output_wav_file_path_regular(num):
+	return output_vid_file_path.replace("$", str(num)) + ".wav"
+
+gen_output_wav_file_path = gen_output_wav_file_path_audio_only if audio_only else gen_output_wav_file_path_regular
 
 def gen_output_img_file_path(num):
-	return gen_output_vid_file_path(num) + IMAGE_FORMAT
+	return output_vid_file_path.replace("$", str(num)) + IMAGE_FORMAT
 
 start_time = time.time()
 
@@ -208,6 +212,7 @@ for i in range(len(image_text_file_lines)):
 			break
 
 end_time = time.time()
+#TODO: make this better
 if replace_video_number == None:
 	print("Made " + str(files_count) + " videos in " + str(end_time - start_time) + "s")
 else:

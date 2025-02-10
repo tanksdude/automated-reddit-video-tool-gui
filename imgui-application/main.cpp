@@ -87,8 +87,8 @@ ImageData idata;
 AudioData adata;
 VideoData vdata;
 
-const char* imageDeleteAgeList[] = { "1 day", "2 weeks", "1 month", "6 months" };
-const int imageDeleteAgeList_values[] = { 1, 14, 30, 180 };
+const char* imageDeleteAgeList[] = { "Everything in the past", "1 hour", "24 hours", "2 weeks", "1 month", "6 months" };
+const int imageDeleteAgeList_values[] = { 0, 1, 24, 14*24, 30*24, 180*24 };
 static_assert(IM_ARRAYSIZE(imageDeleteAgeList) == IM_ARRAYSIZE(imageDeleteAgeList_values));
 int imageDeleteAgeList_current = 0;
 
@@ -455,9 +455,9 @@ int main(int, char**)
 						ImGui::PopItemWidth();
 
 						ImGui::SeparatorText("##Image Parameters button separator");
-						ImGui::Combo("Image Format", &vdata.imageFormatArray_current, vdata.imageFormatArray, IM_ARRAYSIZE(vdata.imageFormatArray));
+						ImGui::Combo("Image Format", &idata.imageFormatArray_current, idata.imageFormatArray, IM_ARRAYSIZE(idata.imageFormatArray));
 
-						strcpy(evaluated_test_image_path, ARVT::inputFileName_toCommentTestImagePath_TestImage(the_file_input_name, vdata.imageFormatArray[vdata.imageFormatArray_current]).c_str()); //TODO
+						strcpy(evaluated_test_image_path, ARVT::inputFileName_toCommentTestImagePath_TestImage(the_file_input_name, idata.imageFormatArray[idata.imageFormatArray_current]).c_str());
 						ImGui::InputText("##Test Image Path", evaluated_test_image_path, IM_ARRAYSIZE(evaluated_test_image_path), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 
 						if (ImGui::Button("Refresh →", ImVec2(-FLT_MIN, 0.0f))) {
@@ -479,6 +479,7 @@ int main(int, char**)
 						ImGui::Checkbox("Audio Only", &vdata.audio_only_option_input);
 						if (adata.voiceArray_current < 0) {
 							ImGui::TextColored(ImVec4(1, 0, 0, 1), "You haven't set a voice yet!\nGo to the Configure tab.");
+							//TODO: lock stuff
 						}
 
 						ImGui::TableNextColumn();
@@ -516,12 +517,14 @@ int main(int, char**)
 
 						if (ImGui::Button("GO!", ImVec2(-FLT_MIN, 0.0f))) {
 							//TODO: progress bar and async
+							//TODO: this needs to be much cleaner (probably remove the name function calls), use the data structs instead
 							ARVT::call_comment_to_speech(evaluated_input_split_1, evaluated_input_split_2,
-								ARVT::inputFileName_toCommentToSpeechPath(the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current]).c_str(),
+								vdata.audio_only_option_input ? ARVT::inputFileName_toCommentToSpeechPath_AudioOnly(the_file_input_name).c_str()
+									: ARVT::inputFileName_toCommentToSpeechPath(the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current]).c_str(),
 								idata, adata, vdata);
 						}
 						if (ImGui::Button("Reveal in File Explorer##final video", ImVec2(-FLT_MIN, 0.0f))) {
-							int result = ARVT::revealFileExplorer(ARVT::inputFileName_toCommentToSpeechPath_getFileExplorerName(the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current], false).c_str());
+							int result = ARVT::revealFileExplorer(ARVT::inputFileName_toCommentToSpeechPath_getFileExplorerName(the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current], vdata.audio_only_option_input).c_str());
 							if (result) {
 								//strcpy(, "error"); //TODO: red text
 							}

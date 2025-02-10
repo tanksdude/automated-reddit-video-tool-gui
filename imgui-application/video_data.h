@@ -19,9 +19,6 @@ struct VideoData {
 	char video_replacement_numbers_input[64];
 	bool audio_only_option_input = false;
 
-	const char* imageFormatArray[6] = { ".png", ".jpg", ".avif", ".webp", ".tiff", ".bmp" };
-	int imageFormatArray_current = 0;
-
 	/* Passing codec information to the Python script:
 	 * The Python script will read the string character for character. It will
 	 * interpret "H.265 / HEVC" as H.265.
@@ -55,7 +52,6 @@ struct VideoData {
 	std::int8_t crf_max = 63;
 
 	inline std::string get_video_replacement_numbers_input() const { return std::string(video_replacement_numbers_input); }
-	inline std::string get_imageFormat() const { return std::string(imageFormatArray[imageFormatArray_current]); }
 	inline std::string get_videoEncoder() const { return std::string(videoEncoderArray[videoEncoderArray_current]); }
 	inline std::string get_videoPreset() const { return std::string(videoPresetArray[videoPresetArray_current]); }
 	inline std::string get_videoContainer() const { return std::string(videoContainerArray[videoContainerArray_current]); }
