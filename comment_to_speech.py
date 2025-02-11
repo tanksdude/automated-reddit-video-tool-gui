@@ -50,7 +50,7 @@ parser.add_argument("speechEngine")
 parser.add_argument("voice")
 parser.add_argument("audioEncoder")
 parser.add_argument("videoEncoder")
-parser.add_argument("videoPreset") #TODO: "default" option that doesn't provide a -preset arg
+parser.add_argument("videoPreset")
 parser.add_argument("faststart_flag")
 parser.add_argument("fps")
 parser.add_argument("crf")
@@ -115,7 +115,9 @@ def speech_and_image_to_vid_func(vid_file_name, wav_file_name, img_file_name):
 	command_args = ["ffmpeg", "-i", wav_file_name, "-i", img_file_name]
 
 	# Video args
-	command_args.extend(["-c:v", VIDEO_VID_CODEC, "-preset", VIDEO_VID_PRESET])
+	command_args.extend(["-c:v", VIDEO_VID_CODEC])
+	if VIDEO_VID_PRESET != "default":
+		command_args.extend(["-preset", VIDEO_VID_PRESET])
 	command_args.extend(["-r", VIDEO_FPS, "-crf", VIDEO_VID_CRF])
 	if VIDEO_VID_FASTSTART:
 		command_args.extend(["-movflags", "+faststart"])

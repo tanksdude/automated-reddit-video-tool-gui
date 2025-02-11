@@ -31,8 +31,8 @@ struct VideoData {
 	 * means "medium (default)" will be interpreted the same as "medium".
 	 */
 	//TODO: either separate preset array or dynamically change this based on the codec
-	const char* videoPresetArray[10] = { "ultrafast", "superfast", "veryfast", "faster", "fast", "medium (default)" , "slow", "slower", "veryslow", "placebo (not recommended)" };
-	int videoPresetArray_current = 5;
+	const char* videoPresetArray[11] = { "default", "ultrafast", "superfast", "veryfast", "faster", "fast", "medium (default)" , "slow", "slower", "veryslow", "placebo (not recommended)" };
+	int videoPresetArray_current = 0;
 
 	const char* videoContainerArray[3] = { ".mp4", ".mkv", ".mov" };
 	int videoContainerArray_current = 0;

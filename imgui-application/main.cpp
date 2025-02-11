@@ -87,7 +87,7 @@ ImageData idata;
 AudioData adata;
 VideoData vdata;
 
-const char* imageDeleteAgeList[] = { "Everything in the past", "1 hour", "24 hours", "2 weeks", "1 month", "6 months" };
+const char* imageDeleteAgeList[] = { "0 seconds", "1 hour", "24 hours", "2 weeks", "1 month", "6 months" };
 const int imageDeleteAgeList_values[] = { 0, 1, 24, 14*24, 30*24, 180*24 };
 static_assert(IM_ARRAYSIZE(imageDeleteAgeList) == IM_ARRAYSIZE(imageDeleteAgeList_values));
 int imageDeleteAgeList_current = 0;
@@ -524,6 +524,7 @@ int main(int, char**)
 								idata, adata, vdata);
 						}
 						if (ImGui::Button("Reveal in File Explorer##final video", ImVec2(-FLT_MIN, 0.0f))) {
+							//TODO: this should open in the folder if the file doesn't exist
 							int result = ARVT::revealFileExplorer(ARVT::inputFileName_toCommentToSpeechPath_getFileExplorerName(the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current], vdata.audio_only_option_input).c_str());
 							if (result) {
 								//strcpy(, "error"); //TODO: red text
