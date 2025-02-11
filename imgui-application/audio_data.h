@@ -3,12 +3,17 @@
 #include <cstring> //strcpy
 
 struct AudioData {
+	/* Passing voice engine information to the Python script:
+	 * The Python script will read the string character for character. It will
+	 * translate each voice engine name to the correct program.
+	 */
 #if defined(WIN32) || defined(_WIN32)
-	const char* voiceEngineArray[2] = { "Balabolka", "Espeak" };
-	const char* voiceEngineArray_exeForUpdatingVoiceList[2] = { "\"..\\balcon\" -l", "\"..\\espeak\" --voices" }; //note: internal use only
+	const char* voiceEngineArray[4] = { "Balabolka", "Espeak", "Espeak NG", "Windows Narrator (TODO)" };
+	const char* voiceEngineArray_exeForUpdatingVoiceList[4] = { "\"..\\balcon\" -l", "\"espeak\" --voices=en", "\"espeak-ng\" --voices=en", "" }; //note: internal use only
+	//TODO: look into whether nvaccess/nvda has compatible command line support
 #else
-	const char* voiceEngineArray[1] = { "Espeak" };
-	const char* voiceEngineArray_exeForUpdatingVoiceList[1] = { "../espeak --voices" }; //note: internal use only
+	const char* voiceEngineArray[4] = { "Espeak", "say (TODO)", "spd-say (TODO)", "Festival (TODO)" }; //TODO: https://askubuntu.com/questions/501910/how-to-text-to-speech-output-using-command-line/501917#501917
+	const char* voiceEngineArray_exeForUpdatingVoiceList[4] = { "../espeak --voices", "", "", "" }; //note: internal use only
 #endif
 	int voiceEngineArray_current = 0;
 

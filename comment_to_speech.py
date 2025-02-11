@@ -5,6 +5,12 @@ import time
 
 # python comment_to_speech.py input_text.txt [-s input_speech] output_speech/vid_$.mp4 [-n replace] [-a] VIDEO_PARAMTERS
 
+audioProgramLookup = {
+	"Balabolka": "../balcon",
+	"Espeak":    "espeak",
+	"Espeak NG": "espeak-ng",
+}
+
 audioCodecLookup = {
 	"copy":   "copy",
 	"AAC":    "aac",
@@ -65,6 +71,7 @@ IMAGE_SIZE = str(IMAGE_WIDTH) + "x" + str(IMAGE_HEIGHT)
 IMAGE_SIZE_EXTENDED = str(IMAGE_WIDTH + 2*IMAGE_W_BORDER) + "x" + str(IMAGE_HEIGHT + 2*IMAGE_H_BORDER)
 
 # Video parameters:
+AUDIO_PROGRAM = audioProgramLookup[args.speechEngine]
 AUDIO_VOICE = args.voice
 VIDEO_FPS = args.fps #TODO
 VIDEO_VID_CRF = args.crf
@@ -81,10 +88,21 @@ if output_vid_file_path.find('$') == -1:
 input_speech_text_file_path = args.input_speech_file
 audio_only = args.audio_only
 
-def text_to_speech_func(wav_file_name, text_file_name):
+def text_to_speech_func_balabolka(wav_file_name, text_file_name):
 	# make sure to do -w arg before the -f arg, because sometimes it just won't write to a wav file otherwise
-	return subprocess.run(["../balcon", "-n", AUDIO_VOICE, "-enc", "utf8", "-w", wav_file_name, "-f", text_file_name])
-	# Linux espeak: subprocess.run(["espeak", "-v", "english+f4", "-w", wav_file_name, "-f", text_file_name])
+	return subprocess.run([AUDIO_PROGRAM, "-n", AUDIO_VOICE, "-enc", "utf8", "-w", wav_file_name, "-f", text_file_name])
+def text_to_speech_func_espeak(wav_file_name, text_file_name):
+	subprocess.run([AUDIO_PROGRAM, "-v", AUDIO_VOICE, "-w", wav_file_name, "-f", text_file_name])
+	# SAPI voices will not appear in espeak's command line version: https://sourceforge.net/p/espeak/discussion/538921/thread/257f8ce6/
+	# also see function espeak_ListVoices() at https://github.com/espeak-ng/espeak-ng/blob/master/src/include/espeak-ng/speak_lib.h
+
+ttsFunctionLookup = {
+	"Balabolka": text_to_speech_func_balabolka,
+	"Espeak":    text_to_speech_func_espeak,
+	"Espeak NG": text_to_speech_func_espeak,
+}
+
+text_to_speech_func = ttsFunctionLookup[args.speechEngine]
 
 def text_to_image_func(img_file_name, text_file_name):
 	#return subprocess.run(["magick", "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_TEXT_COLOR, "-family", "Times New Roman", "-pointsize", IMAGE_FONT_SIZE, "pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])

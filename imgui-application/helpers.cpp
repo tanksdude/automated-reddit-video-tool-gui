@@ -204,7 +204,7 @@ int call_comment_to_speech(const char* textPath, const char* speechPath, const c
 		"-n \"" + vdata.get_video_replacement_numbers_input() + "\" " + //needs -n, otherwise Python's argparse will treat "-3" as an argument and get confused
 		(vdata.audio_only_option_input ? "-a " : "") +
 
-		adata.get_voiceEngine() + " " +
+		"\"" + adata.get_voiceEngine() + "\" " +
 		"\"" + adata.get_voice() + "\" " +
 		"\"" + adata.get_audioEncoder() + "\" " +
 		"\"" + vdata.get_videoEncoder() + "\" " +

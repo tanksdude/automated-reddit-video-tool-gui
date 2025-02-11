@@ -34,7 +34,7 @@ void AudioData::update_voiceArray() {
 	std::vector<std::string> voiceList;
 
 	switch (voiceEngineArray_current) {
-		case 0:
+		case 0: //Balabolka
 			{
 			// Balabolka lists the voices under "SAPI" with a space, so it's a voice if it's indented
 			// yes, that's a dumb way of checking, but it works
@@ -44,13 +44,13 @@ void AudioData::update_voiceArray() {
 				if (l.empty()) [[unlikely]] {
 					continue;
 				}
-				if (l[0] == ' ' || l[0] == '\t') {
+				if (l[0] == ' ') {
 					// scrub whitespace
-					pos = l.find_last_not_of(" \t\r\n");
+					pos = l.find_last_not_of(" \r\n");
 					if (pos+1 < l.size()) {
 						l.erase(pos+1);
 					}
-					pos = l.find_first_not_of(" \t");
+					pos = l.find_first_not_of(" ");
 					if (pos != 0) {
 						l.erase(0, pos);
 					}
@@ -63,9 +63,37 @@ void AudioData::update_voiceArray() {
 			}
 			}
 			break;
-		
-		case 1:
-			//TODO
+
+		case 1: //eSpeak
+			[[fallthrough]];
+		case 2: //eSpeak NG
+			{
+			// The first line is formatting information, everything else is the languages
+			// Columns are separated by spaces, simply go through until the 4th column
+			// Assumes every VoiceName does not have spaces. The docs suggest it's not a requirement but every included voice seems to follow it.
+
+			file_lines.erase(file_lines.begin()); //remove formatting information
+			for (std::string& l : file_lines) {
+				while (!l.empty() && l[0] == ' ') {
+					l.erase(0, 1);
+				}
+				if (l.empty()) [[unlikely]] {
+					//sanity check
+					continue;
+				}
+
+				//find start and end of VoiceName column (TODO: would regex be easier? basically ([^\s]+[\s]+){3} to get the start of the name)
+				size_t pos = l.find_first_of(" ");
+				do { pos++; } while (l[pos] == ' '); //Language column
+				pos = l.find_first_of(" ", pos);
+				do { pos++; } while (l[pos] == ' '); //Age/Gender column
+				pos = l.find_first_of(" ", pos);
+				do { pos++; } while (l[pos] == ' '); //VoiceName column
+				size_t endPos = l.find_first_of(" ", pos);
+
+				voiceList.push_back(l.substr(pos, endPos - pos));
+			}
+			}
 			break;
 	}
 

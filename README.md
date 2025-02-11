@@ -71,25 +71,24 @@ Currently only Windows x64 with MSVC 2022 is supported.
 
 ## Options that currently work
 
-* Image settings (except paragraph separator)
-* Audio voice
-* Video FPS & CRF
+* Image settings
+* Speech voice
 * Video container
+* Video & Audio encoders
+* The speech file option
+* Audio-only option
+* Video replacement
+* Speech engine (Balabolka and eSpeak only, though those are the main ones)
 
 ## Options that kinda work
 
 * File name: cannot have spaces without breaking everything
-* Audio encoder: there is no translation from codec name to FFmpeg encoder, so only "copy" works
-* Image paragraph separator: only handles `\n` escape character
-* Audio only: actually does work, just not the way I want
+* Video FPS & CRF: technically works but not the way I want
+* Video preset: works for H.264 (and H.265) but not others
 
 ## Options that don't work
 
 * Word wrap for the input comment
-* The speech file option (though creating it does work, it's just not used anywhere)
-* Speech engine
-* Video encoder & video preset & `-movflags=+faststart`
-* Video replacement
 
 ## Example usage
 
