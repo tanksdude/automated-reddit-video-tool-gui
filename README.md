@@ -1,6 +1,6 @@
-# (Semi-)Automated Reddit Video Tool with a GUI [ALPHA]
+# (Semi-)Automated Reddit Video Tool with a GUI [BETA]
 
-**WARNING**: This software is in a very alpha state. There are countless things that don't work, and countless more that don't display error messages. Use at your own discretion.
+**WARNING**: This software is in a beta state. There are some things that don't work without explanations or warnings. Use at your own discretion.
 
 A program that takes text input and can generate the sentence-by-sentence reading and text-to-speech stuff that's common in Reddit reading videos. Now with a GUI!
 
@@ -30,9 +30,7 @@ Windows:
 
 Linux: Currently not supported. Will be added later.
 
-Mac OS:
-
-* Mac OS is not supported. Source code is right here though, so feel free to try your luck.
+Mac OS: Not supported. Source code is right here though, so feel free to try your luck.
 
 ## Program Requirements
 
@@ -42,10 +40,10 @@ Note that these programs must be accessible from a plain command line, meaning t
 
 * Python 3.8+
 * ImageMagick
-* Balabolka
+* Balabolka or eSpeak
 * FFmpeg 4.4+
 
-Place `balcon.exe` in this project's root folder.
+Place `balcon.exe` in this project's root folder (if you plan on using Balabolka).
 
 ### Compiling from source
 
@@ -54,7 +52,7 @@ Currently only Windows x64 with MSVC 2022 is supported.
 * `cd imgui-application`
 * Enable the MSVC environment variables in your command prompt: `"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"`
 * `build_win64.bat`
-* The executable is in the `Debug` folder
+* The executable is in the `Debug` folder (don't `cd`).
 
 ## TODO list
 
@@ -82,7 +80,6 @@ Currently only Windows x64 with MSVC 2022 is supported.
 
 ## Options that kinda work
 
-* File name: cannot have spaces without breaking everything
 * Video FPS & CRF: technically works but not the way I want
 * Video preset: works for H.264 (and H.265) but not others
 

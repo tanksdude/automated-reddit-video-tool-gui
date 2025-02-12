@@ -1,3 +1,7 @@
+0.2.0 "usable beta"
+* most inputs work
+* eSpeak support
+
 0.1.0 "initial release"
 * works if you know what you're doing and are very careful with inputs
 * Windows-only

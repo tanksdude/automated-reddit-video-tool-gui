@@ -23,7 +23,7 @@ struct VideoData {
 	 * The Python script will read the string character for character. It will
 	 * interpret "H.265 / HEVC" as H.265.
 	 */
-	const char* videoEncoderArray[5] = { "H.264", "H.265 / HEVC", "VP8", "VP9", "AV1" }; //TODO: fill based on the hashmap above?
+	const char* videoEncoderArray[5] = { "H.264", "H.265 / HEVC", "VP8 (TODO)", "VP9 (TODO)", "AV1 (TODO)" }; //TODO: fill based on the hashmap above?
 	int videoEncoderArray_current = 0;
 
 	/* Passing preset information to the Python script:
