@@ -551,7 +551,11 @@ int main(int, char**)
 
 						ImGui::TableSetColumnIndex(0);
 
-						ImGui::Combo("Speech Engine", &adata.voiceEngineArray_current, adata.voiceEngineArray, IM_ARRAYSIZE(adata.voiceEngineArray)); //to align text to the left: use a table
+						//to align text to the left: use a table
+						if (ImGui::Combo("Speech Engine", &adata.voiceEngineArray_current, adata.voiceEngineArray, IM_ARRAYSIZE(adata.voiceEngineArray))) {
+							//there was a change
+							adata.update_voiceArray();
+						}
 
 						ImGui::Combo("Voice", &adata.voiceArray_current, adata.voiceArray, adata.voiceArray_length);
 						ImGui::SameLine();
