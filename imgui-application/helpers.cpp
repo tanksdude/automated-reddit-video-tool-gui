@@ -23,7 +23,7 @@ std::string inputFileName_toCommentTestImagePath_Speech(const char* name) {
 	return INPUT_SPLITS + std::string(name) + "_speech.txt";
 }
 std::string inputFileName_toCommentTestImagePath_TestImage(const char* name, const char* format) {
-	return INPUT_SPLITS + std::string(name) + "_image" + std::string(format);
+	return TEST_IMAGES + std::string(name) + "_image" + std::string(format);
 }
 std::string inputFileName_toCommentToSpeechPath(const char* name, const char* container) {
 	return OUTPUT_SPEECH + std::string(name) + "_$" + std::string(container);
