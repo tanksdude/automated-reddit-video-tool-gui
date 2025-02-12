@@ -97,7 +97,7 @@ int copyFileToCStr(const char* path, char* dest, int buf_size) {
 	input_file.read(dest, buf_size-1);
 	if (input_file.gcount() > 0) {
 		//"success" (look, get() for some reason only read a single line)
-		dest[input_file.gcount()] = '\n';
+		dest[input_file.gcount()] = '\0';
 		input_file.close();
 		return 0;
 	} else {
