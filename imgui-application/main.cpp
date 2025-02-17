@@ -396,6 +396,14 @@ int main(int, char**)
 
 						//TODO: only fill if split has happened, and remove if file name changes
 						ImGui::InputTextMultiline("##Input Split 1 Data", input_split_1_data, IM_ARRAYSIZE(input_split_1_data), ImVec2(-FLT_MIN, 0), ImGuiInputTextFlags_ReadOnly);
+						//TODO: there should be a third box for ImageMagick text, which basically just replaces "&" with "&amp;" and other stuff
+						if (ImGui::Button("Reveal in File Explorer##Input Split 1")) {
+							int result = ARVT::revealFileExplorer(evaluated_input_split_1);
+							if (result) {
+								strcpy(input_split_2_data, "error"); //TODO: red text
+							}
+						}
+						ImGui::SameLine();
 						if (ImGui::Button("↓ Make Copy ↓")) {
 							int result = ARVT::copy_file(evaluated_input_split_1, evaluated_input_split_2);
 							if (result) {
@@ -413,6 +421,11 @@ int main(int, char**)
 
 						ImGui::Checkbox("Use Speech Text", &vdata.use_speech_text);
 
+						if (!vdata.use_speech_text) {
+							ImGui::BeginDisabled();
+							//pushes to disabled stack
+						}
+
 						ImGui::InputText("##Input Split 2 Path", evaluated_input_split_2, IM_ARRAYSIZE(evaluated_input_split_2), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 						ImGui::SameLine();
 						if (ImGui::Button("Refresh##Input Split 2")) {
@@ -428,6 +441,11 @@ int main(int, char**)
 							if (result) {
 								strcpy(input_split_2_data, "error"); //TODO: red text
 							}
+						}
+
+						if (!vdata.use_speech_text) {
+							ImGui::EndDisabled();
+							//pops from disabled stack
 						}
 
 						if (!filenameIsLocked) {
