@@ -472,6 +472,8 @@ int main(int, char**)
 						ImGui::InputText("Paragraph Separator",   idata.paragraph_separator_input, IM_ARRAYSIZE(idata.paragraph_separator_input), 0); //TODO: when reading from this, make sure to replace " with \"
 						ImGui::PopItemWidth();
 
+						//TODO: export/import settings (use INI file)
+
 						ImGui::SeparatorText("##Image Parameters button separator");
 						ImGui::Combo("Image Format", &idata.imageFormatArray_current, idata.imageFormatArray, IM_ARRAYSIZE(idata.imageFormatArray));
 
@@ -494,7 +496,7 @@ int main(int, char**)
 						ImGui::SameLine();
 						HelpMarker("ex. \"1,2,3\" or \"4,6-8,15,20-30\"");
 						ImGui::PopItemWidth();
-						ImGui::Checkbox("Audio Only", &vdata.audio_only_option_input);
+						ImGui::Checkbox("Audio Only (.wav)", &vdata.audio_only_option_input); //TODO: put a textbox for the path to videos (which will change its extension based on this setting)
 						if (adata.voiceArray_current < 0) {
 							ImGui::TextColored(ImVec4(1, 0, 0, 1), "You haven't set a voice yet!\nGo to the Configure tab.");
 							//TODO: lock stuff
@@ -540,9 +542,11 @@ int main(int, char**)
 								vdata.audio_only_option_input ? ARVT::inputFileName_toCommentToSpeechPath_AudioOnly(the_file_input_name).c_str()
 									: ARVT::inputFileName_toCommentToSpeechPath(the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current]).c_str(),
 								idata, adata, vdata);
+							//TODO: at program start-up, check programs' existence and maybe ffmpeg version
 						}
 						if (ImGui::Button("Reveal in File Explorer##final video", ImVec2(-FLT_MIN, 0.0f))) {
 							//TODO: this should open in the folder if the file doesn't exist
+							//yes it's *kinda* a hack to open on just the first video, but it's better than iterating through every file in the folder and checking what's available
 							int result = ARVT::revealFileExplorer(ARVT::inputFileName_toCommentToSpeechPath_getFileExplorerName(the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current], vdata.audio_only_option_input).c_str());
 							if (result) {
 								//strcpy(, "error"); //TODO: red text

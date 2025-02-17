@@ -206,6 +206,7 @@ int call_comment_to_speech(const char* textPath, const char* speechPath, const c
 		"\"" + adata.get_audioEncoder() + "\" " +
 		"\"" + vdata.get_videoEncoder() + "\" " +
 		"\"" + vdata.get_videoPreset() + "\" " +
+		"\"" + vdata.get_codecExtraArgs() + "\" " +
 		std::to_string(vdata.faststart_flag) + " " +
 
 		std::to_string(vdata.fps_v) + " " +

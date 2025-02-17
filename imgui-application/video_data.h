@@ -17,6 +17,7 @@ struct VideoData {
 		//CrfData() {} //TODO?
 	};
 	static const std::unordered_map<std::string, CrfData> codecToCrf;
+	static const std::unordered_map<std::string, std::vector<std::string>> codecExtraArgs; //VP9 needs "-b:v 0" for crf mode
 
 	bool use_speech_text = false;
 	char video_replacement_numbers_input[64];
@@ -26,7 +27,8 @@ struct VideoData {
 	 * The Python script will read the string character for character. It will
 	 * interpret "H.265 / HEVC" as H.265.
 	 */
-	const char* videoEncoderArray[5] = { "H.264", "H.265 / HEVC", "VP8 (TODO)", "VP9 (TODO)", "AV1 (TODO)" }; //TODO: fill based on the hashmap above?
+	//TODO: make this static
+	const char* videoEncoderArray[5] = { "H.264", "H.265 / HEVC", "VP8", "VP9", "AV1" }; //TODO: fill based on the hashmap above?
 	int videoEncoderArray_current = 0;
 
 	/* Passing preset information to the Python script:
@@ -58,8 +60,10 @@ struct VideoData {
 	inline std::string get_videoEncoder() const { return std::string(videoEncoderArray[videoEncoderArray_current]); }
 	inline std::string get_videoPreset() const { return std::string(videoPresetArray[videoPresetArray_current]); }
 	inline std::string get_videoContainer() const { return std::string(videoContainerArray[videoContainerArray_current]); }
+	std::string get_codecExtraArgs() const;
 
 	void update_videoCrfValues();
+	void update_videoPresetArray(); //TODO
 
 	VideoData() {
 		strcpy(video_replacement_numbers_input, "");

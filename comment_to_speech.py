@@ -66,9 +66,11 @@ parser.add_argument("voice")
 parser.add_argument("audioEncoder")
 parser.add_argument("videoEncoder")
 parser.add_argument("videoPreset")
+parser.add_argument("videoCodecExtraArgs")
 parser.add_argument("faststart_flag")
 parser.add_argument("fps")
 parser.add_argument("crf")
+#TODO: option to erase all old videos (of the same project name)? needed to "replace" one container with another
 args = parser.parse_args()
 
 # Image parameters:
@@ -94,6 +96,7 @@ VIDEO_AUD_CODEC = audioCodecLookup[args.audioEncoder]
 VIDEO_AUD_BITRATE = "256k" #TODO
 VIDEO_VID_CODEC = videoCodecLookup[args.videoEncoder]
 VIDEO_VID_PRESET = args.videoPreset.split(' ')[0]
+VIDEO_VID_EXTRA_ARGS = list(filter(lambda s : len(s) > 0, args.videoCodecExtraArgs.split(' '))) #TODO: this doesn't work for 'arg:"thing with spaces"'
 VIDEO_VID_FASTSTART = int(args.faststart_flag)
 
 input_image_text_file_path = args.input_text_file
@@ -131,6 +134,7 @@ def speech_and_image_to_vid_func(vid_file_name, wav_file_name, img_file_name):
 
 	# Video args
 	command_args.extend(["-c:v", VIDEO_VID_CODEC])
+	command_args.extend(VIDEO_VID_EXTRA_ARGS)
 	if VIDEO_VID_PRESET != "default":
 		command_args.extend(["-preset", VIDEO_VID_PRESET])
 	command_args.extend(["-r", VIDEO_FPS, "-crf", VIDEO_VID_CRF])
