@@ -587,7 +587,9 @@ int main(int, char**)
 
 						ImGui::SliderScalar("FPS", ImGuiDataType_S8, &vdata.fps_v, &vdata.fps_min, &vdata.fps_max); //TODO: option between common values and custom fraction
 
-						ImGui::Combo("Video Encoder", &vdata.videoEncoderArray_current, vdata.videoEncoderArray, IM_ARRAYSIZE(vdata.videoEncoderArray));
+						if (ImGui::Combo("Video Encoder", &vdata.videoEncoderArray_current, vdata.videoEncoderArray, IM_ARRAYSIZE(vdata.videoEncoderArray))) {
+							vdata.update_videoCrfValues();
+						}
 
 						ImGui::Indent();
 						//TODO (disable and completely swap out on different codecs)

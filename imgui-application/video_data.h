@@ -5,15 +5,18 @@
 #include <cstring> //strcpy, strcmp
 
 struct VideoData {
-	/*
-	static const std::unordered_map<std::string, std::pair<int, int>> codecToCrf = {
-		{ "H.264", { 0, 51 } }, //23 default, 18 "lossless", 17-28 "sane"
-		{ "H.265 / HEVC", { 0, 51 } }, //28 default
-		{ "VP8", { 4, 63 } }, //10 default?
-		{ "VP9", { 0, 63 } }, //15-35 "sane", 31 "recommended"; requires "-b:v 0" to trigger crf mode; also there's lossless mode, check it out; also there's something like presets
-		{ "AV1", { 0, 63 } }  //35 default, 23 "lossless"; requires FFmpeg 4.3+ to not require "-b:v 0", 4.4+ to avoid a lossless bug
+	struct CrfData {
+		std::int8_t starting_value;
+		std::int8_t min_value; //"sane" min
+		std::int8_t max_value; //"sane" max
+		std::int8_t codec_default_value; //unused
+		std::int8_t codec_min_value;     //unused
+		std::int8_t codec_max_value;     //unused
+		CrfData(std::int8_t start, std::int8_t min, std::int8_t max, std::int8_t c_def, std::int8_t c_min, std::int8_t c_max) :
+			starting_value(start), min_value(min), max_value(max), codec_default_value(c_def), codec_min_value(c_min), codec_max_value(c_max) {}
+		//CrfData() {} //TODO?
 	};
-	*/
+	static const std::unordered_map<std::string, CrfData> codecToCrf;
 
 	bool use_speech_text = false;
 	char video_replacement_numbers_input[64];
@@ -47,16 +50,19 @@ struct VideoData {
 	std::uint16_t fps_min = 1;
 	std::uint16_t fps_max = 120;
 
-	std::int8_t crf_v = 18;
-	std::int8_t crf_min = 0;
-	std::int8_t crf_max = 63;
+	std::int8_t crf_v;
+	std::int8_t crf_min;
+	std::int8_t crf_max;
 
 	inline std::string get_video_replacement_numbers_input() const { return std::string(video_replacement_numbers_input); }
 	inline std::string get_videoEncoder() const { return std::string(videoEncoderArray[videoEncoderArray_current]); }
 	inline std::string get_videoPreset() const { return std::string(videoPresetArray[videoPresetArray_current]); }
 	inline std::string get_videoContainer() const { return std::string(videoContainerArray[videoContainerArray_current]); }
 
+	void update_videoCrfValues();
+
 	VideoData() {
 		strcpy(video_replacement_numbers_input, "");
+		update_videoCrfValues();
 	}
 };
