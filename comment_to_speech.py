@@ -2,14 +2,29 @@ import os, sys
 import subprocess
 import argparse
 import time
+import platform
 
 # python comment_to_speech.py input_text.txt [-s input_speech] output_speech/vid_$.mp4 [-n replace] [-a] VIDEO_PARAMTERS
 
-audioProgramLookup = {
-	"Balabolka": "../balcon",
-	"Espeak":    "espeak",
-	"Espeak NG": "espeak-ng",
-}
+audioProgramLookup = None
+if platform.system() == "Windows":
+	audioProgramLookup = {
+		"Balabolka": "../balcon",
+		"Espeak":    "espeak",
+		"Espeak NG": "espeak-ng",
+	}
+elif platform.system() == "Darwin":
+	sys.exit("Mac OS not supported")
+elif platform.system() == "Linux" or platform.system() in ["FreeBSD", "OpenBSD", "NetBSD"]:
+	audioProgramLookup = {
+		"Espeak":    "espeak",
+		"Espeak NG": "espeak-ng",
+	}
+	sys.exit("Linux not supported at this time")
+else:
+	# Jython and mobile devices
+	sys.exit("Unknown/unsupported platform")
+# checking the OS can also be done with os.uname().sysname
 
 audioCodecLookup = {
 	"copy":   "copy",
