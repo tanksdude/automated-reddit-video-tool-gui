@@ -5,19 +5,6 @@ import time
 
 # python comment_test_image.py input_text test_images/output IMAGE_PARAMETERS
 
-"""
-int call_comment_test_image(const char* textPath, const char* output,
-	char image_width_input[],
-	char image_height_input[],
-	char image_w_border_input[],
-	char image_h_border_input[],
-	char font_size_input[],
-	char font_color_input[],
-	char background_color_input[],
-	char paragraph_separator_input[]
-);
-"""
-
 def text_to_image_func(img_file_name, text_file_name):
 	#return subprocess.run(["magick", "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_TEXT_COLOR, "-family", "Times New Roman", "-pointsize", IMAGE_FONT_SIZE, "pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])
 	return subprocess.run(["magick", "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_TEXT_COLOR, "-font", "Verdana", "-pointsize", IMAGE_FONT_SIZE, "pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])

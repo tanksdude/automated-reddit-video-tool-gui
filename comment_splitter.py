@@ -6,7 +6,6 @@ import time
 # python comment_splitter.py input output
 
 SPLIT_CHARS = "".join([".", "!", "\\?"])
-SPLIT_PERIOD = "\\.+"
 SPLIT_REGEX = "[" + SPLIT_CHARS + r"]+\S*\s+"
 
 parser = argparse.ArgumentParser()
