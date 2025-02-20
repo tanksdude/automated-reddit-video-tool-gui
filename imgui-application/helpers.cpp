@@ -209,8 +209,7 @@ int call_comment_to_speech(const char* textPath, const char* speechPath, const c
 		std::to_string(vdata.faststart_flag) + " " +
 
 		std::to_string(vdata.fps_v) + " " +
-		std::to_string(vdata.crf_v) + " " +
-		"--vcodec_extraargs " + vdata.get_codecExtraArgs();
+		std::to_string(vdata.crf_v) + " ";
 
 	#if defined(WIN32) || defined(_WIN32)
 	if (command.size() > 4000) {

@@ -17,7 +17,6 @@ struct VideoData {
 		//CrfData() {} //TODO?
 	};
 	static const std::unordered_map<std::string, CrfData> codecToCrf;
-	static const std::unordered_map<std::string, std::vector<std::string>> codecExtraArgs; //VP9 needs "-b:v 0" for crf mode
 
 	bool use_speech_text = false;
 	char video_replacement_numbers_input[64];
@@ -69,7 +68,6 @@ struct VideoData {
 	inline std::string get_videoEncoder() const { return std::string(videoEncoderArray[videoEncoderArray_current]); }
 	inline std::string get_videoPreset() const { return std::string(videoPresetArray[videoPresetArray_current]); }
 	inline std::string get_videoContainer() const { return std::string(videoContainerArray[videoContainerArray_current]); }
-	std::string get_codecExtraArgs() const;
 
 	void update_videoCrfValues();
 	void update_videoPresetArray(); //TODO

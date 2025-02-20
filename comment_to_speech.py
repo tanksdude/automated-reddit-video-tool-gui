@@ -52,6 +52,15 @@ videoPresetKeywordLookup = {
 	"FFV1":    [],
 }
 
+videoExtraArgsLookup = {
+	"H.264":   [],
+	"H.265":   [],
+	"VP8":     ["-b:v", "1G" ],   # possibly required: https://goughlui.com/2023/12/27/video-codec-round-up-2023-part-4-libvpx-vp8/
+	"VP9":     ["-b:v", "0" ],    # definitely required
+	"AV1":     [],                # requires FFmpeg 4.3+ to not require "-b:v 0", 4.4+ to avoid a lossless bug
+	"FFV1":    ["-level", "3"],   # version 3
+}
+
 #print(sys.argv[1:]);
 
 parser = argparse.ArgumentParser()
@@ -79,7 +88,6 @@ parser.add_argument("videoPreset")
 parser.add_argument("faststart_flag")
 parser.add_argument("fps")
 parser.add_argument("crf")
-parser.add_argument("--vcodec_extraargs", metavar="vcodec_extraargs", nargs="*", help="optional extra video codec args")
 #TODO: option to erase all old videos (of the same project name)? needed to "replace" one container with another
 args = parser.parse_args()
 
@@ -106,7 +114,7 @@ VIDEO_AUD_CODEC = audioCodecLookup[args.audioEncoder]
 VIDEO_AUD_BITRATE = "256k" #TODO
 VIDEO_VID_CODEC = videoCodecLookup[args.videoEncoder.split(' ')[0]]
 VIDEO_VID_PRESET = args.videoPreset.split(' ')[0]
-VIDEO_VID_EXTRA_ARGS = list(map(lambda s : s[1:], args.vcodec_extraargs)) # In order to parse something like "-b:v", every argument is prepended with an underscore, so remove it
+VIDEO_VID_EXTRA_ARGS = videoExtraArgsLookup[args.videoEncoder.split(' ')[0]]
 VIDEO_VID_FASTSTART = int(args.faststart_flag)
 
 input_image_text_file_path = args.input_text_file
@@ -245,6 +253,8 @@ if len(video_replacement_set) == 0:
 		video_replacement_set.add(i)
 
 files_count = 0 # for the vid_$.mp4 file; the file number won't match the line number
+replaced_files_count = 0 #TODO: this is a pretty hacky solution
+#print(len([line for line in speech_text_file_lines if len(line) > 1])) #TODO: does this always get the file count?
 curr_text_file_read = ""
 
 for i in range(len(image_text_file_lines)):
@@ -284,6 +294,11 @@ for i in range(len(image_text_file_lines)):
 			os.remove(gen_output_wav_file_path(files_count))
 			os.remove(gen_output_img_file_path(files_count))
 
+		replaced_files_count += 1
+
 end_time = time.time()
-#TODO: make this better (and figure out a good way to state which videos were replaced)
-print("Made " + str(files_count) + " videos in " + str(end_time - start_time) + "s")
+if replaced_files_count == files_count:
+	print("Made " + str(files_count) + " videos in " + str(end_time - start_time) + "s")
+else:
+	print("Replaced " + str(replaced_files_count) + " videos in " + str(end_time - start_time) + "s")
+	#TODO: state which videos were replaced?
