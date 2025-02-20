@@ -8,7 +8,7 @@ const std::unordered_map<std::string, VideoData::CrfData> VideoData::codecToCrf 
 	{ "VP8",          { 12,  5, 30, 32,  4, 63 } }, //0 is the true crf minimum but 4 is the default minimum
 	{ "VP9",          { 31, 15, 35, 32,  0, 63 } },
 	{ "AV1",          { 23, 20, 35, 32,  0, 63 } },
-	//{ "FFV1",         { -1, -1, -1, -1, -1, -1 } }, //TODO: seems like FFV1 is lossless-only
+	{ "FFV1",         { -1, -1, -1, -1, -1, -1 } }, //TODO: seems like FFV1 is lossless-only
 	//supports alpha: qtrle, vp8, vp9, ffv1
 };
 
@@ -27,22 +27,31 @@ const std::unordered_map<std::string, VideoData::CrfData> VideoData::codecToCrf 
 const std::unordered_map<std::string, std::vector<std::string>> VideoData::codecExtraArgs = {
 	{ "H.264",        {} },
 	{ "H.265 / HEVC", {} },
-	{ "VP8",          { "-b:v 1G" } },  //possibly required: https://goughlui.com/2023/12/27/video-codec-round-up-2023-part-4-libvpx-vp8/
-	{ "VP9",          { "-b:v 0" } },   //definitely required
-	{ "AV1",          {} },             //requires FFmpeg 4.3+ to not require "-b:v 0", 4.4+ to avoid a lossless bug
-	//{ "FFV1",         { "-level=3" } }, //version 3
+	{ "VP8",          { "-b:v", "1G" } },  //possibly required: https://goughlui.com/2023/12/27/video-codec-round-up-2023-part-4-libvpx-vp8/
+	{ "VP9",          { "-b:v", "0" } },   //definitely required
+	{ "AV1",          {} },                //requires FFmpeg 4.3+ to not require "-b:v 0", 4.4+ to avoid a lossless bug
+	{ "FFV1",         { "-level", "3" } }, //version 3
 };
 
+/* Python argparse problems:
+ * An argument like "-b:v" will confuse argparse because it expects that to be
+ * used by the program instead of being an actual input. Adding a "--"
+ * psuedo-argument before each use won't work, because that will stop the
+ * nargs="+" from consuming. So as a workaround, prepend every argument with an
+ * underscore and simply remove it in Python.
+ * https://docs.python.org/3/library/argparse.html#arguments-containing
+ * https://docs.python.org/3/howto/argparse.html#specifying-ambiguous-arguments
+ */
 std::string VideoData::get_codecExtraArgs() const {
 	const std::vector<std::string>& argList = VideoData::codecExtraArgs.at(get_videoEncoder());
 	if (argList.size() == 0) {
 		return "";
 	} else if (argList.size() == 1) {
-		return argList[0];
+		return "\"_" + argList[0] + "\"";
 	} else {
-		std::string args = argList[0];
+		std::string args = "\"_" + argList[0] + "\"";
 		for (int i = 1; i < argList.size(); i++) {
-			args += " " + argList[i];
+			args += " \"_" + argList[i] + "\"";
 		}
 		return args;
 	}

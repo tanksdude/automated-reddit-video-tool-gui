@@ -38,4 +38,4 @@ int call_comment_splitter(const char* path, const char* output);
 int call_comment_test_image(const char* textPath, const char* output, const ImageData& idata);
 int call_comment_to_speech(const char* textPath, const char* speechPath, const char* output, const ImageData& idata, const AudioData& adata, const VideoData& vdata);
 
-}
+} // namespace ARVT

@@ -27,19 +27,29 @@ else:
 # checking the OS can also be done with os.uname().sysname
 
 audioCodecLookup = {
-	"copy":   "copy",
-	"AAC":    "aac",
-	"Opus":   "libopus",
-	"FLAC":   "flac",
-	"Vorbis": "libvorbis",
+	"copy":     "copy",
+	"AAC":      "aac",
+	"Opus":     "libopus",
+	"FLAC":     "flac",
+	"Vorbis":   "libvorbis",
 }
 
 videoCodecLookup = {
-	"H.264":        "libx264",
-	"H.265 / HEVC": "libx265",
-	"VP8":          "libvpx",
-	"VP9":          "libvpx-vp9",
-	"AV1":          "libaom-av1",
+	"H.264":   "libx264",
+	"H.265":   "libx265",
+	"VP8":     "libvpx",
+	"VP9":     "libvpx-vp9",
+	"AV1":     "libaom-av1",
+	"FFV1":    "ffv1",
+}
+
+videoPresetKeywordLookup = {
+	"H.264":   ["-preset"],
+	"H.265":   ["-preset"],
+	"VP8":     [], #TODO
+	"VP9":     ["-deadline", "-cpu-used"],
+	"AV1":     ["-cpu-used"],
+	"FFV1":    [],
 }
 
 #print(sys.argv[1:]);
@@ -66,10 +76,10 @@ parser.add_argument("voice")
 parser.add_argument("audioEncoder")
 parser.add_argument("videoEncoder")
 parser.add_argument("videoPreset")
-parser.add_argument("videoCodecExtraArgs")
 parser.add_argument("faststart_flag")
 parser.add_argument("fps")
 parser.add_argument("crf")
+parser.add_argument("--vcodec_extraargs", metavar="vcodec_extraargs", nargs="*", help="optional extra video codec args")
 #TODO: option to erase all old videos (of the same project name)? needed to "replace" one container with another
 args = parser.parse_args()
 
@@ -94,9 +104,9 @@ VIDEO_FPS = args.fps #TODO
 VIDEO_VID_CRF = args.crf
 VIDEO_AUD_CODEC = audioCodecLookup[args.audioEncoder]
 VIDEO_AUD_BITRATE = "256k" #TODO
-VIDEO_VID_CODEC = videoCodecLookup[args.videoEncoder]
+VIDEO_VID_CODEC = videoCodecLookup[args.videoEncoder.split(' ')[0]]
 VIDEO_VID_PRESET = args.videoPreset.split(' ')[0]
-VIDEO_VID_EXTRA_ARGS = list(filter(lambda s : len(s) > 0, args.videoCodecExtraArgs.split(' '))) #TODO: this doesn't work for 'arg:"thing with spaces"'
+VIDEO_VID_EXTRA_ARGS = list(map(lambda s : s[1:], args.vcodec_extraargs)) # In order to parse something like "-b:v", every argument is prepended with an underscore, so remove it
 VIDEO_VID_FASTSTART = int(args.faststart_flag)
 
 input_image_text_file_path = args.input_text_file

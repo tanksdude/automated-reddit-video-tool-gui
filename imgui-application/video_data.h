@@ -24,12 +24,17 @@ struct VideoData {
 	bool audio_only_option_input = false;
 
 	/* Passing codec information to the Python script:
-	 * The Python script will read the string character for character. It will
-	 * interpret "H.265 / HEVC" as H.265.
+	 * The Python script will ignore everything after the first space. This
+	 * means "H.265 / HEVC" will be interpreted the same as "H.265".
 	 */
 	//TODO: make this static
-	const char* videoEncoderArray[5] = { "H.264", "H.265 / HEVC", "VP8", "VP9", "AV1" }; //TODO: fill based on the hashmap above?
+	const char* videoEncoderArray[6] = { "H.264", "H.265 / HEVC", "VP8", "VP9", "AV1", "FFV1" }; //TODO: fill based on the hashmap above?
 	int videoEncoderArray_current = 0;
+	bool videoEncoderIsLossless = false; //TODO: would allow FFV1 to hide the CRF slider; update this when updating the preset information //also every codec here has a lossless mode but only FFV1's will be supported
+	bool videoEncoderSupportsAlpha = false; //TODO: display "doesn't support alpha" if some color is "transparent", though yes that wouldn't detect "rgba(...)" colors; also check which codecs need some kind of specific flag to enable alpha encoding, add checkbox for that
+	//TODO: do those bools need to be mutable? pretty sure they're going to get updated from update_videoPresetArray(), so no
+
+	//TODO: VP8 and FFV1 don't support .mp4; either ignore that (print error to some console), disable something, or drop support
 
 	/* Passing preset information to the Python script:
 	 * The Python script will ignore everything after the first space. This
@@ -38,6 +43,10 @@ struct VideoData {
 	//TODO: either separate preset array or dynamically change this based on the codec
 	const char* videoPresetArray[11] = { "default", "ultrafast", "superfast", "veryfast", "faster", "fast", "medium (default)" , "slow", "slower", "veryslow", "placebo (not recommended)" };
 	int videoPresetArray_current = 0;
+
+	const char* videoPresetArray_VP9_deadline[4] = { "default", "good (default)", "best", "realtime" };
+	const char* videoPresetArray_VP9_cpu_used[10] = { "default", "0", "1 (default)", "2", "3", "4", "5", "6", "7", "8" };
+	const char* videoPresetArray_AV1[10] = { "default", "0", "1 (default)", "2", "3", "4", "5", "6", "7", "8" }; //valid: 0-8, 1 default; with "-usage realtime" the range is 7-10
 
 	const char* videoContainerArray[3] = { ".mp4", ".mkv", ".mov" };
 	int videoContainerArray_current = 0;

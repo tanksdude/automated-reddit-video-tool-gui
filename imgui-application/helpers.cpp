@@ -198,7 +198,7 @@ int call_comment_to_speech(const char* textPath, const char* speechPath, const c
 		"\"" + idata.get_paragraph_separator() + "\" " +
 		idata.get_imageFormat() + " " +
 
-		"-n \"" + vdata.get_video_replacement_numbers_input() + "\" " + //needs -n, otherwise Python's argparse will treat "-3" as an argument and get confused
+		"-n \"" + vdata.get_video_replacement_numbers_input() + "\" " + //needs the -n flag, otherwise Python's argparse will treat something like "-3" as an argument and get confused
 		(vdata.audio_only_option_input ? "-a " : "") +
 
 		"\"" + adata.get_voiceEngine() + "\" " +
@@ -206,11 +206,11 @@ int call_comment_to_speech(const char* textPath, const char* speechPath, const c
 		"\"" + adata.get_audioEncoder() + "\" " +
 		"\"" + vdata.get_videoEncoder() + "\" " +
 		"\"" + vdata.get_videoPreset() + "\" " +
-		"\"" + vdata.get_codecExtraArgs() + "\" " +
 		std::to_string(vdata.faststart_flag) + " " +
 
 		std::to_string(vdata.fps_v) + " " +
-		std::to_string(vdata.crf_v) + " ";
+		std::to_string(vdata.crf_v) + " " +
+		"--vcodec_extraargs " + vdata.get_codecExtraArgs();
 
 	#if defined(WIN32) || defined(_WIN32)
 	if (command.size() > 4000) {
@@ -222,4 +222,4 @@ int call_comment_to_speech(const char* textPath, const char* speechPath, const c
 	return system_helper(command.c_str(), false);
 }
 
-}
+} // namespace ARVT
