@@ -1,5 +1,29 @@
 #include "video_data.h"
 
+const char* VideoData::videoEncoderArray[6] = { "H.264", "H.265 / HEVC", "VP8", "VP9", "AV1", "FFV1" };
+std::vector<const char*> VideoData::videoPresetArray_H264 = { "default", "ultrafast", "superfast", "veryfast", "faster", "fast", "medium (default)" , "slow", "slower", "veryslow", "placebo (not recommended)" };
+std::vector<const char*> VideoData::videoPresetArray_VP9_deadline = { "default", "good (default)", "best", "realtime" };
+std::vector<const char*> VideoData::videoPresetArray_VP9_cpu_used = { "default", "0", "1 (default)", "2", "3", "4", "5", "6", "7", "8" };
+std::vector<const char*> VideoData::videoPresetArray_empty = {};
+const char* VideoData::videoContainerArray[6] = { ".mp4", ".mkv", ".mov", ".webm", ".ogg", ".avi" }; //TODO: .ogg has really poor support for codecs, so either remove it or find a way to communicate that or disable/warn on certain codecs; could remove codecs based on the container or vice versa
+
+const std::unordered_map<std::string, std::pair<std::string, std::vector<const char*>&>> VideoData::codecToPresetArray1 = {
+	{ "H.264",        { "Preset", videoPresetArray_H264 } },
+	{ "H.265 / HEVC", { "Preset", videoPresetArray_H264 } },
+	{ "VP8",          { "Deadline", videoPresetArray_VP9_deadline } },
+	{ "VP9",          { "Deadline", videoPresetArray_VP9_deadline } },
+	{ "AV1",          { "Deadline", videoPresetArray_VP9_deadline } },
+	{ "FFV1",         { "", videoPresetArray_empty } },
+};
+const std::unordered_map<std::string, std::pair<std::string, std::vector<const char*>&>> VideoData::codecToPresetArray2 = {
+	{ "H.264",        { "", videoPresetArray_empty } },
+	{ "H.265 / HEVC", { "", videoPresetArray_empty } },
+	{ "VP8",          { "-cpu_used", videoPresetArray_VP9_cpu_used } },
+	{ "VP9",          { "-cpu_used", videoPresetArray_VP9_cpu_used } },
+	{ "AV1",          { "-cpu_used", videoPresetArray_VP9_cpu_used } },
+	{ "FFV1",         { "", videoPresetArray_empty } },
+};
+
 //note: video_data.cpp *needs* to be included before main.cpp to initialize this, otherwise update_videoCrfValues() in the constructor will be called when there's zero elements
 //apart from H.264, the recommended starting value and range are mostly guesses
 const std::unordered_map<std::string, VideoData::CrfData> VideoData::codecToCrf = {
@@ -8,7 +32,7 @@ const std::unordered_map<std::string, VideoData::CrfData> VideoData::codecToCrf 
 	{ "VP8",          { 12,  5, 30, 32,  4, 63 } }, //0 is the true crf minimum but 4 is the default minimum
 	{ "VP9",          { 31, 15, 35, 32,  0, 63 } },
 	{ "AV1",          { 23, 20, 35, 32,  0, 63 } },
-	{ "FFV1",         { -1, -1, -1, -1, -1, -1 } }, //TODO: seems like FFV1 is lossless-only
+	{ "FFV1",         { -1, -1, -1, -1, -1, -1 } }, //TODO: figure out a good way to disable the slider for lossless codecs; probably need another hashmap which stores a struct with the info
 	//supports alpha: qtrle, vp8, vp9, ffv1
 };
 
@@ -23,6 +47,31 @@ const std::unordered_map<std::string, VideoData::CrfData> VideoData::codecToCrf 
 };
 */
 
+const char** VideoData::get_videoPresetArray1() const {
+	return codecToPresetArray1.at(get_videoEncoder()).second.data();
+}
+const char** VideoData::get_videoPresetArray2() const {
+	return codecToPresetArray2.at(get_videoEncoder()).second.data();
+}
+
+int VideoData::get_videoPresetArray1_size() const {
+	const std::vector<const char*>& codecArr = codecToPresetArray1.at(get_videoEncoder()).second;
+	return codecArr.size();
+}
+int VideoData::get_videoPresetArray2_size() const {
+	const std::vector<const char*>& codecArr = codecToPresetArray2.at(get_videoEncoder()).second;
+	return codecArr.size();
+}
+
+std::string VideoData::get_videoPreset1() const {
+	const std::vector<const char*>& codecArr = codecToPresetArray1.at(get_videoEncoder()).second;
+	return codecArr.empty() ? "default" : codecArr[videoPresetArray1_current];
+}
+std::string VideoData::get_videoPreset2() const {
+	const std::vector<const char*>& codecArr = codecToPresetArray2.at(get_videoEncoder()).second;
+	return codecArr.empty() ? "default" : codecArr[videoPresetArray2_current];
+}
+
 void VideoData::update_videoCrfValues() {
 	const VideoData::CrfData& data = codecToCrf.at(get_videoEncoder());
 	crf_v = data.starting_value;
@@ -31,5 +80,12 @@ void VideoData::update_videoCrfValues() {
 }
 
 void VideoData::update_videoPresetArray() {
-	//TODO: handle these later
+	videoPresetArray1_current = 0;
+	videoPresetArray2_current = 0;
+
+	const std::string codec = get_videoEncoder();
+	videoCodec_hasPreset1 = !codecToPresetArray1.at(codec).second.empty();
+	videoCodec_hasPreset2 = !codecToPresetArray2.at(codec).second.empty();
+	videoCodec_preset1Term = codecToPresetArray1.at(codec).first;
+	videoCodec_preset2Term = codecToPresetArray2.at(codec).first;
 }

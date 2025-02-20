@@ -198,15 +198,16 @@ int call_comment_to_speech(const char* textPath, const char* speechPath, const c
 		"\"" + idata.get_paragraph_separator() + "\" " +
 		idata.get_imageFormat() + " " +
 
-		"-n \"" + vdata.get_video_replacement_numbers_input() + "\" " + //needs the -n flag, otherwise Python's argparse will treat something like "-3" as an argument and get confused
+		"-n \"" + vdata.get_video_replacement_numbers_input() + "\" " + //needs the -n flag, otherwise Python's argparse will treat something like "-3" as an argument and get confused (pretty sure it's allowed because "-3" is a negative number)
 		(vdata.audio_only_option_input ? "-a " : "") +
 
 		"\"" + adata.get_voiceEngine() + "\" " +
 		"\"" + adata.get_voice() + "\" " +
 		"\"" + adata.get_audioEncoder() + "\" " +
 		"\"" + vdata.get_videoEncoder() + "\" " +
-		"\"" + vdata.get_videoPreset() + "\" " +
-		std::to_string(vdata.faststart_flag) + " " +
+		"\"" + vdata.get_videoPreset1() + "\" " +
+		"\"" + vdata.get_videoPreset2() + "\" " +
+		std::to_string(vdata.faststart_flag && vdata.get_faststart_available()) + " " +
 
 		std::to_string(vdata.fps_v) + " " +
 		std::to_string(vdata.crf_v) + " ";

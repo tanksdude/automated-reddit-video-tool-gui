@@ -46,9 +46,9 @@ videoCodecLookup = {
 videoPresetKeywordLookup = {
 	"H.264":   ["-preset"],
 	"H.265":   ["-preset"],
-	"VP8":     [], #TODO
+	"VP8":     ["-deadline", "-cpu-used"],
 	"VP9":     ["-deadline", "-cpu-used"],
-	"AV1":     ["-cpu-used"],
+	"AV1":     ["-deadline", "-cpu-used"],
 	"FFV1":    [],
 }
 
@@ -84,7 +84,8 @@ parser.add_argument("speechEngine")
 parser.add_argument("voice")
 parser.add_argument("audioEncoder")
 parser.add_argument("videoEncoder")
-parser.add_argument("videoPreset")
+parser.add_argument("videoPreset1")
+parser.add_argument("videoPreset2")
 parser.add_argument("faststart_flag")
 parser.add_argument("fps")
 parser.add_argument("crf")
@@ -106,15 +107,17 @@ IMAGE_SIZE = str(IMAGE_WIDTH) + "x" + str(IMAGE_HEIGHT)
 IMAGE_SIZE_EXTENDED = str(IMAGE_WIDTH + 2*IMAGE_W_BORDER) + "x" + str(IMAGE_HEIGHT + 2*IMAGE_H_BORDER)
 
 # Video parameters:
+VIDEO_VID_CODEC_name = args.videoEncoder.split(' ')[0]
 AUDIO_PROGRAM = audioProgramLookup[args.speechEngine]
 AUDIO_VOICE = args.voice
 VIDEO_FPS = args.fps #TODO
 VIDEO_VID_CRF = args.crf
 VIDEO_AUD_CODEC = audioCodecLookup[args.audioEncoder]
 VIDEO_AUD_BITRATE = "256k" #TODO
-VIDEO_VID_CODEC = videoCodecLookup[args.videoEncoder.split(' ')[0]]
-VIDEO_VID_PRESET = args.videoPreset.split(' ')[0]
-VIDEO_VID_EXTRA_ARGS = videoExtraArgsLookup[args.videoEncoder.split(' ')[0]]
+VIDEO_VID_CODEC_lib = videoCodecLookup[VIDEO_VID_CODEC_name]
+VIDEO_VID_PRESET_1 = args.videoPreset1.split(' ')[0]
+VIDEO_VID_PRESET_2 = args.videoPreset2.split(' ')[0]
+VIDEO_VID_EXTRA_ARGS = videoExtraArgsLookup[VIDEO_VID_CODEC_name]
 VIDEO_VID_FASTSTART = int(args.faststart_flag)
 
 input_image_text_file_path = args.input_text_file
@@ -151,10 +154,12 @@ def speech_and_image_to_vid_func(vid_file_name, wav_file_name, img_file_name):
 	command_args = ["ffmpeg", "-i", wav_file_name, "-i", img_file_name]
 
 	# Video args
-	command_args.extend(["-c:v", VIDEO_VID_CODEC])
+	command_args.extend(["-c:v", VIDEO_VID_CODEC_lib])
 	command_args.extend(VIDEO_VID_EXTRA_ARGS)
-	if VIDEO_VID_PRESET != "default":
-		command_args.extend(["-preset", VIDEO_VID_PRESET])
+	if VIDEO_VID_PRESET_1 != "default":
+		command_args.extend([videoPresetKeywordLookup[VIDEO_VID_CODEC_name][0], VIDEO_VID_PRESET_1])
+	if VIDEO_VID_PRESET_2 != "default":
+		command_args.extend([videoPresetKeywordLookup[VIDEO_VID_CODEC_name][1], VIDEO_VID_PRESET_2])
 	command_args.extend(["-r", VIDEO_FPS, "-crf", VIDEO_VID_CRF])
 	if VIDEO_VID_FASTSTART:
 		command_args.extend(["-movflags", "+faststart"])

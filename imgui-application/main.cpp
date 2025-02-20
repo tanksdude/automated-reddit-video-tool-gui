@@ -34,13 +34,13 @@ static void HelpMarker(const char* desc)
 char the_file_input_name[1024] = "lorem_ipsum";
 char evaluated_input_file_name[1024] = "evaluated_input_file_name"; //TODO: these can overflow
 
-char input_comment_data[1024 * 16] = "input_comment_data";
+char input_comment_data[16 * 1024] = "input_comment_data";
 bool input_comment_word_wrap = true; //TODO
 
 char evaluated_input_split_1[1024] = "evaluated_input_split_1";
 char evaluated_input_split_2[1024] = "evaluated_input_split_2";
-char input_split_1_data[1024 * 16] = "input_split_1_data";
-char input_split_2_data[1024 * 16] = "input_split_2_data";
+char input_split_1_data[16 * 1024] = "input_split_1_data";
+char input_split_2_data[16 * 1024] = "input_split_2_data";
 
 char evaluated_test_image_path[1024] = "evaluated_test_image_path";
 
@@ -334,7 +334,6 @@ int main(int, char**)
 						ImGui::Text("File Name:"); //TODO: this isn't horizontally or vertically centered
 						ImGui::SameLine();
 						ImGui::InputText("##Main Input Comment", the_file_input_name, IM_ARRAYSIZE(the_file_input_name), ImGuiInputTextFlags_CallbackCharFilter, filnameCleaningFunc);
-						//TODO: filenames can have space in them, make sure that's handled
 						ImGui::SameLine();
 
 						if (filenameIsLocked) {
@@ -468,11 +467,11 @@ int main(int, char**)
 						ImGui::SeparatorText("Font"); //TODO: align these to center
 						ImGui::InputText("Font Size",             idata.font_size_input,           IM_ARRAYSIZE(idata.font_size_input),        ImGuiInputTextFlags_CharsDecimal);
 						ImGui::InputText("Font Color",            idata.font_color_input,          IM_ARRAYSIZE(idata.font_color_input),       ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc);
-						ImGui::InputText("Background Color",      idata.background_color_input,    IM_ARRAYSIZE(idata.background_color_input), ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc);
-						ImGui::InputText("Paragraph Separator",   idata.paragraph_separator_input, IM_ARRAYSIZE(idata.paragraph_separator_input), 0); //TODO: when reading from this, make sure to replace " with \"
+						ImGui::InputText("Background Color",      idata.background_color_input,    IM_ARRAYSIZE(idata.background_color_input), ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc); //TODO: think these need to also scrub backslashes
+						ImGui::InputText("Paragraph Separator",   idata.paragraph_separator_input, IM_ARRAYSIZE(idata.paragraph_separator_input), 0);
 						ImGui::PopItemWidth();
 
-						//TODO: export/import settings (use INI file)
+						//TODO: export/import settings (use INI file) (buttons: export, quick import (same file name), import specific (file select)) (also a separate gui for batch remake, where it will re-run the script with the settings files)
 
 						ImGui::SeparatorText("##Image Parameters button separator");
 						ImGui::Combo("Image Format", &idata.imageFormatArray_current, idata.imageFormatArray, IM_ARRAYSIZE(idata.imageFormatArray));
@@ -486,17 +485,20 @@ int main(int, char**)
 							ret = LoadTextureFromFile(evaluated_test_image_path, &my_image_texture, &my_image_width, &my_image_height);
 						}
 
+						ImGui::SeparatorText("Video Settings (optional)");
+						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
+						ImGui::InputText("Video Replacement", vdata.video_replacement_numbers_input, IM_ARRAYSIZE(vdata.video_replacement_numbers_input), ImGuiInputTextFlags_CallbackCharFilter, video_replacement_scrubbingFunc);
+						//TODO: clear these when unlocking?
+						ImGui::SameLine();
+						HelpMarker("ex. \"1,2,3\" or \"4,6-8,15,20-30\"\n"
+						           "\"-3\" is start to 3; \"30-\" is 30 to end");
+						ImGui::PopItemWidth();
+						ImGui::Checkbox("Audio Only (.wav)", &vdata.audio_only_option_input); //TODO: put a textbox for the path to videos (which will change its extension based on this setting)
+
 						if (!filenameIsLocked) {
 							ImGui::EndDisabled();
 						}
 
-						ImGui::SeparatorText("Video Settings (optional)");
-						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
-						ImGui::InputText("Video Replacement", vdata.video_replacement_numbers_input, IM_ARRAYSIZE(vdata.video_replacement_numbers_input), ImGuiInputTextFlags_CallbackCharFilter, video_replacement_scrubbingFunc);
-						ImGui::SameLine();
-						HelpMarker("ex. \"1,2,3\" or \"4,6-8,15,20-30\"");
-						ImGui::PopItemWidth();
-						ImGui::Checkbox("Audio Only (.wav)", &vdata.audio_only_option_input); //TODO: put a textbox for the path to videos (which will change its extension based on this setting)
 						if (adata.voiceArray_current < 0) {
 							ImGui::TextColored(ImVec4(1, 0, 0, 1), "You haven't set a voice yet!\nGo to the Configure tab.");
 							//TODO: lock stuff
@@ -593,11 +595,17 @@ int main(int, char**)
 
 						if (ImGui::Combo("Video Encoder", &vdata.videoEncoderArray_current, vdata.videoEncoderArray, IM_ARRAYSIZE(vdata.videoEncoderArray))) {
 							vdata.update_videoCrfValues();
+							vdata.update_videoPresetArray();
 						}
 
 						ImGui::Indent();
-						//TODO (disable and completely swap out on different codecs)
-						ImGui::Combo("Preset", &vdata.videoPresetArray_current, vdata.videoPresetArray, IM_ARRAYSIZE(vdata.videoPresetArray), IM_ARRAYSIZE(vdata.videoPresetArray)); //doesn't take flags like ImGuiComboFlags_HeightLargest
+						if (vdata.videoCodec_hasPreset1) {
+							ImGui::Combo(vdata.videoCodec_preset1Term.c_str(), &vdata.videoPresetArray1_current, vdata.get_videoPresetArray1(), vdata.get_videoPresetArray1_size(), vdata.get_videoPresetArray1_size());
+							//doesn't take flags like ImGuiComboFlags_HeightLargest
+							if (vdata.videoCodec_hasPreset2) {
+								ImGui::Combo(vdata.videoCodec_preset2Term.c_str(), &vdata.videoPresetArray2_current, vdata.get_videoPresetArray2(), vdata.get_videoPresetArray2_size(), vdata.get_videoPresetArray2_size());
+							}
+						}
 
 						ImGui::SliderScalar("CRF", ImGuiDataType_S8, &vdata.crf_v, &vdata.crf_min, &vdata.crf_max);
 						//ImGui::SameLine();
