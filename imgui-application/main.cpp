@@ -32,15 +32,15 @@ static void HelpMarker(const char* desc)
 #include "video_data.h"
 
 char the_file_input_name[1024] = "lorem_ipsum";
-char evaluated_input_file_name[1024] = "evaluated_input_file_name"; //TODO: these can overflow
+char evaluated_input_file_name[1024]; //TODO: these can overflow
 
-char input_comment_data[16 * 1024] = "input_comment_data";
+char input_comment_data[16 * 1024] = "";
 bool input_comment_word_wrap = true; //TODO
 
-char evaluated_input_split_1[1024] = "evaluated_input_split_1";
-char evaluated_input_split_2[1024] = "evaluated_input_split_2";
-char input_split_1_data[16 * 1024] = "input_split_1_data";
-char input_split_2_data[16 * 1024] = "input_split_2_data";
+char evaluated_input_split_1[1024];
+char evaluated_input_split_2[1024];
+char input_split_1_data[16 * 1024] = "";
+char input_split_2_data[16 * 1024] = "";
 
 char evaluated_test_image_path[1024] = "evaluated_test_image_path";
 
@@ -473,13 +473,15 @@ int main(int, char**)
 
 						//TODO: export/import settings (use INI file) (buttons: export, quick import (same file name), import specific (file select)) (also a separate gui for batch remake, where it will re-run the script with the settings files)
 
-						ImGui::SeparatorText("##Image Parameters button separator");
+						ImGui::SeparatorText("Export");
+						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
 						ImGui::Combo("Image Format", &idata.imageFormatArray_current, idata.imageFormatArray, IM_ARRAYSIZE(idata.imageFormatArray));
+						ImGui::PopItemWidth();
 
 						strcpy(evaluated_test_image_path, ARVT::inputFileName_toCommentTestImagePath_TestImage(the_file_input_name, idata.imageFormatArray[idata.imageFormatArray_current]).c_str());
 						ImGui::InputText("##Test Image Path", evaluated_test_image_path, IM_ARRAYSIZE(evaluated_test_image_path), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 
-						if (ImGui::Button("Refresh →", ImVec2(-FLT_MIN, 0.0f))) {
+						if (ImGui::Button("Create →", ImVec2(-FLT_MIN, 0.0f))) {
 							ARVT::call_comment_test_image(evaluated_input_split_1, evaluated_test_image_path, idata);
 							//TODO: check if success
 							ret = LoadTextureFromFile(evaluated_test_image_path, &my_image_texture, &my_image_width, &my_image_height);
@@ -537,6 +539,7 @@ int main(int, char**)
 							ImGui::BeginDisabled();
 						}
 
+						if (adata.voiceArray_current < 0) { ImGui::BeginDisabled(); }
 						if (ImGui::Button("GO!", ImVec2(-FLT_MIN, 0.0f))) {
 							//TODO: progress bar and async
 							//TODO: this needs to be much cleaner (probably remove the name function calls), use the data structs instead
@@ -546,6 +549,7 @@ int main(int, char**)
 								idata, adata, vdata);
 							//TODO: at program start-up, check programs' existence and maybe ffmpeg version
 						}
+						if (adata.voiceArray_current < 0) { ImGui::EndDisabled(); }
 						if (ImGui::Button("Reveal in File Explorer##final video", ImVec2(-FLT_MIN, 0.0f))) {
 							//TODO: this should open in the folder if the file doesn't exist
 							//yes it's *kinda* a hack to open on just the first video, but it's better than iterating through every file in the folder and checking what's available
