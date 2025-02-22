@@ -588,6 +588,12 @@ int main(int, char**)
 						}
 
 						ImGui::Combo("Audio Encoder", &adata.audioEncoderArray_current, adata.audioEncoderArray, IM_ARRAYSIZE(adata.audioEncoderArray));
+						if (adata.get_audioEncoder() != "copy" && adata.get_audioEncoder() != "FLAC") {
+							//TODO: lossless flag
+							//ImGui doesn't support steps for sliders, oh well
+							ImGui::SliderScalar("Audio Bitrate (kbps)", ImGuiDataType_U16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max);
+							//ImGui::InputScalar("Audio Bitrate (kbps)", ImGuiDataType_U16, &adata.audio_bitrate_v, &adata.audio_bitrate_step, &adata.audio_bitrate_step);
+						}
 
 						ImGui::TableNextColumn();
 

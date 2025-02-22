@@ -41,7 +41,7 @@ Note that these programs must be accessible from a plain command line, meaning t
 * Python 3.8+
 * ImageMagick
 * Balabolka or eSpeak
-* FFmpeg 4.4+
+* FFmpeg 4.4+ (corresponds to Ubuntu 22.04 (Jammy Jellyfish) or higher)
 
 Place `balcon.exe` in this project's root folder (if you plan on using Balabolka).
 
@@ -64,28 +64,34 @@ Currently only Windows x64 with MSVC 2022 is supported.
 * Doxygen
 * an INI file for saving and loading settings
 * support for SSH-ing into a virtual machine (don't count on it)
-* option to embed subtitles in the videos (would anyone use it?)
+* option to embed subtitles in the videos (would anyone use it?) (supposedly needs a .mkv but it seems to work in a .mp4)
 * unit tests (GTest)
+* other font options
 
 ## Options that currently work
 
 * Image settings
 * Speech voice
+* The speech file option
 * Video container
 * Video & Audio encoders
-* The speech file option
+* Video preset
+* Audio bitrate
 * Audio-only option
 * Video replacement
-* Speech engine (Balabolka and eSpeak only, though those are the main ones)
+* Speech engine (Balabolka and eSpeak only)
 
 ## Options that kinda work
 
 * Video FPS & CRF: technically works but not the way I want
-* Video preset: works for H.264 (and H.265) but not others
 
 ## Options that don't work
 
 * Word wrap for the input comment
+
+## Audio-only note
+
+Kdenlive seems to have trouble correctly detecting the length of the .wav files produced with audio-only mode. Simply reload/refresh the clips (after a restart?) to fix this.
 
 ## Example usage
 

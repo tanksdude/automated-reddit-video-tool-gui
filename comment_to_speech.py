@@ -83,6 +83,7 @@ parser.add_argument("-n", "--video_replacement_numbers", metavar="video_replacem
 parser.add_argument("speechEngine")
 parser.add_argument("voice")
 parser.add_argument("audioEncoder")
+parser.add_argument("audioBitrate")
 parser.add_argument("videoEncoder")
 parser.add_argument("videoPreset1")
 parser.add_argument("videoPreset2")
@@ -107,13 +108,14 @@ IMAGE_SIZE = str(IMAGE_WIDTH) + "x" + str(IMAGE_HEIGHT)
 IMAGE_SIZE_EXTENDED = str(IMAGE_WIDTH + 2*IMAGE_W_BORDER) + "x" + str(IMAGE_HEIGHT + 2*IMAGE_H_BORDER)
 
 # Video parameters:
+VIDEO_AUD_CODEC_name = args.audioEncoder
 VIDEO_VID_CODEC_name = args.videoEncoder.split(' ')[0]
 AUDIO_PROGRAM = audioProgramLookup[args.speechEngine]
 AUDIO_VOICE = args.voice
 VIDEO_FPS = args.fps #TODO
 VIDEO_VID_CRF = args.crf
-VIDEO_AUD_CODEC = audioCodecLookup[args.audioEncoder]
-VIDEO_AUD_BITRATE = "256k" #TODO
+VIDEO_AUD_CODEC_lib = audioCodecLookup[VIDEO_AUD_CODEC_name]
+VIDEO_AUD_BITRATE = args.audioBitrate
 VIDEO_VID_CODEC_lib = videoCodecLookup[VIDEO_VID_CODEC_name]
 VIDEO_VID_PRESET_1 = args.videoPreset1.split(' ')[0]
 VIDEO_VID_PRESET_2 = args.videoPreset2.split(' ')[0]
@@ -165,9 +167,9 @@ def speech_and_image_to_vid_func(vid_file_name, wav_file_name, img_file_name):
 		command_args.extend(["-movflags", "+faststart"])
 
 	# Audio args
-	command_args.extend(["-c:a", VIDEO_AUD_CODEC])
-	if VIDEO_AUD_CODEC != "copy":
-		# bitrate is ignored when the codec is copy, so this check is unnecessary
+	command_args.extend(["-c:a", VIDEO_AUD_CODEC_lib])
+	if VIDEO_AUD_CODEC_name != "copy" and VIDEO_AUD_CODEC_name != "FLAC":
+		# bitrate is ignored when the codec is lossless, so this check is unnecessary
 		command_args.extend(["-b:a", VIDEO_AUD_BITRATE])
 
 	# Other args

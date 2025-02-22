@@ -1,6 +1,5 @@
 #pragma once
 #include <string>
-#include <cstring> //strcpy
 
 struct AudioData {
 	/* Passing voice engine information to the Python script:
@@ -25,12 +24,13 @@ struct AudioData {
 	 * The Python script will read the string character for character. It will
 	 * translate each codec name to the correct library.
 	 */
-	//TODO: maybe this goes in VideoData?
 	const char* audioEncoderArray[5] = { "copy", "AAC", "Opus", "FLAC", "Vorbis" };
 	int audioEncoderArray_current = 0;
 
-	//TODO: this should probably be a slider input, [60,300] step=4
-	char audio_bitrate_input[32]; //used only if codec is not copy
+	std::uint16_t audio_bitrate_v = 192;
+	std::uint16_t audio_bitrate_min = 60;
+	std::uint16_t audio_bitrate_max = 300;
+	std::uint16_t audio_bitrate_step = 4; //TODO: unused because ImGui sliders don't support stepping
 
 	inline std::string get_voiceEngine() const { return std::string(voiceEngineArray[voiceEngineArray_current]); }
 	inline std::string get_voice() const {
@@ -38,12 +38,11 @@ struct AudioData {
 		return std::string(voiceArray[voiceArray_current]);
 	}
 	inline std::string get_audioEncoder() const { return std::string(audioEncoderArray[audioEncoderArray_current]); }
-	inline std::string get_audio_bitrate_input() const { return std::string(audio_bitrate_input); }
+	inline std::string get_audioBitrate() const { return std::to_string(audio_bitrate_v) + "k"; }
 
 	void update_voiceArray(); // updates voiceArray and its related data
 
 	AudioData() {
-		strcpy(audio_bitrate_input, "256k");
 		update_voiceArray();
 	}
 

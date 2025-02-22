@@ -204,6 +204,7 @@ int call_comment_to_speech(const char* textPath, const char* speechPath, const c
 		"\"" + adata.get_voiceEngine() + "\" " +
 		"\"" + adata.get_voice() + "\" " +
 		"\"" + adata.get_audioEncoder() + "\" " +
+		adata.get_audioBitrate() + " " +
 		"\"" + vdata.get_videoEncoder() + "\" " +
 		"\"" + vdata.get_videoPreset1() + "\" " +
 		"\"" + vdata.get_videoPreset2() + "\" " +
