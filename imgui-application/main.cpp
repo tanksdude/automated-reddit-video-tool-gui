@@ -45,6 +45,10 @@ char input_split_2_data[16 * 1024] = "";
 char evaluated_test_image_path[1024] = "evaluated_test_image_path";
 
 
+auto integerOnlyPositiveFunc = [] (ImGuiInputTextCallbackData* data) {
+	if (data->EventChar >= '0' && data->EventChar <= '9') { return 0; }
+	return 1;
+};
 auto filnameCleaningFunc = [] (ImGuiInputTextCallbackData* data) {
 	//main goal: don't allow quotes
 	//additionally, don't allow NTFS-invalid characters, list from https://en.wikipedia.org/wiki/NTFS
@@ -601,7 +605,21 @@ int main(int, char**)
 
 						ImGui::TableNextColumn();
 
-						ImGui::SliderScalar("FPS", ImGuiDataType_S8, &vdata.fps_v, &vdata.fps_min, &vdata.fps_max); //TODO: option between common values and custom fraction
+						ImGui::Checkbox("Custom FPS", &vdata.fractionalFps);
+						ImGui::Indent();
+						if (vdata.fractionalFps) {
+							ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.4f);
+							ImGui::InputText("##FPS Numerator",      vdata.fps_numerator_input,   IM_ARRAYSIZE(vdata.fps_numerator_input),   ImGuiInputTextFlags_CallbackCharFilter, integerOnlyPositiveFunc);
+							ImGui::SameLine();
+							ImGui::Text(" / ");
+							ImGui::SameLine();
+							ImGui::InputText("FPS##FPS Denominator", vdata.fps_denominator_input, IM_ARRAYSIZE(vdata.fps_denominator_input), ImGuiInputTextFlags_CallbackCharFilter, integerOnlyPositiveFunc);
+							ImGui::PopItemWidth();
+						} else {
+							//TODO: should this be a combo instead?
+							ImGui::SliderScalar("FPS##Integer", ImGuiDataType_S8, &vdata.fps_v, &vdata.fps_min, &vdata.fps_max);
+						}
+						ImGui::Unindent();
 
 						if (ImGui::Combo("Video Encoder", &vdata.videoEncoderArray_current, vdata.videoEncoderArray, IM_ARRAYSIZE(vdata.videoEncoderArray))) {
 							vdata.update_videoCrfValues();

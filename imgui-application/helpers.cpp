@@ -210,7 +210,7 @@ int call_comment_to_speech(const char* textPath, const char* speechPath, const c
 		"\"" + vdata.get_videoPreset2() + "\" " +
 		std::to_string(vdata.faststart_flag && vdata.get_faststart_available()) + " " +
 
-		std::to_string(vdata.fps_v) + " " +
+		vdata.get_fps() + " " +
 		std::to_string(vdata.crf_v) + " ";
 
 	#if defined(WIN32) || defined(_WIN32)
