@@ -18,6 +18,15 @@ struct VideoData {
 		//CrfData() {} //TODO?
 	};
 
+	/*
+	struct VideoCodecInformation {
+		char name[16];
+		bool lossless;
+		bool supportsAlpha;
+		std::vector<std::string> supportedContainers;
+	};
+	*/
+
 	/* Passing codec information to the Python script:
 	 * The Python script will ignore everything after the first space. This
 	 * means "H.265 / HEVC" will be interpreted the same as "H.265".
@@ -43,8 +52,8 @@ struct VideoData {
 	bool audio_only_option_input = false;
 
 	int videoEncoderArray_current = 0;
-	bool videoEncoderIsLossless = false; //TODO: would allow FFV1 to hide the CRF slider; update this when updating the preset information //also every codec here has a lossless mode but only FFV1's will be supported
-	bool videoEncoderSupportsAlpha = false; //TODO: display "doesn't support alpha" if some color is "transparent", though yes that wouldn't detect "rgba(...)" colors; also check which codecs need some kind of specific flag to enable alpha encoding, add checkbox for that
+	bool get_videoEncoderIsLossless() { return false; } //TODO: would allow FFV1 to hide the CRF slider; update this when updating the preset information //also every codec here has a lossless mode but only FFV1's will be supported
+	bool get_videoEncoderSupportsAlpha() { return false; } //TODO: display "doesn't support alpha" if some color is "transparent", though yes that wouldn't detect "rgba(...)" colors; also check which codecs need some kind of specific flag to enable alpha encoding, add checkbox for that
 
 	//preset counts: FFV1 zero, H.264 one, VP9 two
 	bool videoCodec_hasPreset1;

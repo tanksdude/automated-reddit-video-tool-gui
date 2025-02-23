@@ -1,18 +1,26 @@
 #pragma once
 #include <string>
+#include <vector>
 
 struct AudioData {
+	/*
+	struct AudioCodecInformation {
+		char name[16];
+		bool lossless;
+		std::vector<std::string> supportedContainers;
+	};
+	*/
+
 	/* Passing voice engine information to the Python script:
 	 * The Python script will read the string character for character. It will
 	 * translate each voice engine name to the correct program.
 	 */
 #if defined(WIN32) || defined(_WIN32)
-	const char* voiceEngineArray[4] = { "Balabolka", "Espeak", "Espeak NG", "Windows Narrator (TODO)" };
-	const char* voiceEngineArray_exeForUpdatingVoiceList[4] = { "\"..\\balcon\" -l", "\"espeak\" --voices=en", "\"espeak-ng\" --voices=en", "" }; //note: internal use only
-	//TODO: look into whether nvaccess/nvda has compatible command line support
+	static const char* voiceEngineArray[4];
+	static const char* voiceEngineArray_exeForUpdatingVoiceList[4]; //note: internal use only
 #else
-	const char* voiceEngineArray[4] = { "Espeak", "say (TODO)", "spd-say (TODO)", "Festival (TODO)" }; //TODO: https://askubuntu.com/questions/501910/how-to-text-to-speech-output-using-command-line/501917#501917
-	const char* voiceEngineArray_exeForUpdatingVoiceList[4] = { "../espeak --voices", "", "", "" }; //note: internal use only
+	static const char* voiceEngineArray[5];
+	static const char* voiceEngineArray_exeForUpdatingVoiceList[5]; //note: internal use only
 #endif
 	int voiceEngineArray_current = 0;
 
@@ -20,11 +28,14 @@ struct AudioData {
 	int voiceArray_current;
 	int voiceArray_length;
 
+	static void getVoiceListFromExe_Balabolka(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList);
+	static void getVoiceListFromExe_Espeak(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList);
+
 	/* Passing codec information to the Python script:
 	 * The Python script will read the string character for character. It will
 	 * translate each codec name to the correct library.
 	 */
-	const char* audioEncoderArray[5] = { "copy", "AAC", "Opus", "FLAC", "Vorbis" };
+	static const char* audioEncoderArray[5];
 	int audioEncoderArray_current = 0;
 
 	std::uint16_t audio_bitrate_v = 192;
