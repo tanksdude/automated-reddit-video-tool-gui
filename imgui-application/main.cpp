@@ -42,7 +42,8 @@ char evaluated_input_split_2[1024];
 char input_split_1_data[16 * 1024] = "";
 char input_split_2_data[16 * 1024] = "";
 
-char evaluated_test_image_path[1024] = "evaluated_test_image_path";
+char evaluated_test_image_path[1024];
+char evaluated_output_speech_path[1024];
 
 
 auto integerOnlyPositiveFunc = [] (ImGuiInputTextCallbackData* data) {
@@ -499,7 +500,12 @@ int main(int, char**)
 						HelpMarker("ex. \"1,2,3\" or \"4,6-8,15,20-30\"\n"
 						           "\"-3\" is start to 3; \"30-\" is 30 to end");
 						ImGui::PopItemWidth();
-						ImGui::Checkbox("Audio Only (.wav)", &vdata.audio_only_option_input); //TODO: put a textbox for the path to videos (which will change its extension based on this setting)
+						ImGui::Checkbox("Audio Only", &vdata.audio_only_option_input);
+
+						strcpy(evaluated_output_speech_path, vdata.audio_only_option_input ?
+							ARVT::inputFileName_toCommentToSpeechPath_AudioOnly(the_file_input_name).c_str() :
+							ARVT::inputFileName_toCommentToSpeechPath(the_file_input_name, vdata.get_videoContainer().c_str()).c_str());
+						ImGui::InputText("##Output Videos Path", evaluated_output_speech_path, IM_ARRAYSIZE(evaluated_output_speech_path), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 
 						if (!filenameIsLocked) {
 							ImGui::EndDisabled();
@@ -659,16 +665,25 @@ int main(int, char**)
 
 						ImGui::SeparatorText("Misc");
 
+						ImGui::BeginDisabled();
 						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
 						ImGui::Combo("File Delete Age", &imageDeleteAgeList_current, imageDeleteAgeList, IM_ARRAYSIZE(imageDeleteAgeList));
 						ImGui::PopItemWidth();
 						ImGui::SameLine();
-						if (ImGui::Button("Delete files")) {
+						if (ImGui::Button("Delete videos")) {
 							int result = ARVT::deleteAllOldFiles(ARVT::OUTPUT_SPEECH.c_str(), imageDeleteAgeList_values[imageDeleteAgeList_current]);
 							if (result) {
 								//TODO
 							}
 						}
+						ImGui::SameLine();
+						if (ImGui::Button("Delete images")) {
+							int result = ARVT::deleteAllOldFiles(ARVT::TEST_IMAGES.c_str(), imageDeleteAgeList_values[imageDeleteAgeList_current]);
+							if (result) {
+								//TODO
+							}
+						}
+						ImGui::EndDisabled();
 
 						ImGui::Text("TODO: reset all to default button");
 
