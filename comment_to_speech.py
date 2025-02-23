@@ -127,13 +127,32 @@ output_vid_file_path = args.output_mp4_files
 if output_vid_file_path.find('$') == -1:
 	sys.exit("Bad output vid file names")
 input_speech_text_file_path = args.input_speech_file
-audio_only = args.audio_only
+AUDIO_ONLY = args.audio_only
+
+speech_and_image_to_vid_command_args = []
+# FFmpeg video args
+speech_and_image_to_vid_command_args.extend(["-c:v", VIDEO_VID_CODEC_lib])
+speech_and_image_to_vid_command_args.extend(VIDEO_VID_EXTRA_ARGS)
+if VIDEO_VID_PRESET_1 != "default":
+	speech_and_image_to_vid_command_args.extend([videoPresetKeywordLookup[VIDEO_VID_CODEC_name][0], VIDEO_VID_PRESET_1])
+if VIDEO_VID_PRESET_2 != "default":
+	speech_and_image_to_vid_command_args.extend([videoPresetKeywordLookup[VIDEO_VID_CODEC_name][1], VIDEO_VID_PRESET_2])
+speech_and_image_to_vid_command_args.extend(["-r", VIDEO_FPS, "-crf", VIDEO_VID_CRF])
+if VIDEO_VID_FASTSTART:
+	speech_and_image_to_vid_command_args.extend(["-movflags", "+faststart"])
+# FFmpeg audio args
+speech_and_image_to_vid_command_args.extend(["-c:a", VIDEO_AUD_CODEC_lib])
+if VIDEO_AUD_CODEC_name != "copy" and VIDEO_AUD_CODEC_name != "FLAC":
+	# bitrate is ignored when the codec is lossless, so this check is unnecessary
+	speech_and_image_to_vid_command_args.extend(["-b:a", VIDEO_AUD_BITRATE])
+# FFmpeg other args
+speech_and_image_to_vid_command_args.extend(["-loglevel", "error", "-y"]) # loglevels: quiet, fatal, error, warning
 
 def text_to_speech_func_balabolka(wav_file_name, text_file_name):
 	# make sure to do -w arg before the -f arg, because sometimes it just won't write to a wav file otherwise
 	return subprocess.run([AUDIO_PROGRAM, "-n", AUDIO_VOICE, "-enc", "utf8", "-w", wav_file_name, "-f", text_file_name])
 def text_to_speech_func_espeak(wav_file_name, text_file_name):
-	subprocess.run([AUDIO_PROGRAM, "-v", AUDIO_VOICE, "-w", wav_file_name, "-f", text_file_name])
+	return subprocess.run([AUDIO_PROGRAM, "-v", AUDIO_VOICE, "-w", wav_file_name, "-f", text_file_name])
 	# SAPI voices will not appear in espeak's command line version: https://sourceforge.net/p/espeak/discussion/538921/thread/257f8ce6/
 	# also see function espeak_ListVoices() at https://github.com/espeak-ng/espeak-ng/blob/master/src/include/espeak-ng/speak_lib.h
 
@@ -151,32 +170,10 @@ def text_to_image_func(img_file_name, text_file_name):
 	# https://imagemagick.org/Usage/text/#caption
 
 def speech_and_image_to_vid_func(vid_file_name, wav_file_name, img_file_name):
-	# TODO: these args should be in a global list to avoid remaking the list every time, since only the input files change
-	# Main args
 	command_args = ["ffmpeg", "-i", wav_file_name, "-i", img_file_name]
-
-	# Video args
-	command_args.extend(["-c:v", VIDEO_VID_CODEC_lib])
-	command_args.extend(VIDEO_VID_EXTRA_ARGS)
-	if VIDEO_VID_PRESET_1 != "default":
-		command_args.extend([videoPresetKeywordLookup[VIDEO_VID_CODEC_name][0], VIDEO_VID_PRESET_1])
-	if VIDEO_VID_PRESET_2 != "default":
-		command_args.extend([videoPresetKeywordLookup[VIDEO_VID_CODEC_name][1], VIDEO_VID_PRESET_2])
-	command_args.extend(["-r", VIDEO_FPS, "-crf", VIDEO_VID_CRF])
-	if VIDEO_VID_FASTSTART:
-		command_args.extend(["-movflags", "+faststart"])
-
-	# Audio args
-	command_args.extend(["-c:a", VIDEO_AUD_CODEC_lib])
-	if VIDEO_AUD_CODEC_name != "copy" and VIDEO_AUD_CODEC_name != "FLAC":
-		# bitrate is ignored when the codec is lossless, so this check is unnecessary
-		command_args.extend(["-b:a", VIDEO_AUD_BITRATE])
-
-	# Other args
-	command_args.extend(["-loglevel", "error", "-y", vid_file_name])
-
+	command_args.extend(speech_and_image_to_vid_command_args)
+	command_args.append(vid_file_name)
 	return subprocess.run(command_args)
-	# loglevels: quiet, fatal, error, warning
 	# https://ffmpeg.org/ffmpeg.html#Main-options
 
 def gen_output_vid_file_path(num):
@@ -187,7 +184,7 @@ def gen_output_wav_file_path_audio_only(num):
 def gen_output_wav_file_path_regular(num):
 	return output_vid_file_path.replace("$", str(num)) + ".wav"
 
-gen_output_wav_file_path = gen_output_wav_file_path_audio_only if audio_only else gen_output_wav_file_path_regular
+gen_output_wav_file_path = gen_output_wav_file_path_audio_only if AUDIO_ONLY else gen_output_wav_file_path_regular
 
 def gen_output_img_file_path(num):
 	return output_vid_file_path.replace("$", str(num)) + IMAGE_FORMAT
@@ -285,7 +282,7 @@ for i in range(len(image_text_file_lines)):
 		result = text_to_speech_func(gen_output_wav_file_path(files_count), gen_output_wav_file_path(files_count)+".temp")
 		os.remove(gen_output_wav_file_path(files_count)+".temp")
 
-		if not audio_only:
+		if not AUDIO_ONLY:
 			# image file:
 			output_file = open(gen_output_img_file_path(files_count)+".temp", "w", encoding="utf8")
 			output_file.write(curr_text_file_read)
