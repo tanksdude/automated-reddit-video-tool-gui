@@ -3,11 +3,7 @@
 #include "imgui/imgui_impl_opengl3.h"
 #include <stdio.h>
 #include <iostream> //TODO
-#define GL_SILENCE_DEPRECATION
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-#include <GLES2/gl2.h>
-#endif
-#include <GLFW/glfw3.h> // Will drag system OpenGL headers
+#include <GLFW/glfw3.h>
 
 
 // Helper to display a little (?) mark which shows a tooltip when hovered.
@@ -22,6 +18,15 @@ static void HelpMarker(const char* desc)
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
     }
+}
+
+inline float getMultilineInputHeight(float height) {
+	if (height <= 0) {
+		height = ImGui::GetTextLineHeight() * 8.0f;
+		//default height found in imgui_widgets.cpp:
+		//const ImVec2 frame_size = CalcItemSize(size_arg, CalcItemWidth(), (is_multiline ? g.FontSize * 8.0f : label_size.y) + style.FramePadding.y * 2.0f); // Arbitrary default of 8 lines high for multi-line
+	}
+	return height + 2 * ImGui::GetStyle().ItemSpacing.y;
 }
 
 
@@ -330,6 +335,8 @@ int main(int, char**)
 						ImGui::TableHeadersRow();
 						ImGui::TableNextRow();
 
+						float columnHeights[3]; //for correctly scaling the test image
+
 						ImGui::TableSetColumnIndex(0);
 
 						if (filenameIsLocked) {
@@ -354,7 +361,7 @@ int main(int, char**)
 						ImGui::InputText("##Input Comment Path", evaluated_input_file_name, IM_ARRAYSIZE(evaluated_input_file_name), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 						ImGui::SameLine();
 
-						if (ImGui::Button("Preview File")) { //TODO: add?: https://github.com/mlabbe/nativefiledialog
+						if (ImGui::Button("Preview File##Input Comment")) { //TODO: add?: https://github.com/mlabbe/nativefiledialog
 							int result = ARVT::copyFileToCStr(evaluated_input_file_name, input_comment_data, IM_ARRAYSIZE(input_comment_data));
 							if (result) {
 								strcpy(input_comment_data, "error"); //TODO: red text
@@ -367,8 +374,10 @@ int main(int, char**)
 							ImGui::EndTooltip();
 						}
 
+						/*
 						ImGui::Checkbox("Word Wrap##Input Comment", &input_comment_word_wrap);
 						//TODO: doesn't seem like word wrap affects TextMultiline so remove this option
+						*/
 
 						if (input_comment_word_wrap) {
 							ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + ImGui::GetContentRegionAvail().x - 400.f);
@@ -377,6 +386,8 @@ int main(int, char**)
 						if (input_comment_word_wrap) {
 							ImGui::PopTextWrapPos();
 						}
+
+						columnHeights[0] = 2 * ImGui::GetFrameHeightWithSpacing() + getMultilineInputHeight(ImGui::GetTextLineHeight() * 16);
 
 						ImGui::TableNextColumn();
 
@@ -391,14 +402,13 @@ int main(int, char**)
 
 						ImGui::InputText("##Input Split 1 Path", evaluated_input_split_1, 1024, ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 						ImGui::SameLine();
-						if (ImGui::Button("Refresh##Input Split 1")) {
+						if (ImGui::Button("Preview File##Input Split 1")) {
 							int result = ARVT::copyFileToCStr(evaluated_input_split_1, input_split_1_data, IM_ARRAYSIZE(input_split_1_data));
 							if (result) {
 								strcpy(input_split_1_data, "error"); //TODO: red text
 							}
 						}
 
-						//TODO: only fill if split has happened, and remove if file name changes
 						ImGui::InputTextMultiline("##Input Split 1 Data", input_split_1_data, IM_ARRAYSIZE(input_split_1_data), ImVec2(-FLT_MIN, 0), ImGuiInputTextFlags_ReadOnly);
 						//TODO: there should be a third box for ImageMagick text, which basically just replaces "&" with "&amp;" and other stuff
 						if (ImGui::Button("Reveal in File Explorer##Input Split 1")) {
@@ -432,7 +442,7 @@ int main(int, char**)
 
 						ImGui::InputText("##Input Split 2 Path", evaluated_input_split_2, IM_ARRAYSIZE(evaluated_input_split_2), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 						ImGui::SameLine();
-						if (ImGui::Button("Refresh##Input Split 2")) {
+						if (ImGui::Button("Preview File##Input Split 2")) {
 							int result = ARVT::copyFileToCStr(evaluated_input_split_2, input_split_2_data, IM_ARRAYSIZE(input_split_2_data));
 							if (result) {
 								strcpy(input_split_2_data, "error"); //TODO: red text
@@ -456,6 +466,8 @@ int main(int, char**)
 							ImGui::EndDisabled();
 						}
 
+						columnHeights[1] = 7 * ImGui::GetFrameHeightWithSpacing() + 2 * getMultilineInputHeight(0);
+
 						ImGui::TableNextColumn();
 
 						if (!filenameIsLocked) {
@@ -469,7 +481,7 @@ int main(int, char**)
 						ImGui::InputText("Width Border",    idata.image_w_border_input, IM_ARRAYSIZE(idata.image_w_border_input), ImGuiInputTextFlags_CharsDecimal);
 						ImGui::InputText("Height Border",   idata.image_h_border_input, IM_ARRAYSIZE(idata.image_h_border_input), ImGuiInputTextFlags_CharsDecimal);
 
-						ImGui::SeparatorText("Font"); //TODO: align these to center
+						ImGui::SeparatorText("Font"); //TODO: align SeparatorText to center
 						ImGui::InputText("Font Size",             idata.font_size_input,           IM_ARRAYSIZE(idata.font_size_input),        ImGuiInputTextFlags_CharsDecimal);
 						ImGui::InputText("Font Color",            idata.font_color_input,          IM_ARRAYSIZE(idata.font_color_input),       ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc);
 						ImGui::InputText("Background Color",      idata.background_color_input,    IM_ARRAYSIZE(idata.background_color_input), ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc); //TODO: think these need to also scrub backslashes
@@ -511,13 +523,36 @@ int main(int, char**)
 							ImGui::EndDisabled();
 						}
 
+						columnHeights[2] = (5 + 5 + 4 + 4) * ImGui::GetFrameHeightWithSpacing();
+
 						if (adata.voiceArray_current < 0) {
 							ImGui::TextColored(ImVec4(1, 0, 0, 1), "You haven't set a voice yet!\nGo to the Configure tab.");
-							//TODO: lock stuff
+							columnHeights[2] += 2 * ImGui::GetTextLineHeight(); //no ItemSpacing.y
 						}
 
 						ImGui::TableNextColumn();
-						ImGui::Image((ImTextureID)(intptr_t)my_image_texture, ImVec2(ImGui::GetContentRegionAvail().x, (ImGui::GetContentRegionAvail().x / my_image_width) * my_image_height)); //TODO: figure out whether to scale to x or y
+
+						/* NOTE: ImGui currently doesn't have a way to calculate
+						 * the available height *before* the content has been
+						 * rendered. One idea is to skip to the next row then
+						 * jump back, but that's not supported. So it seems the
+						 * only way to get the available height for scaling the
+						 * image is to manually calculate the height of the
+						 * columns and compare that against the true remaining
+						 * space in the window.
+						 */
+						//sizing: https://github.com/ocornut/imgui/issues/3714
+
+						const float largestColumn = *std::max_element(columnHeights, columnHeights + IM_ARRAYSIZE(columnHeights));
+						const float contentAvailableY = ImGui::GetContentRegionAvail().y + 2*ImGui::GetStyle().ItemSpacing.y;
+						const float availableHeight = std::max(0.0f, std::min(largestColumn, contentAvailableY));
+						const float availableWidth = std::max(0.0f, ImGui::GetContentRegionAvail().x);
+
+						if ((availableWidth / my_image_width) * my_image_height > availableHeight) {
+							ImGui::Image((ImTextureID)(intptr_t)my_image_texture, ImVec2((availableHeight / my_image_height) * my_image_width, availableHeight));
+						} else {
+							ImGui::Image((ImTextureID)(intptr_t)my_image_texture, ImVec2(availableWidth, (availableWidth / my_image_width) * my_image_height));
+						}
 
 						ImGui::TableNextRow();
 						ImGui::TableSetColumnIndex(0);
