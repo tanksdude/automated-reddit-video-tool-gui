@@ -6,6 +6,7 @@ std::vector<const char*> VideoData::videoPresetArray_VP9_deadline = { "default",
 std::vector<const char*> VideoData::videoPresetArray_VP9_cpu_used = { "default", "0", "1 (default)", "2", "3", "4", "5", "6", "7", "8" };
 std::vector<const char*> VideoData::videoPresetArray_empty = {};
 const char* VideoData::videoContainerArray[6] = { ".mp4", ".mkv", ".mov", ".webm", ".ogg", ".avi" }; //TODO: .ogg has really poor support for codecs, so either remove it or find a way to communicate that or disable/warn on certain codecs; could remove codecs based on the container or vice versa
+const char* VideoData::fpsArray[9] = { "10", "20", "25", "30", "50", "60", "75", "90", "120" };
 
 const std::unordered_map<std::string, std::pair<std::string, std::vector<const char*>&>> VideoData::codecToPresetArray1 = {
 	{ "H.264",        { "Preset", videoPresetArray_H264 } },

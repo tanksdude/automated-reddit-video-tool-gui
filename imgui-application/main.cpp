@@ -651,8 +651,7 @@ int main(int, char**)
 							ImGui::InputText("FPS##FPS Denominator", vdata.fps_denominator_input, IM_ARRAYSIZE(vdata.fps_denominator_input), ImGuiInputTextFlags_CallbackCharFilter, integerOnlyPositiveFunc);
 							ImGui::PopItemWidth();
 						} else {
-							//TODO: should this be a combo instead?
-							ImGui::SliderScalar("FPS##Integer", ImGuiDataType_S8, &vdata.fps_v, &vdata.fps_min, &vdata.fps_max);
+							ImGui::Combo("FPS##Integer", &vdata.fpsArray_current, vdata.fpsArray, IM_ARRAYSIZE(vdata.fpsArray), IM_ARRAYSIZE(vdata.fpsArray));
 						}
 						ImGui::Unindent();
 

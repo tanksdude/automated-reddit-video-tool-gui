@@ -77,10 +77,9 @@ struct VideoData {
 	}
 
 	bool fractionalFps = false;
-	//slider
-	std::uint16_t fps_v = 60;
-	std::uint16_t fps_min = 1;
-	std::uint16_t fps_max = 120;
+	//integers
+	static const char* fpsArray[9];
+	int fpsArray_current = 5;
 	//fraction
 	char fps_numerator_input[32];
 	char fps_denominator_input[32];
@@ -92,7 +91,7 @@ struct VideoData {
 	inline std::string get_video_replacement_numbers_input() const { return std::string(video_replacement_numbers_input); }
 	inline std::string get_videoEncoder() const { return std::string(videoEncoderArray[videoEncoderArray_current]); }
 	inline std::string get_videoContainer() const { return std::string(videoContainerArray[videoContainerArray_current]); }
-	inline std::string get_fps() const { return fractionalFps ? std::string(fps_numerator_input) + "/" + std::string(fps_denominator_input) : std::to_string(fps_v); }
+	inline std::string get_fps() const { return fractionalFps ? std::string(fps_numerator_input) + "/" + std::string(fps_denominator_input) : std::string(fpsArray[fpsArray_current]); }
 	std::string get_videoPreset1() const;
 	std::string get_videoPreset2() const;
 
