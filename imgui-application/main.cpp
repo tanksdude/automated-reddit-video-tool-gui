@@ -335,8 +335,6 @@ int main(int, char**)
 						ImGui::TableHeadersRow();
 						ImGui::TableNextRow();
 
-						float columnHeights[3]; //for correctly scaling the test image
-
 						ImGui::TableSetColumnIndex(0);
 
 						if (filenameIsLocked) {
@@ -356,8 +354,11 @@ int main(int, char**)
 							clear_input_data(filenameIsLocked);
 							filenameIsLocked = !filenameIsLocked;
 						}
+						const float lock_icon_frame_height = 32.0f + ImGui::GetStyle().FramePadding.y;
+						//HACK: apparently there's ImGui::GetStyle().FramePadding.y*2.0f extra size on image buttons, but that seems like 2px off
+						//regardless, it's irrelevant because this column isn't the largest
 
-						strcpy(evaluated_input_file_name, ARVT::inputFileName_toCommentSplitterPath(the_file_input_name).c_str());
+						ARVT::copyEvaluatedFileName_toCommentSplitterPath(the_file_input_name, evaluated_input_file_name, IM_ARRAYSIZE(evaluated_input_file_name));
 						ImGui::InputText("##Input Comment Path", evaluated_input_file_name, IM_ARRAYSIZE(evaluated_input_file_name), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 						ImGui::SameLine();
 
@@ -387,8 +388,6 @@ int main(int, char**)
 							ImGui::PopTextWrapPos();
 						}
 
-						columnHeights[0] = 2 * ImGui::GetFrameHeightWithSpacing() + getMultilineInputHeight(ImGui::GetTextLineHeight() * 16);
-
 						ImGui::TableNextColumn();
 
 						if (!filenameIsLocked) {
@@ -397,10 +396,10 @@ int main(int, char**)
 
 						ImGui::SeparatorText("Image Text");
 
-						strcpy(evaluated_input_split_1, ARVT::inputFileName_toCommentTestImagePath_Text(the_file_input_name).c_str());
-						strcpy(evaluated_input_split_2, ARVT::inputFileName_toCommentTestImagePath_Speech(the_file_input_name).c_str());
+						ARVT::copyEvaluatedFileName_toCommentTestImagePath_Text(the_file_input_name, evaluated_input_split_1, IM_ARRAYSIZE(evaluated_input_split_1));
+						ARVT::copyEvaluatedFileName_toCommentTestImagePath_Speech(the_file_input_name, evaluated_input_split_2, IM_ARRAYSIZE(evaluated_input_split_2));
 
-						ImGui::InputText("##Input Split 1 Path", evaluated_input_split_1, 1024, ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
+						ImGui::InputText("##Input Split 1 Path", evaluated_input_split_1, IM_ARRAYSIZE(evaluated_input_split_1), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 						ImGui::SameLine();
 						if (ImGui::Button("Preview File##Input Split 1")) {
 							int result = ARVT::copyFileToCStr(evaluated_input_split_1, input_split_1_data, IM_ARRAYSIZE(input_split_1_data));
@@ -466,8 +465,6 @@ int main(int, char**)
 							ImGui::EndDisabled();
 						}
 
-						columnHeights[1] = 7 * ImGui::GetFrameHeightWithSpacing() + 2 * getMultilineInputHeight(0);
-
 						ImGui::TableNextColumn();
 
 						if (!filenameIsLocked) {
@@ -495,11 +492,11 @@ int main(int, char**)
 						ImGui::Combo("Image Format", &idata.imageFormatArray_current, idata.imageFormatArray, IM_ARRAYSIZE(idata.imageFormatArray));
 						ImGui::PopItemWidth();
 
-						strcpy(evaluated_test_image_path, ARVT::inputFileName_toCommentTestImagePath_TestImage(the_file_input_name, idata.imageFormatArray[idata.imageFormatArray_current]).c_str());
+						ARVT::copyEvaluatedFileName_toCommentTestImagePath_TestImage(the_file_input_name, idata, evaluated_test_image_path, IM_ARRAYSIZE(evaluated_test_image_path));
 						ImGui::InputText("##Test Image Path", evaluated_test_image_path, IM_ARRAYSIZE(evaluated_test_image_path), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 
 						if (ImGui::Button("Create →", ImVec2(-FLT_MIN, 0.0f))) {
-							ARVT::call_comment_test_image(evaluated_input_split_1, evaluated_test_image_path, idata);
+							ARVT::call_comment_test_image(the_file_input_name, idata);
 							//TODO: check if success
 							ret = LoadTextureFromFile(evaluated_test_image_path, &my_image_texture, &my_image_width, &my_image_height);
 						}
@@ -514,21 +511,17 @@ int main(int, char**)
 						ImGui::PopItemWidth();
 						ImGui::Checkbox("Audio Only", &vdata.audio_only_option_input);
 
-						strcpy(evaluated_output_speech_path, vdata.audio_only_option_input ?
-							ARVT::inputFileName_toCommentToSpeechPath_AudioOnly(the_file_input_name).c_str() :
-							ARVT::inputFileName_toCommentToSpeechPath(the_file_input_name, vdata.get_videoContainer().c_str()).c_str());
+						ARVT::copyEvaluatedFileName_toCommentToSpeechPath(the_file_input_name, vdata, evaluated_output_speech_path, IM_ARRAYSIZE(evaluated_output_speech_path));
 						ImGui::InputText("##Output Videos Path", evaluated_output_speech_path, IM_ARRAYSIZE(evaluated_output_speech_path), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 
 						if (!filenameIsLocked) {
 							ImGui::EndDisabled();
 						}
 
-						columnHeights[2] = (5 + 5 + 4 + 4) * ImGui::GetFrameHeightWithSpacing();
-
 						if (adata.voiceArray_current < 0) {
 							ImGui::TextColored(ImVec4(1, 0, 0, 1), "You haven't set a voice yet!\nGo to the Configure tab.");
-							columnHeights[2] += 2 * ImGui::GetTextLineHeight(); //no ItemSpacing.y
 						}
+						const float no_voice_height = (adata.voiceArray_current < 0) ? 2 * ImGui::GetTextLineHeight() : 0.0f; //no ItemSpacing.y
 
 						ImGui::TableNextColumn();
 
@@ -542,6 +535,11 @@ int main(int, char**)
 						 * space in the window.
 						 */
 						//sizing: https://github.com/ocornut/imgui/issues/3714
+
+						float columnHeights[3];
+						columnHeights[0] = lock_icon_frame_height + ImGui::GetFrameHeightWithSpacing() + getMultilineInputHeight(ImGui::GetTextLineHeight() * 16);
+						columnHeights[1] = 7 * ImGui::GetFrameHeightWithSpacing() + 2 * getMultilineInputHeight(0);
+						columnHeights[2] = (5 + 5 + 4 + 4) * ImGui::GetFrameHeightWithSpacing() + no_voice_height;
 
 						const float largestColumn = *std::max_element(columnHeights, columnHeights + IM_ARRAYSIZE(columnHeights));
 						const float contentAvailableY = ImGui::GetContentRegionAvail().y + 2*ImGui::GetStyle().ItemSpacing.y;
@@ -562,7 +560,7 @@ int main(int, char**)
 						}
 
 						if (ImGui::Button("Split!", ImVec2(-FLT_MIN, 0.0f))) {
-							ARVT::call_comment_splitter(evaluated_input_file_name, ARVT::inputFileName_toCommentTestImagePath_Text(the_file_input_name).c_str());
+							ARVT::call_comment_splitter(the_file_input_name);
 							ARVT::copyFileToCStr(ARVT::inputFileName_toCommentTestImagePath_Text(the_file_input_name).c_str(), input_split_1_data, IM_ARRAYSIZE(input_split_1_data));
 						}
 						if (ImGui::BeginItemTooltip()) {
@@ -587,11 +585,7 @@ int main(int, char**)
 						if (adata.voiceArray_current < 0) { ImGui::BeginDisabled(); }
 						if (ImGui::Button("GO!", ImVec2(-FLT_MIN, 0.0f))) {
 							//TODO: progress bar and async
-							//TODO: this needs to be much cleaner (probably remove the name function calls), use the data structs instead
-							ARVT::call_comment_to_speech(evaluated_input_split_1, evaluated_input_split_2,
-								vdata.audio_only_option_input ? ARVT::inputFileName_toCommentToSpeechPath_AudioOnly(the_file_input_name).c_str()
-									: ARVT::inputFileName_toCommentToSpeechPath(the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current]).c_str(),
-								idata, adata, vdata);
+							ARVT::call_comment_to_speech(the_file_input_name, idata, adata, vdata);
 							//TODO: at program start-up, check programs' existence and maybe ffmpeg version
 						}
 						if (adata.voiceArray_current < 0) { ImGui::EndDisabled(); }
@@ -700,7 +694,9 @@ int main(int, char**)
 
 						ImGui::SeparatorText("Misc");
 
-						ImGui::BeginDisabled();
+						//TODO: application settings (fonts mainly)
+
+						ImGui::BeginDisabled(); //TODO: un-disable when there's saving and loading of video settings
 						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
 						ImGui::Combo("File Delete Age", &imageDeleteAgeList_current, imageDeleteAgeList, IM_ARRAYSIZE(imageDeleteAgeList));
 						ImGui::PopItemWidth();

@@ -1,5 +1,6 @@
 #include "helpers.h"
 #include <cstdlib> //system()
+#include <cstring> //strncpy
 #include <fstream>
 #include <filesystem>
 #include <algorithm> //replace()
@@ -13,6 +14,22 @@
 
 namespace ARVT {
 
+void copyEvaluatedFileName_toCommentSplitterPath(const char* name, char* dest, size_t buf_size) {
+	strncpy(dest, inputFileName_toCommentSplitterPath(name).c_str(), buf_size);
+}
+void copyEvaluatedFileName_toCommentTestImagePath_Text(const char* name, char* dest, size_t buf_size) {
+	strncpy(dest, inputFileName_toCommentTestImagePath_Text(name).c_str(), buf_size);
+}
+void copyEvaluatedFileName_toCommentTestImagePath_Speech(const char* name, char* dest, size_t buf_size) {
+	strncpy(dest, inputFileName_toCommentTestImagePath_Speech(name).c_str(), buf_size);
+}
+void copyEvaluatedFileName_toCommentTestImagePath_TestImage(const char* name, const ImageData& id, char* dest, size_t buf_size) {
+	strncpy(dest, inputFileName_toCommentTestImagePath_TestImage(name, id.get_imageFormat().c_str()).c_str(), buf_size);
+}
+void copyEvaluatedFileName_toCommentToSpeechPath(const char* name, const VideoData& vd, char* dest, size_t buf_size) {
+	strncpy(dest, inputFileName_toCommentToSpeechPath(name, vd.get_videoContainer().c_str(), vd.audio_only_option_input).c_str(), buf_size);
+}
+
 std::string inputFileName_toCommentSplitterPath(const char* name) {
 	return INPUT_COMMENTS + std::string(name) + ".txt";
 }
@@ -25,14 +42,15 @@ std::string inputFileName_toCommentTestImagePath_Speech(const char* name) {
 std::string inputFileName_toCommentTestImagePath_TestImage(const char* name, const char* format) {
 	return TEST_IMAGES + std::string(name) + "_image" + std::string(format);
 }
-std::string inputFileName_toCommentToSpeechPath(const char* name, const char* container) {
-	return OUTPUT_SPEECH + std::string(name) + "_$" + std::string(container);
+std::string inputFileName_toCommentToSpeechPath(const char* name, const char* container, bool audio_only) {
+	if (audio_only) {
+		return OUTPUT_SPEECH + std::string(name) + "_$.wav";
+	} else {
+		return OUTPUT_SPEECH + std::string(name) + "_$" + std::string(container);
+	}
 }
-std::string inputFileName_toCommentToSpeechPath_AudioOnly(const char* name) {
-	return OUTPUT_SPEECH + std::string(name) + "_$.wav";
-}
-std::string inputFileName_toCommentToSpeechPath_getFileExplorerName(const char* name, const char* container, bool audioOnly) {
-	std::string path = audioOnly ? inputFileName_toCommentToSpeechPath_AudioOnly(name) : inputFileName_toCommentToSpeechPath(name, container);
+std::string inputFileName_toCommentToSpeechPath_getFileExplorerName(const char* name, const char* container, bool audio_only) {
+	std::string path = inputFileName_toCommentToSpeechPath(name, container, audio_only);
 	std::replace(path.begin(), path.end(), '$', '1');
 	return path;
 }
@@ -160,13 +178,17 @@ int deleteAllOldFiles(const char* dir, int hourCount) {
 
 
 
-int call_comment_splitter(const char* path, const char* output) {
-	std::string command = "python ../comment_splitter.py \"" + std::string(path) + "\" \"" + std::string(output) + "\"";
+int call_comment_splitter(const char* name) {
+	const std::string input_path = inputFileName_toCommentSplitterPath(name);
+	const std::string output_path = inputFileName_toCommentTestImagePath_Text(name);
+	const std::string command = "python ../comment_splitter.py \"" + input_path + "\" \"" + output_path + "\"";
 	return system_helper(command.c_str(), true);
 }
 
-int call_comment_test_image(const char* textPath, const char* output, const ImageData& idata) {
-	std::string command = "python ../comment_test_image.py \"" + std::string(textPath) + "\" \"" + std::string(output) + "\" " +
+int call_comment_test_image(const char* name, const ImageData& idata) {
+	const std::string text_path = inputFileName_toCommentTestImagePath_Text(name);
+	const std::string image_path = inputFileName_toCommentTestImagePath_TestImage(name, idata.get_imageFormat().c_str());
+	const std::string command = "python ../comment_test_image.py \"" + std::string(text_path) + "\" \"" + std::string(image_path) + "\" " +
 		idata.get_image_width_input() + " " +
 		idata.get_image_height_input() + " " +
 		idata.get_image_w_border_input() + " " +
@@ -185,9 +207,12 @@ int call_comment_test_image(const char* textPath, const char* output, const Imag
 	return system_helper(command.c_str(), false);
 }
 
-int call_comment_to_speech(const char* textPath, const char* speechPath, const char* output, const ImageData& idata, const AudioData& adata, const VideoData& vdata) {
-	std::string command = "python ../comment_to_speech.py \"" + std::string(textPath) + "\" \"" + std::string(output) + "\" " +
-		(vdata.use_speech_text ? "-s \"" + std::string(speechPath) + "\" " : "") +
+int call_comment_to_speech(const char* name, const ImageData& idata, const AudioData& adata, const VideoData& vdata) {
+	const std::string text_path = inputFileName_toCommentTestImagePath_Text(name);
+	const std::string speech_path = inputFileName_toCommentTestImagePath_Speech(name);
+	const std::string video_path = inputFileName_toCommentToSpeechPath(name, vdata.get_videoContainer().c_str(), vdata.audio_only_option_input);
+	const std::string command = "python ../comment_to_speech.py \"" + std::string(text_path) + "\" \"" + std::string(video_path) + "\" " +
+		(vdata.use_speech_text ? "-s \"" + std::string(speech_path) + "\" " : "") +
 		idata.get_image_width_input() + " " +
 		idata.get_image_height_input() + " " +
 		idata.get_image_w_border_input() + " " +
