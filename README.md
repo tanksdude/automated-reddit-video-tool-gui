@@ -1,6 +1,6 @@
-# (Semi-)Automated Reddit Video Tool with a GUI [BETA]
+# (Semi-)Automated Reddit Video Tool with a GUI [post-BETA ("GAMMA"?)]
 
-**WARNING**: This software is in a beta state. There are some things that don't work without explanations or warnings. Use at your own discretion.
+**NOTE**: This software is in a post-beta ("gamma") state. Some things don't work without explanations or warnings (sometimes crashing), but there shouldn't be anything that seriously breaks.
 
 A program that takes text input and can generate the sentence-by-sentence reading and text-to-speech stuff that's common in Reddit reading videos. Now with a GUI!
 
@@ -13,8 +13,8 @@ This program does not automate the entire process of making a "Reddit reading" v
 1. Obtain the comment you want to make a video for as a .txt file. Put that file in the `input_comments` folder.
 1. Type in the file name in the "File Name" section. Click "Preview File" to make sure you got the right file.
 1. **Click the lock icon**, then click "Split!" to have it split.
-1. (Optional) If you want to have the speech and image text be different, click "Make Copy" to make a copy of it, then "Reveal in File Explorer" to find it, then edit it as you wish.
-1. (Optional, strongly recommended) Edit the image parameters as you desire. Click "Refresh" to see your changes.
+1. (Optional) If you want to have the speech and image text be different, click "Make Copy" to make a copy of it, then "Reveal in File Explorer" to find it, then edit it as you wish. Check "Use Speech Text" to enable using it.
+1. (Optional, strongly recommended) Edit the image parameters as you desire. Click "Preview" to see your changes.
 1. Click "GO!" to make the videos!
 1. Click "Reveal in File Explorer" to reveal the files' location.
 1. Throw those videos into your favorite video editor and do what you want!
@@ -56,7 +56,7 @@ Currently only Windows x64 with MSVC 2022 is supported.
 
 ## TODO list
 
-* make all the options do something
+* ~~make all the options do something~~
 * *robustness*
 * ImGui window fullscreen
 * support for other platforms and compilers (use Cmake)
@@ -66,28 +66,7 @@ Currently only Windows x64 with MSVC 2022 is supported.
 * support for SSH-ing into a virtual machine (don't count on it)
 * option to embed subtitles in the videos (would anyone use it?) (supposedly needs a .mkv but it seems to work in a .mp4)
 * unit tests (GTest)
-* other font options
-
-## Options that currently work
-
-* Image settings
-* Speech voice
-* The speech file option
-* Video container
-* Video & Audio encoders
-* Video preset
-* Audio bitrate
-* Audio-only option
-* Video replacement
-* Speech engine (Balabolka and eSpeak only)
-
-## Options that kinda work
-
-* Video FPS & CRF: technically works but not the way I want
-
-## Options that don't work
-
-* Word wrap for the input comment
+* ~~other font options~~ (should be a bit easier though)
 
 ## Audio-only note
 

@@ -1,3 +1,9 @@
+0.3.0
+* every input works
+* test image now also scales on height
+* fractional FPS option
+* application font setting
+
 0.2.0 "usable beta"
 * most inputs work
 * eSpeak support

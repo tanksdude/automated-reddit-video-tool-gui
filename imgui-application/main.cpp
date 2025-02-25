@@ -37,7 +37,7 @@ inline float getMultilineInputHeight(float height) {
 #include "video_data.h"
 
 char the_file_input_name[1024] = "lorem_ipsum";
-char evaluated_input_file_name[1024]; //TODO: these can overflow
+char evaluated_input_file_name[1024];
 
 char input_comment_data[16 * 1024] = "";
 bool input_comment_word_wrap = true; //TODO
@@ -50,17 +50,47 @@ char input_split_2_data[16 * 1024] = "";
 char evaluated_test_image_path[1024];
 char evaluated_output_speech_path[1024];
 
+char application_font_path[1024] = "c:\\Windows\\Fonts\\segoeui.ttf";
+char application_font_size[32] = "24.0";
+ImFont* currentFont = nullptr;
+bool needToChangeFonts = false;
+
+void refreshApplicationFont() {
+	float size = std::stof(application_font_size); //TODO: const std::invalid_argument&, const std::out_of_range&
+	ImGuiIO& io = ImGui::GetIO();
+	ImFont* newFont = io.Fonts->AddFontFromFileTTF(application_font_path, size); //TODO: check if file exists, also somehow handle the assert when it can't be loaded
+	if (newFont == nullptr) {
+		//TODO
+		return;
+	}
+	io.Fonts->Build();
+	ImGui_ImplOpenGL3_DestroyFontsTexture();
+	ImGui_ImplOpenGL3_CreateFontsTexture();
+	currentFont = newFont;
+}
 
 auto integerOnlyPositiveFunc = [] (ImGuiInputTextCallbackData* data) {
 	if (data->EventChar >= '0' && data->EventChar <= '9') { return 0; }
 	return 1;
 };
-auto filnameCleaningFunc = [] (ImGuiInputTextCallbackData* data) {
+auto filenameCleaningFunc = [] (ImGuiInputTextCallbackData* data) {
 	//main goal: don't allow quotes
 	//additionally, don't allow NTFS-invalid characters, list from https://en.wikipedia.org/wiki/NTFS
 	if (data->EventChar == '/'  ||
 	    data->EventChar == '\\' ||
 	    data->EventChar == ':'  ||
+	    data->EventChar == '*'  ||
+	    data->EventChar == '\"' ||
+	    data->EventChar == '?'  ||
+	    data->EventChar == '<'  ||
+	    data->EventChar == '>'  ||
+	    data->EventChar == '|')
+	{ return 1; }
+	return 0;
+};
+auto filepathCleaningFunc = [] (ImGuiInputTextCallbackData* data) {
+	//identical to filenameCleaningFunc but allows slashes
+	if (data->EventChar == ':'  ||
 	    data->EventChar == '*'  ||
 	    data->EventChar == '\"' ||
 	    data->EventChar == '?'  ||
@@ -233,14 +263,14 @@ int main(int, char**)
     // - Read 'docs/FONTS.md' for more instructions and details.
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
     // - Our Emscripten build process allows embedding fonts to be accessible at runtime from the "fonts/" folder. See Makefile.emscripten for details.
-    //io.Fonts->AddFontDefault();
+    //io.Fonts->AddFontDefault(); //might need to load this if the user tries to load an invalid font (though then the previous valid font should be used...)
     //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
-    io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 24.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != nullptr);
+	refreshApplicationFont();
 
     // Our state
     bool show_demo_window = false;
@@ -271,6 +301,12 @@ int main(int, char**)
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
+		// Font handling
+		if (needToChangeFonts) [[unlikely]] {
+			refreshApplicationFont();
+			needToChangeFonts = false;
+		}
+
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
@@ -284,7 +320,7 @@ int main(int, char**)
         }
 
         // Start the Dear ImGui frame
-        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplOpenGL3_NewFrame(); //indirectly calls io.Fonts->Build()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
@@ -317,6 +353,7 @@ int main(int, char**)
 
 		// main window
 		{
+			ImGui::PushFont(currentFont);
 			ImGui::Begin("Main Window", nullptr);
 
 			if (ImGui::BeginTabBar("MainTabBar", 0)) {
@@ -343,7 +380,7 @@ int main(int, char**)
 
 						ImGui::Text("File Name:"); //TODO: this isn't horizontally or vertically centered
 						ImGui::SameLine();
-						ImGui::InputText("##Main Input Comment", the_file_input_name, IM_ARRAYSIZE(the_file_input_name), ImGuiInputTextFlags_CallbackCharFilter, filnameCleaningFunc);
+						ImGui::InputText("##Main Input Comment", the_file_input_name, IM_ARRAYSIZE(the_file_input_name), ImGuiInputTextFlags_CallbackCharFilter, filenameCleaningFunc);
 						ImGui::SameLine();
 
 						if (filenameIsLocked) {
@@ -687,6 +724,14 @@ int main(int, char**)
 
 						ImGui::TableNextColumn();
 
+						ImGui::SeparatorText("Application");
+
+						ImGui::InputText("Font Path", application_font_path, IM_ARRAYSIZE(application_font_path), ImGuiInputTextFlags_CallbackCharFilter, filepathCleaningFunc);
+						ImGui::InputText("Font Size", application_font_size, IM_ARRAYSIZE(application_font_size), ImGuiInputTextFlags_CharsDecimal);
+						if (ImGui::Button("Refresh##Font")) {
+							needToChangeFonts = true;
+						}
+
 						ImGui::SeparatorText("Paths");
 						ImGui::Text("TODO: three main dirs and a temp dir");
 						//other TODO: display what the commands will be (though maybe this should be in the main section?)
@@ -747,6 +792,7 @@ int main(int, char**)
 			}
 
 			ImGui::End();
+			ImGui::PopFont();
 		}
 
 
