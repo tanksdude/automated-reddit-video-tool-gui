@@ -58,6 +58,11 @@ struct AudioData {
 	}
 
 	~AudioData() {
-		//TODO: clear voiceArray
+		if (voiceArray != nullptr) [[likely]] {
+			for (int i = 0; i < voiceArray_length; i++) {
+				delete voiceArray[i];
+			}
+			delete[] voiceArray;
+		}
 	}
 };
