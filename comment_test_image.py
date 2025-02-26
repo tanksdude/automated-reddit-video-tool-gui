@@ -21,8 +21,8 @@ parser.add_argument("image_h_border_input")
 parser.add_argument("font_size_input")
 parser.add_argument("font_color_input")
 parser.add_argument("background_color_input")
-parser.add_argument("paragraph_separator_input")
-# TODO: option for "new paragraph starter" (basically for \t starts)
+parser.add_argument("paragraph_newline_count")
+parser.add_argument("paragraph_tabbed_start")
 
 # TODO: don't force parameter order
 
@@ -39,7 +39,8 @@ IMAGE_HEIGHT = int(args.image_height_input) - 2*IMAGE_H_BORDER
 IMAGE_FONT_SIZE = args.font_size_input
 IMAGE_TEXT_COLOR = args.font_color_input
 IMAGE_BACKGROUND_COLOR = args.background_color_input
-IMAGE_NEW_PARAGRAPH_SEP = args.paragraph_separator_input.replace("\\n", "\n").replace("\\t", "\t")
+IMAGE_PARAGRAPH_SEP = "\n" * int(args.paragraph_newline_count)
+IMAGE_PARAGRAPH_START = "\t" if int(args.paragraph_tabbed_start) else ""
 # evaluated image parameters:
 IMAGE_SIZE = str(IMAGE_WIDTH) + "x" + str(IMAGE_HEIGHT)
 IMAGE_SIZE_EXTENDED = str(IMAGE_WIDTH + 2*IMAGE_W_BORDER) + "x" + str(IMAGE_HEIGHT + 2*IMAGE_H_BORDER)
@@ -62,13 +63,13 @@ input_image_text_file.close()
 
 # split the sentences into their own files, append them, then convert it to an image:
 
-curr_file_read = ""
+curr_file_read = IMAGE_PARAGRAPH_START
 
 for line in image_text_file_lines:
 	line = line[0:-1] # every line should end in a \n
 	#print(line, end="")
 	if len(line) == 0:
-		curr_file_read += IMAGE_NEW_PARAGRAPH_SEP
+		curr_file_read += IMAGE_PARAGRAPH_SEP + IMAGE_PARAGRAPH_START
 		continue
 	curr_file_read += line
 

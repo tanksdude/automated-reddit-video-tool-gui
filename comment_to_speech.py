@@ -76,7 +76,8 @@ parser.add_argument("image_h_border_input")
 parser.add_argument("font_size_input")
 parser.add_argument("font_color_input")
 parser.add_argument("background_color_input")
-parser.add_argument("paragraph_separator_input")
+parser.add_argument("paragraph_newline_count")
+parser.add_argument("paragraph_tabbed_start")
 parser.add_argument("imageFormat")
 
 parser.add_argument("-n", "--video_replacement_numbers", metavar="video_replacement_numbers", required=False, help="update/generate a specific video")
@@ -101,7 +102,8 @@ IMAGE_HEIGHT = int(args.image_height_input) - 2*IMAGE_H_BORDER
 IMAGE_FONT_SIZE = args.font_size_input
 IMAGE_TEXT_COLOR = args.font_color_input
 IMAGE_BACKGROUND_COLOR = args.background_color_input
-IMAGE_NEW_PARAGRAPH_SEP = args.paragraph_separator_input.replace("\\n", "\n").replace("\\t", "\t")
+IMAGE_PARAGRAPH_SEP = "\n" * int(args.paragraph_newline_count)
+IMAGE_PARAGRAPH_START = "\t" if int(args.paragraph_tabbed_start) else ""
 IMAGE_FORMAT = args.imageFormat
 # evaluated image parameters:
 IMAGE_SIZE = str(IMAGE_WIDTH) + "x" + str(IMAGE_HEIGHT)
@@ -259,7 +261,7 @@ if len(video_replacement_set) == 0:
 files_count = 0 # for the vid_$.mp4 file; the file number won't match the line number
 replaced_files_count = 0 #TODO: this is a pretty hacky solution
 #print(len([line for line in speech_text_file_lines if len(line) > 1])) #TODO: does this always get the file count?
-curr_text_file_read = ""
+curr_text_file_read = IMAGE_PARAGRAPH_START
 
 for i in range(len(image_text_file_lines)):
 	speech_line = speech_text_file_lines[i]
@@ -267,7 +269,7 @@ for i in range(len(image_text_file_lines)):
 	speech_line = speech_line[0:-1] # every line should end in a \n
 	image_line = image_line[0:-1]
 	if len(speech_line) == 0:
-		curr_text_file_read += IMAGE_NEW_PARAGRAPH_SEP
+		curr_text_file_read += IMAGE_PARAGRAPH_SEP + IMAGE_PARAGRAPH_START
 		continue
 	curr_text_file_read += image_line
 

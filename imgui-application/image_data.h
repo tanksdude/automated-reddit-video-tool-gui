@@ -11,7 +11,11 @@ struct ImageData {
 	char font_size_input[32];
 	char font_color_input[32];
 	char background_color_input[32];
-	char paragraph_separator_input[32];
+
+	std::uint8_t paragraph_newline_v = 2;
+	std::uint8_t paragraph_newline_min = 0;
+	std::uint8_t paragraph_newline_max = 4;
+	bool paragraph_tabbed_start_input = false;
 
 	const char* imageFormatArray[6] = { ".png", ".jpg", ".avif", ".webp", ".tiff", ".bmp" };
 	int imageFormatArray_current = 0;
@@ -24,7 +28,6 @@ struct ImageData {
 	inline std::string get_font_size_input() const { return std::string(font_size_input); }
 	inline std::string get_font_color_input() const { return std::string(font_color_input); }
 	inline std::string get_background_color_input() const { return std::string(background_color_input); }
-	std::string get_paragraph_separator() const; //escapes quotes and backslashes (TODO: Linux probably handles things differently, might have to make this a "newline count" instead of anything)
 	inline std::string get_imageFormat() const { return std::string(imageFormatArray[imageFormatArray_current]); }
 
 	ImageData() {
@@ -36,6 +39,5 @@ struct ImageData {
 		strcpy(font_size_input, "16");
 		strcpy(font_color_input, "white");
 		strcpy(background_color_input, "black");
-		strcpy(paragraph_separator_input, "\\n\\n");
 	}
 };

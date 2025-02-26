@@ -519,7 +519,8 @@ int main(int, char**)
 						ImGui::InputText("Font Size",             idata.font_size_input,           IM_ARRAYSIZE(idata.font_size_input),        ImGuiInputTextFlags_CharsDecimal);
 						ImGui::InputText("Font Color",            idata.font_color_input,          IM_ARRAYSIZE(idata.font_color_input),       ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc);
 						ImGui::InputText("Background Color",      idata.background_color_input,    IM_ARRAYSIZE(idata.background_color_input), ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc); //TODO: think these need to also scrub backslashes
-						ImGui::InputText("Paragraph Separator",   idata.paragraph_separator_input, IM_ARRAYSIZE(idata.paragraph_separator_input), 0);
+						ImGui::SliderScalar("Newline Count", ImGuiDataType_U8, &idata.paragraph_newline_v, &idata.paragraph_newline_min, &idata.paragraph_newline_max);
+						ImGui::Checkbox("Paragraph Tabbed Start", &idata.paragraph_tabbed_start_input);
 						ImGui::PopItemWidth();
 
 						//TODO: export/import settings (use INI file) (buttons: export, quick import (same file name), import specific (file select)) (also a separate gui for batch remake, where it will re-run the script with the settings files)
@@ -576,7 +577,7 @@ int main(int, char**)
 						float columnHeights[3];
 						columnHeights[0] = lock_icon_frame_height + ImGui::GetFrameHeightWithSpacing() + getMultilineInputHeight(ImGui::GetTextLineHeight() * 16);
 						columnHeights[1] = 7 * ImGui::GetFrameHeightWithSpacing() + 2 * getMultilineInputHeight(0);
-						columnHeights[2] = (5 + 5 + 4 + 4) * ImGui::GetFrameHeightWithSpacing() + no_voice_height;
+						columnHeights[2] = (5 + 6 + 4 + 4) * ImGui::GetFrameHeightWithSpacing() + no_voice_height;
 
 						const float largestColumn = *std::max_element(columnHeights, columnHeights + IM_ARRAYSIZE(columnHeights));
 						const float contentAvailableY = ImGui::GetContentRegionAvail().y + 2*ImGui::GetStyle().ItemSpacing.y;
