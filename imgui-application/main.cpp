@@ -57,8 +57,17 @@ bool needToChangeFonts = false;
 
 void refreshApplicationFont() {
 	float size = std::stof(application_font_size); //TODO: const std::invalid_argument&, const std::out_of_range&
+	ImWchar ranges[] = {
+		0x0020, 0x00FF, // Basic Latin + Latin Supplement
+		0x2190, 0x23FF, //arrows & math
+		0xFFFD, 0xFFFD, // Invalid
+		//0x01F300, 0x01F64F, //refresh symbol and emoticons //requires setting IMGUI_USE_WCHAR32 in imconfig.h
+		//TODO: that ^ didn't seem to get added to the font atlas
+		0,
+		//https://en.wikipedia.org/wiki/Unicode_block
+	};
 	ImGuiIO& io = ImGui::GetIO();
-	ImFont* newFont = io.Fonts->AddFontFromFileTTF(application_font_path, size); //TODO: check if file exists, also somehow handle the assert when it can't be loaded
+	ImFont* newFont = io.Fonts->AddFontFromFileTTF(application_font_path, size, nullptr, ranges); //TODO: check if file exists, also somehow handle the assert when it can't be loaded
 	if (newFont == nullptr) {
 		//TODO
 		return;
@@ -727,6 +736,7 @@ int main(int, char**)
 
 						ImGui::SeparatorText("Application");
 
+						//TODO: fonts have "Scale"
 						ImGui::InputText("Font Path", application_font_path, IM_ARRAYSIZE(application_font_path), ImGuiInputTextFlags_CallbackCharFilter, filepathCleaningFunc);
 						ImGui::InputText("Font Size", application_font_size, IM_ARRAYSIZE(application_font_size), ImGuiInputTextFlags_CharsDecimal);
 						if (ImGui::Button("Refresh##Font")) {
