@@ -41,6 +41,7 @@ videoCodecLookup = {
 	"VP9":     "libvpx-vp9",
 	"AV1":     "libaom-av1",
 	"FFV1":    "ffv1",
+	"Ut":      "utvideo",
 }
 
 videoPresetKeywordLookup = {
@@ -50,6 +51,7 @@ videoPresetKeywordLookup = {
 	"VP9":     ["-deadline", "-cpu-used"],
 	"AV1":     ["-deadline", "-cpu-used"],
 	"FFV1":    [],
+	"Ut":      ["-pred"],
 }
 
 videoExtraArgsLookup = {
@@ -59,6 +61,7 @@ videoExtraArgsLookup = {
 	"VP9":     ["-b:v", "0" ],    # definitely required
 	"AV1":     [],                # requires FFmpeg 4.3+ to not require "-b:v 0", 4.4+ to avoid a lossless bug
 	"FFV1":    ["-level", "3"],   # version 3
+	"Ut":      [],
 }
 
 #print(sys.argv[1:]);

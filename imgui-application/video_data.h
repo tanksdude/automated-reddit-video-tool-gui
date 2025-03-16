@@ -31,7 +31,7 @@ struct VideoData {
 	 * The Python script will ignore everything after the first space. This
 	 * means "H.265 / HEVC" will be interpreted the same as "H.265".
 	 */
-	static const char* videoEncoderArray[6];
+	static const char* videoEncoderArray[7];
 	/* Passing preset information to the Python script:
 	 * The Python script will ignore everything after the first space. This
 	 * means "medium (default)" will be interpreted the same as "medium".
@@ -39,6 +39,7 @@ struct VideoData {
 	static std::vector<const char*> videoPresetArray_H264;
 	static std::vector<const char*> videoPresetArray_VP9_deadline;
 	static std::vector<const char*> videoPresetArray_VP9_cpu_used;
+	static std::vector<const char*> videoPresetArray_UtVideo_prediction;
 	static std::vector<const char*> videoPresetArray_empty; //placeholder for the hashmap lookups
 
 	static const std::unordered_map<std::string, std::pair<std::string, std::vector<const char*>&>> codecToPresetArray1; //preset term ("preset"/"deadline"), then list of options
