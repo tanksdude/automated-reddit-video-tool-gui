@@ -7,13 +7,13 @@
 #include <vector>
 #include <iostream>
 
-#if defined(WIN32) || defined(_WIN32)
+#ifdef _WIN32
 	const char* AudioData::voiceEngineArray[4] = { "Balabolka", "Espeak", "Espeak NG", "Windows Narrator (TODO)" };
 	const char* AudioData::voiceEngineArray_exeForUpdatingVoiceList[4] = { "\"..\\balcon\" -l", "\"espeak\" --voices=en", "\"espeak-ng\" --voices=en", "" }; //note: internal use only
 	//TODO: look into whether nvaccess/nvda has compatible command line support
 #else
 	const char* AudioData::voiceEngineArray[5] = { "Espeak", "Espeak NG", "say (TODO)", "spd-say (TODO)", "Festival (TODO)" }; //TODO: https://askubuntu.com/questions/501910/how-to-text-to-speech-output-using-command-line/501917#501917
-	const char* AudioData::voiceEngineArray_exeForUpdatingVoiceList[5] = { "../espeak --voices", "../espeak-ng --voices", "", "", "" }; //note: internal use only
+	const char* AudioData::voiceEngineArray_exeForUpdatingVoiceList[5] = { "espeak --voices", "espeak-ng --voices", "", "", "" }; //note: internal use only
 #endif
 
 const char* AudioData::audioEncoderArray[5] = { "copy", "AAC", "Opus", "FLAC", "Vorbis" };
@@ -99,7 +99,7 @@ void AudioData::update_voiceArray() {
 	std::vector<std::string> voiceList;
 
 	switch (voiceEngineArray_current) {
-	#if defined(WIN32) || defined(_WIN32)
+	#ifdef _WIN32
 		case 0: //Balabolka
 			getVoiceListFromExe_Balabolka(file_lines, voiceList);
 			break;

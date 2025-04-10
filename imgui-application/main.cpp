@@ -3,6 +3,7 @@
 #include "imgui/imgui_impl_opengl3.h"
 #include <stdio.h>
 #include <iostream> //TODO
+#include <algorithm> //std::max_element
 #include <GLFW/glfw3.h>
 
 
@@ -50,8 +51,13 @@ char input_split_2_data[16 * 1024] = "";
 char evaluated_test_image_path[1024];
 char evaluated_output_speech_path[1024];
 
+#ifdef _WIN32
 char application_font_path[1024] = "c:\\Windows\\Fonts\\segoeui.ttf";
 char application_font_size[32] = "24.0";
+#else
+char application_font_path[1024] = "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf";
+char application_font_size[32] = "20.0";
+#endif
 ImFont* currentFont = nullptr;
 bool needToChangeFonts = false;
 
@@ -272,7 +278,7 @@ int main(int, char**)
     // - Read 'docs/FONTS.md' for more instructions and details.
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
     // - Our Emscripten build process allows embedding fonts to be accessible at runtime from the "fonts/" folder. See Makefile.emscripten for details.
-    //io.Fonts->AddFontDefault(); //might need to load this if the user tries to load an invalid font (though then the previous valid font should be used...)
+    io.Fonts->AddFontDefault(); //might need to load this if the user tries to load an invalid font (though then the previous valid font should be used...)
     //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);

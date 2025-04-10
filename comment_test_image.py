@@ -2,12 +2,25 @@ import os, sys
 import subprocess
 import argparse
 import time
+import platform
 
 # python comment_test_image.py input_text test_images/output IMAGE_PARAMETERS
 
+MAGICK_NAME = None
+if platform.system() == "Windows":
+	MAGICK_NAME = "magick"
+elif platform.system() == "Darwin":
+	sys.exit("Mac OS not supported")
+elif platform.system() == "Linux" or platform.system() in ["FreeBSD", "OpenBSD", "NetBSD"]:
+	MAGICK_NAME = "convert"
+else:
+	# Jython and mobile devices
+	sys.exit("Unknown/unsupported platform")
+# checking the OS can also be done with os.uname().sysname
+
 def text_to_image_func(img_file_name, text_file_name):
-	#return subprocess.run(["magick", "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_TEXT_COLOR, "-family", "Times New Roman", "-pointsize", IMAGE_FONT_SIZE, "pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])
-	return subprocess.run(["magick", "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_TEXT_COLOR, "-font", "Verdana", "-pointsize", IMAGE_FONT_SIZE, "pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])
+	#return subprocess.run([MAGICK_NAME, "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_TEXT_COLOR, "-family", "Times New Roman", "-pointsize", IMAGE_FONT_SIZE, "pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])
+	return subprocess.run([MAGICK_NAME, "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_TEXT_COLOR, "-font", "Verdana", "-pointsize", IMAGE_FONT_SIZE, "pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])
 	# https://imagemagick.org/Usage/text/#caption
 
 parser = argparse.ArgumentParser()

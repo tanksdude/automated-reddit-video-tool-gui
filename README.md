@@ -45,14 +45,36 @@ Note that these programs must be accessible from a plain command line, meaning t
 
 Place `balcon.exe` in this project's root folder (if you plan on using Balabolka).
 
-### Compiling from source
+### Compiling from source (Windows)
 
 Currently only Windows x64 with MSVC 2022 is supported.
 
-* `cd imgui-application`
 * Enable the MSVC environment variables in your command prompt: `"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"`
+* `cd imgui-application`
 * `build_win64.bat`
 * The executable is in the `Debug` folder (don't `cd`).
+
+### Compiling from source (Linux)
+
+Linux support is WIP. Only tested on Ubuntu.
+
+* get a compiler and CMake
+* `sudo apt install libglfw3-dev`
+* `mkdir build && cd build`
+* `cmake ..`
+* `./arvt-gui`
+* in the Python scripts, change `.temp` extensions to `.txt` (will fix this step later)
+* unicode doesn't show in imgui, fix later
+
+ImageMagick is extremely picky, so you need to fix some of its security policies. Edit `/etc/ImageMagick-6/policy.xml` with the following changes:
+
+* Fix this comment not ending, just so the syntax highlighter stops being confused: `<!-- <policy domain="cache" name="shared-secret" value="passphrase" stealth="true"/>`
+* add: `<policy domain="coder" rights="read|write" pattern="{GIF,JPEG,PNG,WEBP}" />`
+* add: `<policy domain="coder" rights="read|write" pattern="PANGO" />`
+* add: `<policy domain="path" rights="read" pattern="*" />` (might not be needed)
+* remove conflicting policies (mainly this: `<policy domain="path" rights="none" pattern="@*"/>`)
+
+Currently can't execute an ImageMagick command because `pango@*` is treated like a file instead of telling pango to open the file. Will hopefully fix later (and if not, then no Linux support... unless compiling ImageMagick from source is different).
 
 ## TODO list
 
@@ -63,7 +85,7 @@ Currently only Windows x64 with MSVC 2022 is supported.
 * ClangFormat
 * Doxygen
 * an INI file for saving and loading settings
-* support for SSH-ing into a virtual machine (don't count on it)
+* support for SSH-ing into a virtual machine (don't count on it) (plus pack up files using zstd)
 * option to embed subtitles in the videos (would anyone use it?) (supposedly needs a .mkv but it seems to work in a .mp4)
 * unit tests (GTest)
 * ~~other font options~~ (should be a bit easier though)

@@ -7,12 +7,14 @@ import platform
 # python comment_to_speech.py input_text.txt [-s input_speech] output_speech/vid_$.mp4 [-n replace] [-a] VIDEO_PARAMTERS
 
 audioProgramLookup = None
+MAGICK_NAME = None
 if platform.system() == "Windows":
 	audioProgramLookup = {
 		"Balabolka": "../balcon",
 		"Espeak":    "espeak",
 		"Espeak NG": "espeak-ng",
 	}
+	MAGICK_NAME = "magick"
 elif platform.system() == "Darwin":
 	sys.exit("Mac OS not supported")
 elif platform.system() == "Linux" or platform.system() in ["FreeBSD", "OpenBSD", "NetBSD"]:
@@ -20,7 +22,7 @@ elif platform.system() == "Linux" or platform.system() in ["FreeBSD", "OpenBSD",
 		"Espeak":    "espeak",
 		"Espeak NG": "espeak-ng",
 	}
-	sys.exit("Linux not supported at this time")
+	MAGICK_NAME = "convert"
 else:
 	# Jython and mobile devices
 	sys.exit("Unknown/unsupported platform")
@@ -170,8 +172,8 @@ ttsFunctionLookup = {
 text_to_speech_func = ttsFunctionLookup[args.speechEngine]
 
 def text_to_image_func(img_file_name, text_file_name):
-	#return subprocess.run(["magick", "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_TEXT_COLOR, "-family", "Times New Roman", "-pointsize", IMAGE_FONT_SIZE, "pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])
-	return subprocess.run(["magick", "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_TEXT_COLOR, "-font", "Verdana", "-pointsize", IMAGE_FONT_SIZE, "pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])
+	#return subprocess.run([MAGICK_NAME, "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_TEXT_COLOR, "-family", "Times New Roman", "-pointsize", IMAGE_FONT_SIZE, "pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])
+	return subprocess.run([MAGICK_NAME, "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_TEXT_COLOR, "-font", "Verdana", "-pointsize", IMAGE_FONT_SIZE, "pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])
 	# https://imagemagick.org/Usage/text/#caption
 
 def speech_and_image_to_vid_func(vid_file_name, wav_file_name, img_file_name):

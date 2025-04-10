@@ -11,7 +11,7 @@ const std::string INPUT_SPLITS = "../input_splits/";
 const std::string TEST_IMAGES = "../test_images/";
 const std::string TEST_IMAGE_DATA = "../test_image_data/"; //TODO
 const std::string OUTPUT_SPEECH = "../output_speech/";
-#if defined(WIN32) || defined(_WIN32)
+#ifdef _WIN32
 const std::string COMMAND_QUOTE = "\""; //TODO: actually use
 #else
 const std::string COMMAND_QUOTE = "\'";

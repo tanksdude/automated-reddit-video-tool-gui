@@ -15,7 +15,7 @@ struct AudioData {
 	 * The Python script will read the string character for character. It will
 	 * translate each voice engine name to the correct program.
 	 */
-#if defined(WIN32) || defined(_WIN32)
+#ifdef _WIN32
 	static const char* voiceEngineArray[4];
 	static const char* voiceEngineArray_exeForUpdatingVoiceList[4]; //note: internal use only
 #else
