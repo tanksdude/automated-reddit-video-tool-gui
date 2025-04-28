@@ -7,14 +7,14 @@ import platform
 # python comment_to_speech.py input_text.txt [-s input_speech] output_speech/vid_$.mp4 [-n replace] [-a] VIDEO_PARAMTERS
 
 audioProgramLookup = None
-MAGICK_NAME = None
+MAGICK_CMD = None
 if platform.system() == "Windows":
 	audioProgramLookup = {
 		"Balabolka": "../balcon",
 		"Espeak":    "espeak",
 		"Espeak NG": "espeak-ng",
 	}
-	MAGICK_NAME = "magick"
+	MAGICK_CMD = "magick"
 elif platform.system() == "Darwin":
 	sys.exit("Mac OS not supported")
 elif platform.system() == "Linux" or platform.system() in ["FreeBSD", "OpenBSD", "NetBSD"]:
@@ -22,7 +22,7 @@ elif platform.system() == "Linux" or platform.system() in ["FreeBSD", "OpenBSD",
 		"Espeak":    "espeak",
 		"Espeak NG": "espeak-ng",
 	}
-	MAGICK_NAME = "convert"
+	MAGICK_CMD = "convert"
 else:
 	# Jython and mobile devices
 	sys.exit("Unknown/unsupported platform")
@@ -117,7 +117,7 @@ IMAGE_SIZE_EXTENDED = str(IMAGE_WIDTH + 2*IMAGE_W_BORDER) + "x" + str(IMAGE_HEIG
 # Video parameters:
 VIDEO_AUD_CODEC_name = args.audioEncoder
 VIDEO_VID_CODEC_name = args.videoEncoder.split(' ')[0]
-AUDIO_PROGRAM = audioProgramLookup[args.speechEngine]
+AUDIO_PROGRAM_CMD = audioProgramLookup[args.speechEngine]
 AUDIO_VOICE = args.voice
 VIDEO_FPS = args.fps # Fun fact: FFmpeg's default framerate is 25. Only answer I could find for why is PAL compatibility, but I think that's just a coincidence.
 VIDEO_VID_CRF = args.crf
@@ -157,9 +157,9 @@ speech_and_image_to_vid_command_args.extend(["-loglevel", "error", "-y"]) # logl
 
 def text_to_speech_func_balabolka(wav_file_name, text_file_name):
 	# make sure to do -w arg before the -f arg, because sometimes it just won't write to a wav file otherwise
-	return subprocess.run([AUDIO_PROGRAM, "-n", AUDIO_VOICE, "-enc", "utf8", "-w", wav_file_name, "-f", text_file_name])
+	return subprocess.run([AUDIO_PROGRAM_CMD, "-n", AUDIO_VOICE, "-enc", "utf8", "-w", wav_file_name, "-f", text_file_name])
 def text_to_speech_func_espeak(wav_file_name, text_file_name):
-	return subprocess.run([AUDIO_PROGRAM, "-v", AUDIO_VOICE, "-w", wav_file_name, "-f", text_file_name])
+	return subprocess.run([AUDIO_PROGRAM_CMD, "-v", AUDIO_VOICE, "-w", wav_file_name, "-f", text_file_name])
 	# SAPI voices will not appear in espeak's command line version: https://sourceforge.net/p/espeak/discussion/538921/thread/257f8ce6/
 	# also see function espeak_ListVoices() at https://github.com/espeak-ng/espeak-ng/blob/master/src/include/espeak-ng/speak_lib.h
 
@@ -172,8 +172,8 @@ ttsFunctionLookup = {
 text_to_speech_func = ttsFunctionLookup[args.speechEngine]
 
 def text_to_image_func(img_file_name, text_file_name):
-	#return subprocess.run([MAGICK_NAME, "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_TEXT_COLOR, "-family", "Times New Roman", "-pointsize", IMAGE_FONT_SIZE, "pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])
-	return subprocess.run([MAGICK_NAME, "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_TEXT_COLOR, "-font", "Verdana", "-pointsize", IMAGE_FONT_SIZE, "pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])
+	#return subprocess.run([MAGICK_CMD, "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_TEXT_COLOR, "-family", "Times New Roman", "-pointsize", IMAGE_FONT_SIZE, "pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])
+	return subprocess.run([MAGICK_CMD, "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_TEXT_COLOR, "-font", "Verdana", "-pointsize", IMAGE_FONT_SIZE, "pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])
 	# https://imagemagick.org/Usage/text/#caption
 
 def speech_and_image_to_vid_func(vid_file_name, wav_file_name, img_file_name):
@@ -187,7 +187,7 @@ def gen_output_vid_file_path(num):
 	return output_vid_file_path.replace("$", str(num))
 
 def gen_output_wav_file_path_audio_only(num):
-	return output_vid_file_path.replace("$", str(num)) # if it's audio-only, then ".wav" is in the file path
+	return output_vid_file_path.replace("$", str(num)) # if it's audio-only, then ".wav" is already in the file path
 def gen_output_wav_file_path_regular(num):
 	return output_vid_file_path.replace("$", str(num)) + ".wav"
 
