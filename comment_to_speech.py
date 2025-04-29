@@ -51,7 +51,7 @@ videoPresetKeywordLookup = {
 	"H.265":   ["-preset"],
 	"VP8":     ["-deadline", "-cpu-used"],
 	"VP9":     ["-deadline", "-cpu-used"],
-	"AV1":     ["-deadline", "-cpu-used"],
+	"AV1":     ["-usage",    "-cpu-used"],
 	"FFV1":    [],
 	"Ut":      ["-pred"],
 }
@@ -60,7 +60,7 @@ videoExtraArgsLookup = {
 	"H.264":   [],
 	"H.265":   [],
 	"VP8":     ["-b:v", "1G" ],   # possibly required: https://goughlui.com/2023/12/27/video-codec-round-up-2023-part-4-libvpx-vp8/
-	"VP9":     ["-b:v", "0" ],    # definitely required
+	"VP9":     ["-b:v", "0" ],    # definitely required (for CRF mode)
 	"AV1":     [],                # requires FFmpeg 4.3+ to not require "-b:v 0", 4.4+ to avoid a lossless bug
 	"FFV1":    ["-level", "3"],   # version 3
 	"Ut":      [],

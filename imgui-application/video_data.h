@@ -38,6 +38,7 @@ struct VideoData {
 	 */
 	static std::vector<const char*> videoPresetArray_H264;
 	static std::vector<const char*> videoPresetArray_VP9_deadline;
+	static std::vector<const char*> videoPresetArray_AV1_usage;
 	static std::vector<const char*> videoPresetArray_VP9_cpu_used;
 	static std::vector<const char*> videoPresetArray_UtVideo_prediction;
 	static std::vector<const char*> videoPresetArray_empty; //placeholder for the hashmap lookups

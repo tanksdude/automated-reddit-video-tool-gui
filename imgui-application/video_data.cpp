@@ -2,9 +2,10 @@
 
 const char* VideoData::videoEncoderArray[7] = { "H.264", "H.265 / HEVC", "VP8", "VP9", "AV1", "FFV1", "Ut Video" };
 std::vector<const char*> VideoData::videoPresetArray_H264 = { "default", "ultrafast", "superfast", "veryfast", "faster", "fast", "medium (default)" , "slow", "slower", "veryslow", "placebo (not recommended)" };
-std::vector<const char*> VideoData::videoPresetArray_VP9_deadline = { "default", "good (default)", "best", "realtime" };
-std::vector<const char*> VideoData::videoPresetArray_VP9_cpu_used = { "default", "0", "1 (default)", "2", "3", "4", "5", "6", "7", "8" };
-std::vector<const char*> VideoData::videoPresetArray_UtVideo_prediction = { "default", "none", "left (default?)", "top (NOT SUPPORTED)", "top_left (NOT SUPPORTED)", "median" }; //https://ffmpeg.org/doxygen/3.0/libutvideoenc_8cpp.html
+std::vector<const char*> VideoData::videoPresetArray_VP9_deadline = { "default", "good (default)", "best (not recommended)", "realtime" };
+std::vector<const char*> VideoData::videoPresetArray_AV1_usage    = { "default", "good (default)", "realtime", "allintra" };
+std::vector<const char*> VideoData::videoPresetArray_VP9_cpu_used = { "default", "0", "1 (default)", "2", "3", "4", "5", "6", "7", "8" }; //TODO: the range changes based on the deadline
+std::vector<const char*> VideoData::videoPresetArray_UtVideo_prediction = { "default", "none", "left (default)", "gradient (NOT SUPPORTED)", "median" }; //https://ffmpeg.org/doxygen/3.0/libutvideoenc_8cpp.html
 std::vector<const char*> VideoData::videoPresetArray_empty = {};
 const char* VideoData::videoContainerArray[6] = { ".mp4", ".mkv", ".mov", ".webm", ".ogg", ".avi" }; //TODO: .ogg has really poor support for codecs, so either remove it or find a way to communicate that or disable/warn on certain codecs; could remove codecs based on the container or vice versa
 const char* VideoData::fpsArray[9] = { "10", "20", "25", "30", "50", "60", "75", "90", "120" };
@@ -14,16 +15,16 @@ const std::unordered_map<std::string, std::pair<std::string, std::vector<const c
 	{ "H.265 / HEVC", { "Preset", videoPresetArray_H264 } },
 	{ "VP8",          { "Deadline", videoPresetArray_VP9_deadline } },
 	{ "VP9",          { "Deadline", videoPresetArray_VP9_deadline } },
-	{ "AV1",          { "Deadline", videoPresetArray_VP9_deadline } },
+	{ "AV1",          { "Usage", videoPresetArray_AV1_usage } },
 	{ "FFV1",         { "", videoPresetArray_empty } },
 	{ "Ut Video",     { "Prediction", videoPresetArray_UtVideo_prediction } },
 };
 const std::unordered_map<std::string, std::pair<std::string, std::vector<const char*>&>> VideoData::codecToPresetArray2 = {
 	{ "H.264",        { "", videoPresetArray_empty } },
 	{ "H.265 / HEVC", { "", videoPresetArray_empty } },
-	{ "VP8",          { "-cpu_used", videoPresetArray_VP9_cpu_used } },
-	{ "VP9",          { "-cpu_used", videoPresetArray_VP9_cpu_used } },
-	{ "AV1",          { "-cpu_used", videoPresetArray_VP9_cpu_used } },
+	{ "VP8",          { "-cpu-used", videoPresetArray_VP9_cpu_used } },
+	{ "VP9",          { "-cpu-used", videoPresetArray_VP9_cpu_used } },
+	{ "AV1",          { "-cpu-used", videoPresetArray_VP9_cpu_used } },
 	{ "FFV1",         { "", videoPresetArray_empty } },
 	{ "Ut Video",     { "", videoPresetArray_empty } }, //TODO: -flags +ilme (don't wanna do a checkbox, so maybe { "il", "im", "ilm", "ile", "ime", "ilme" })
 };
