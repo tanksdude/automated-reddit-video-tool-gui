@@ -13,19 +13,17 @@ struct VideoData {
 		std::int8_t codec_default_value; //unused
 		std::int8_t codec_min_value;     //unused
 		std::int8_t codec_max_value;     //unused
-		CrfData(std::int8_t start, std::int8_t min, std::int8_t max, std::int8_t c_def, std::int8_t c_min, std::int8_t c_max) :
-			starting_value(start), min_value(min), max_value(max), codec_default_value(c_def), codec_min_value(c_min), codec_max_value(c_max) {}
-		//CrfData() {} //TODO?
 	};
 
-	/*
-	struct VideoCodecInformation {
-		char name[16];
-		bool lossless;
-		bool supportsAlpha;
-		std::vector<std::string> supportedContainers;
+	struct CodecPresetInformation {
+		std::string term;
+		std::vector<const char*>& presetArray;
 	};
-	*/
+
+	struct VideoCodecMiscInformation {
+		bool lossless; //most codecs have a lossless mode, but this flag is for always lossless
+		bool supportsAlpha; //not used
+	};
 
 	/* Passing codec information to the Python script:
 	 * The Python script will ignore everything after the first space. This
@@ -43,9 +41,10 @@ struct VideoData {
 	static std::vector<const char*> videoPresetArray_UtVideo_prediction;
 	static std::vector<const char*> videoPresetArray_empty; //placeholder for the hashmap lookups
 
-	static const std::unordered_map<std::string, std::pair<std::string, std::vector<const char*>&>> codecToPresetArray1; //preset term ("preset"/"deadline"), then list of options
-	static const std::unordered_map<std::string, std::pair<std::string, std::vector<const char*>&>> codecToPresetArray2;
+	static const std::unordered_map<std::string, CodecPresetInformation> codecToPresetArray1;
+	static const std::unordered_map<std::string, CodecPresetInformation> codecToPresetArray2;
 	static const std::unordered_map<std::string, CrfData> codecToCrf;
+	static const std::unordered_map<std::string, VideoCodecMiscInformation> codecMiscInformation;
 
 	static const char* videoContainerArray[6];
 
@@ -54,8 +53,9 @@ struct VideoData {
 	bool audio_only_option_input = false;
 
 	int videoEncoderArray_current = 0;
-	bool get_videoEncoderIsLossless() { return false; } //TODO: would allow FFV1 to hide the CRF slider; update this when updating the preset information //also every codec here has a lossless mode but only FFV1's will be supported
-	bool get_videoEncoderSupportsAlpha() { return false; } //TODO: display "doesn't support alpha" if some color is "transparent", though yes that wouldn't detect "rgba(...)" colors; also check which codecs need some kind of specific flag to enable alpha encoding, add checkbox for that
+	bool video_enableAlpha = false;
+	bool get_videoEncoderIsLossless();
+	bool get_videoEncoderSupportsAlpha();
 
 	//preset counts: FFV1 zero, H.264 one, VP9 two
 	bool videoCodec_hasPreset1;

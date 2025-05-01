@@ -722,11 +722,15 @@ int main(int, char**)
 							}
 						}
 
-						ImGui::SliderScalar("CRF", ImGuiDataType_S8, &vdata.crf_v, &vdata.crf_min, &vdata.crf_max);
-						//ImGui::SameLine();
-						//HelpMarker("CTRL+Click to input a value.");
+						if (!vdata.get_videoEncoderIsLossless()) {
+							ImGui::SliderScalar("CRF", ImGuiDataType_S8, &vdata.crf_v, &vdata.crf_min, &vdata.crf_max);
+							//ImGui::SameLine();
+							//HelpMarker("CTRL+Click to input a value.");
+						}
+
 						ImGui::Unindent();
 
+						//TODO: probably move to main settings, think about non-wav containers for audio-only mode
 						ImGui::Combo("Container", &vdata.videoContainerArray_current, vdata.videoContainerArray, IM_ARRAYSIZE(vdata.videoContainerArray));
 
 						ImGui::Indent();
