@@ -16,7 +16,21 @@
 	const char* AudioData::voiceEngineArray_exeForUpdatingVoiceList[5] = { "espeak --voices", "espeak-ng --voices", "", "", "" }; //note: internal use only
 #endif
 
-const char* AudioData::audioEncoderArray[5] = { "copy (pcm)", "AAC", "Opus", "FLAC", "Vorbis" };
+const char* AudioData::audioEncoderArray[7] = { "copy (pcm)", "AAC", "Opus", "FLAC", "Vorbis", "MP3", "ALAC" };
+
+const std::unordered_map<std::string, AudioData::AudioCodecMiscInformation> AudioData::codecMiscInformation = {
+	{ "copy (pcm)", { .lossless=true } },
+	{ "AAC",        { .lossless=false } },
+	{ "Opus",       { .lossless=false } },
+	{ "FLAC",       { .lossless=true } },
+	{ "Vorbis",     { .lossless=false } },
+	{ "MP3",        { .lossless=false } },
+	{ "ALAC",       { .lossless=true } },
+};
+
+bool AudioData::get_audioEncoderIsLossless() {
+	return codecMiscInformation.at(get_audioEncoder()).lossless;
+}
 
 void AudioData::getVoiceListFromExe_Balabolka(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList) {
 	// Balabolka lists the voices under "SAPI" with a space, so it's a voice if it's indented

@@ -34,6 +34,8 @@ audioCodecLookup = {
 	"Opus":     "libopus",
 	"FLAC":     "flac",
 	"Vorbis":   "libvorbis",
+	"MP3":      "libmp3lame",
+	"ALAC":     "alac",
 }
 
 videoCodecLookup = {
@@ -149,9 +151,7 @@ if VIDEO_VID_FASTSTART:
 	speech_and_image_to_vid_command_args.extend(["-movflags", "+faststart"])
 # FFmpeg audio args
 speech_and_image_to_vid_command_args.extend(["-c:a", VIDEO_AUD_CODEC_lib])
-if VIDEO_AUD_CODEC_name != "copy" and VIDEO_AUD_CODEC_name != "FLAC":
-	# bitrate is ignored when the codec is lossless, so this check is unnecessary
-	speech_and_image_to_vid_command_args.extend(["-b:a", VIDEO_AUD_BITRATE])
+speech_and_image_to_vid_command_args.extend(["-b:a", VIDEO_AUD_BITRATE])
 # FFmpeg other args
 speech_and_image_to_vid_command_args.extend(["-loglevel", "error", "-y"]) # loglevels: quiet, fatal, error, warning
 

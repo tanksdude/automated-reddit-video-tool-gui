@@ -1,15 +1,13 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 struct AudioData {
-	/*
-	struct AudioCodecInformation {
-		char name[16];
+	struct AudioCodecMiscInformation {
 		bool lossless;
-		std::vector<std::string> supportedContainers;
+		//guess that's it
 	};
-	*/
 
 	/* Passing voice engine information to the Python script:
 	 * The Python script will read the string character for character. It will
@@ -31,12 +29,15 @@ struct AudioData {
 	static void getVoiceListFromExe_Balabolka(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList);
 	static void getVoiceListFromExe_Espeak(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList);
 
+	static const std::unordered_map<std::string, AudioCodecMiscInformation> codecMiscInformation;
+
 	/* Passing codec information to the Python script:
 	 * The Python script will ignore everything after the first space. This
 	 * means "copy (pcm)" will be interpreted the same as "copy".
 	 */
-	static const char* audioEncoderArray[5];
+	static const char* audioEncoderArray[7];
 	int audioEncoderArray_current = 0;
+	bool get_audioEncoderIsLossless();
 
 	std::uint16_t audio_bitrate_v = 192;
 	std::uint16_t audio_bitrate_min = 60;
