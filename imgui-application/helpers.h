@@ -13,8 +13,10 @@ const std::string TEST_IMAGE_DATA = "../test_image_data/"; //TODO
 const std::string OUTPUT_SPEECH = "../output_speech/";
 #ifdef _WIN32
 const std::string COMMAND_QUOTE = "\""; //TODO: actually use
+const std::string PYTHON_CMD = "python";
 #else
 const std::string COMMAND_QUOTE = "\'";
+const std::string PYTHON_CMD = "python3";
 #endif
 
 // Public methods:

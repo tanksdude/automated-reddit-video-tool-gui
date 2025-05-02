@@ -32,8 +32,8 @@ struct AudioData {
 	static void getVoiceListFromExe_Espeak(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList);
 
 	/* Passing codec information to the Python script:
-	 * The Python script will read the string character for character. It will
-	 * translate each codec name to the correct library.
+	 * The Python script will ignore everything after the first space. This
+	 * means "copy (pcm)" will be interpreted the same as "copy".
 	 */
 	static const char* audioEncoderArray[5];
 	int audioEncoderArray_current = 0;

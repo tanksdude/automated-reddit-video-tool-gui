@@ -10,7 +10,7 @@ audioProgramLookup = None
 MAGICK_CMD = None
 if platform.system() == "Windows":
 	audioProgramLookup = {
-		"Balabolka": "../balcon",
+		"Balabolka": "balcon",
 		"Espeak":    "espeak",
 		"Espeak NG": "espeak-ng",
 	}
@@ -115,7 +115,7 @@ IMAGE_SIZE = str(IMAGE_WIDTH) + "x" + str(IMAGE_HEIGHT)
 IMAGE_SIZE_EXTENDED = str(IMAGE_WIDTH + 2*IMAGE_W_BORDER) + "x" + str(IMAGE_HEIGHT + 2*IMAGE_H_BORDER)
 
 # Video parameters:
-VIDEO_AUD_CODEC_name = args.audioEncoder
+VIDEO_AUD_CODEC_name = args.audioEncoder.split(' ')[0]
 VIDEO_VID_CODEC_name = args.videoEncoder.split(' ')[0]
 AUDIO_PROGRAM_CMD = audioProgramLookup[args.speechEngine]
 AUDIO_VOICE = args.voice

@@ -43,8 +43,6 @@ Note that these programs must be accessible from a plain command line, meaning t
 * Balabolka or eSpeak
 * FFmpeg 4.4+ (corresponds to Ubuntu 22.04 (Jammy Jellyfish) or higher)
 
-Place `balcon.exe` in this project's root folder (if you plan on using Balabolka).
-
 ### Compiling from source (Windows)
 
 Currently only Windows x64 with MSVC 2022 is supported.
