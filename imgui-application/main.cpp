@@ -683,11 +683,20 @@ int main(int, char**)
 							adata.update_voiceArray();
 						}
 
-						ImGui::Combo("Audio Encoder", &adata.audioEncoderArray_current, adata.audioEncoderArray, IM_ARRAYSIZE(adata.audioEncoderArray));
+						if (ImGui::Combo("Audio Encoder", &adata.audioEncoderArray_current, adata.audioEncoderArray, IM_ARRAYSIZE(adata.audioEncoderArray))) {
+							adata.update_audioPresetArray();
+						}
+
+						ImGui::Indent();
+						if (adata.audioCodec_hasPreset) {
+							ImGui::Combo(adata.audioCodec_presetTerm.c_str(), &adata.audioPresetArray_current, adata.get_audioPresetArray(), adata.get_audioPresetArray_size(), adata.get_audioPresetArray_size());
+						}
+
 						if (!adata.get_audioEncoderIsLossless()) {
 							//ImGui doesn't support steps for sliders, oh well
-							ImGui::SliderScalar("Audio Bitrate (kbps)", ImGuiDataType_U16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max);
+							ImGui::SliderScalar("Bitrate (kbps)", ImGuiDataType_U16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max);
 						}
+						ImGui::Unindent();
 
 						ImGui::TableNextColumn();
 

@@ -4,6 +4,12 @@
 #include <unordered_map>
 
 struct AudioData {
+	struct CodecPresetInformation {
+		//yes this is the exact same struct as VideoData, it's whatever
+		std::string term;
+		std::vector<const char*>& presetArray;
+	};
+
 	struct AudioCodecMiscInformation {
 		bool lossless;
 		//guess that's it
@@ -29,15 +35,34 @@ struct AudioData {
 	static void getVoiceListFromExe_Balabolka(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList);
 	static void getVoiceListFromExe_Espeak(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList);
 
-	static const std::unordered_map<std::string, AudioCodecMiscInformation> codecMiscInformation;
-
 	/* Passing codec information to the Python script:
 	 * The Python script will ignore everything after the first space. This
 	 * means "copy (pcm)" will be interpreted the same as "copy".
 	 */
 	static const char* audioEncoderArray[7];
+	/* Passing "preset" information to the Python script:
+	 * The Python script will ignore everything after the first space. This
+	 * means "5 (default)" will be interpreted the same as "5".
+	 */
+	static std::vector<const char*> audioPresetArray_AAC;
+	static std::vector<const char*> audioPresetArray_Opus;
+	static std::vector<const char*> audioPresetArray_FLAC;
+	static std::vector<const char*> audioPresetArray_MP3;
+	static std::vector<const char*> audioPresetArray_empty; //placeholder for the hashmap lookups
+	//other possibilities: flac lpc_coeff_precision, libopus application
+
+	static const std::unordered_map<std::string, CodecPresetInformation> codecToPresetArray;
+	//static const std::unordered_map<std::string, CrfData> codecToCrf; //TODO: maybe have bitrate recommendations?
+	static const std::unordered_map<std::string, AudioCodecMiscInformation> codecMiscInformation;
+
 	int audioEncoderArray_current = 0;
-	bool get_audioEncoderIsLossless();
+	bool get_audioEncoderIsLossless() const;
+
+	bool audioCodec_hasPreset;
+	int audioPresetArray_current;
+	std::string audioCodec_presetTerm;
+	const char** get_audioPresetArray() const;
+	int get_audioPresetArray_size() const;
 
 	std::uint16_t audio_bitrate_v = 192;
 	std::uint16_t audio_bitrate_min = 60;
@@ -51,11 +76,14 @@ struct AudioData {
 	}
 	inline std::string get_audioEncoder() const { return std::string(audioEncoderArray[audioEncoderArray_current]); }
 	inline std::string get_audioBitrate() const { return std::to_string(audio_bitrate_v) + "k"; }
+	std::string get_audioPreset() const;
 
 	void update_voiceArray(); // updates voiceArray and its related data
-
+	void update_audioPresetArray();
+	
 	AudioData() {
 		update_voiceArray();
+		update_audioPresetArray();
 	}
 
 	~AudioData() {

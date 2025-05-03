@@ -235,6 +235,7 @@ int call_comment_to_speech(const char* name, const ImageData& idata, const Audio
 		"\"" + adata.get_voice() + "\" " +
 		"\"" + adata.get_audioEncoder() + "\" " +
 		adata.get_audioBitrate() + " " +
+		"\"" + adata.get_audioPreset() + "\" " +
 		"\"" + vdata.get_videoEncoder() + "\" " +
 		"\"" + vdata.get_videoPreset1() + "\" " +
 		"\"" + vdata.get_videoPreset2() + "\" " +

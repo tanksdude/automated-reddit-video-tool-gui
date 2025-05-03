@@ -17,6 +17,21 @@
 #endif
 
 const char* AudioData::audioEncoderArray[7] = { "copy (pcm)", "AAC", "Opus", "FLAC", "Vorbis", "MP3", "ALAC" };
+std::vector<const char*> AudioData::audioPresetArray_AAC =  { "default", "anmr (not recommended) (NOT SUPPORTED)", "twoloop (default)", "fast" };
+std::vector<const char*> AudioData::audioPresetArray_Opus = { "default", "0 (fast)", "1", "2", "3", "4", "5",           "6", "7", "8", "9", "10 (default)" };
+std::vector<const char*> AudioData::audioPresetArray_FLAC = { "default", "0 (fast)", "1", "2", "3", "4", "5 (default)", "6", "7", "8", "9", "10", "11", "12" };
+std::vector<const char*> AudioData::audioPresetArray_MP3 =  { "default", "0 (slow)", "1", "2", "3", "4", "5 (default)", "6", "7", "8", "9" }; //default is 5 according to its API
+std::vector<const char*> AudioData::audioPresetArray_empty = {};
+
+const std::unordered_map<std::string, AudioData::CodecPresetInformation> AudioData::codecToPresetArray = {
+	{ "copy (pcm)", { "", audioPresetArray_empty } },
+	{ "AAC",        { "Encoding Method", audioPresetArray_AAC } },
+	{ "Opus",       { "Compression Level", audioPresetArray_Opus } },
+	{ "FLAC",       { "Compression Level", audioPresetArray_FLAC } },
+	{ "Vorbis",     { "", audioPresetArray_empty } },
+	{ "MP3",        { "Compression Level", audioPresetArray_MP3 } },
+	{ "ALAC",       { "", audioPresetArray_empty } },
+};
 
 const std::unordered_map<std::string, AudioData::AudioCodecMiscInformation> AudioData::codecMiscInformation = {
 	{ "copy (pcm)", { .lossless=true } },
@@ -28,8 +43,22 @@ const std::unordered_map<std::string, AudioData::AudioCodecMiscInformation> Audi
 	{ "ALAC",       { .lossless=true } },
 };
 
-bool AudioData::get_audioEncoderIsLossless() {
+bool AudioData::get_audioEncoderIsLossless() const {
 	return codecMiscInformation.at(get_audioEncoder()).lossless;
+}
+
+const char** AudioData::get_audioPresetArray() const {
+	return codecToPresetArray.at(get_audioEncoder()).presetArray.data();
+}
+
+int AudioData::get_audioPresetArray_size() const {
+	const std::vector<const char*>& codecArr = codecToPresetArray.at(get_audioEncoder()).presetArray;
+	return codecArr.size();
+}
+
+std::string AudioData::get_audioPreset() const {
+	const std::vector<const char*>& codecArr = codecToPresetArray.at(get_audioEncoder()).presetArray;
+	return codecArr.empty() ? "default" : codecArr[audioPresetArray_current];
 }
 
 void AudioData::getVoiceListFromExe_Balabolka(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList) {
@@ -159,4 +188,12 @@ void AudioData::update_voiceArray() {
 		voiceArray_current = -1;
 		voiceArray_length = voiceList.size();
 	}
+}
+
+void AudioData::update_audioPresetArray() {
+	audioPresetArray_current = 0;
+
+	const std::string codec = get_audioEncoder();
+	audioCodec_hasPreset = !codecToPresetArray.at(codec).presetArray.empty();
+	audioCodec_presetTerm = codecToPresetArray.at(codec).term;
 }

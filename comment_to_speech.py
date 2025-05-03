@@ -38,6 +38,16 @@ audioCodecLookup = {
 	"ALAC":     "alac",
 }
 
+audioPresetKeywordLookup = {
+	"copy":     [],
+	"AAC":      ["-aac_coder"],
+	"Opus":     ["-compression_level"],
+	"FLAC":     ["-compression_level"],
+	"Vorbis":   [],
+	"MP3":      ["-compression_level"],
+	"ALAC":     [],
+}
+
 videoCodecLookup = {
 	"H.264":   "libx264",
 	"H.265":   "libx265",
@@ -92,6 +102,7 @@ parser.add_argument("speechEngine")
 parser.add_argument("voice")
 parser.add_argument("audioEncoder")
 parser.add_argument("audioBitrate")
+parser.add_argument("audioPreset")
 parser.add_argument("videoEncoder")
 parser.add_argument("videoPreset1")
 parser.add_argument("videoPreset2")
@@ -125,6 +136,7 @@ VIDEO_FPS = args.fps # Fun fact: FFmpeg's default framerate is 25. Only answer I
 VIDEO_VID_CRF = args.crf
 VIDEO_AUD_CODEC_lib = audioCodecLookup[VIDEO_AUD_CODEC_name]
 VIDEO_AUD_BITRATE = args.audioBitrate
+VIDEO_AUD_PRESET = args.audioPreset.split(' ')[0]
 VIDEO_VID_CODEC_lib = videoCodecLookup[VIDEO_VID_CODEC_name]
 VIDEO_VID_PRESET_1 = args.videoPreset1.split(' ')[0]
 VIDEO_VID_PRESET_2 = args.videoPreset2.split(' ')[0]
@@ -152,6 +164,8 @@ if VIDEO_VID_FASTSTART:
 # FFmpeg audio args
 speech_and_image_to_vid_command_args.extend(["-c:a", VIDEO_AUD_CODEC_lib])
 speech_and_image_to_vid_command_args.extend(["-b:a", VIDEO_AUD_BITRATE])
+if VIDEO_AUD_PRESET != "default":
+	speech_and_image_to_vid_command_args.extend([audioPresetKeywordLookup[VIDEO_AUD_CODEC_name][0], VIDEO_AUD_PRESET])
 # FFmpeg other args
 speech_and_image_to_vid_command_args.extend(["-loglevel", "error", "-y"]) # loglevels: quiet, fatal, error, warning
 

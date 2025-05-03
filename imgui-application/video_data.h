@@ -53,8 +53,8 @@ struct VideoData {
 
 	int videoEncoderArray_current = 0;
 	bool video_enableAlpha = false;
-	bool get_videoEncoderIsLossless();
-	bool get_videoEncoderSupportsAlpha();
+	bool get_videoEncoderIsLossless() const;
+	bool get_videoEncoderSupportsAlpha() const;
 
 	//preset counts: FFV1 zero, H.264 one, VP9 two
 	bool videoCodec_hasPreset1;

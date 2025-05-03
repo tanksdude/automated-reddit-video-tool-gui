@@ -62,12 +62,13 @@ const std::unordered_map<std::string, VideoData::VideoCodecMiscInformation> Vide
 	//other FFmpeg encoders that support alpha (without strange workarounds): QuickTime Animation (qtrle), Apple ProRes 4444 (prores), Cineform (cfhd)
 };
 
-bool VideoData::get_videoEncoderIsLossless() {
+bool VideoData::get_videoEncoderIsLossless() const {
 	return codecMiscInformation.at(get_videoEncoder()).lossless;
 }
-bool VideoData::get_videoEncoderSupportsAlpha() {
+bool VideoData::get_videoEncoderSupportsAlpha() const {
 	return codecMiscInformation.at(get_videoEncoder()).supportsAlpha;
 }
+
 const char** VideoData::get_videoPresetArray1() const {
 	return codecToPresetArray1.at(get_videoEncoder()).presetArray.data();
 }
