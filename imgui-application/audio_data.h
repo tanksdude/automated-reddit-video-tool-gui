@@ -11,8 +11,18 @@ struct AudioData {
 	};
 
 	struct AudioCodecMiscInformation {
+		//yes this is the exact same enum as VideoData, it's whatever
+		enum class RecommendedLevel : uint8_t {
+			No_Opinion,
+			Awful,
+			Okay,
+			Good,
+			Best,
+		};
+		RecommendedLevel recommendation;
 		bool lossless;
-		//guess that's it
+		std::string information_text;
+		std::string get_recommendedStr() const;
 	};
 
 	/* Passing voice engine information to the Python script:
@@ -57,6 +67,8 @@ struct AudioData {
 
 	int audioEncoderArray_current = 0;
 	bool get_audioEncoderIsLossless() const;
+	std::string get_audioEncoderRecommendationStr() const;
+	std::string get_audioEncoderInformationText() const;
 
 	bool audioCodec_hasPreset;
 	int audioPresetArray_current;

@@ -34,17 +34,40 @@ const std::unordered_map<std::string, AudioData::CodecPresetInformation> AudioDa
 };
 
 const std::unordered_map<std::string, AudioData::AudioCodecMiscInformation> AudioData::codecMiscInformation = {
-	{ "copy (pcm)", { .lossless=true } },
-	{ "AAC",        { .lossless=false } },
-	{ "Opus",       { .lossless=false } },
-	{ "FLAC",       { .lossless=true } },
-	{ "Vorbis",     { .lossless=false } },
-	{ "MP3",        { .lossless=false } },
-	{ "ALAC",       { .lossless=true } },
+	{ "copy (pcm)", { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Okay,  .lossless=true,  .information_text="Uncompressed raw audio. Not very useful." } },
+	{ "AAC",        { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Good,  .lossless=false, .information_text="Very widespread. Opus is faster and higher quality though." } },
+	{ "Opus",       { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Best,  .lossless=false, .information_text="Currently the best lossy audio codec. Very unlikely to encounter compatibility issues." } },
+	{ "FLAC",       { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Best,  .lossless=true,  .information_text="It's lossless. Smaller filesizes than raw audio." } },
+	{ "Vorbis",     { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Awful, .lossless=false, .information_text="Completely outclassed by Opus, and has very poor container support. Refuses to encode when the bitrate is too high for the source (around >90k)." } },
+	{ "MP3",        { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Awful, .lossless=false, .information_text="There are better options; at least use its successor AAC." } },
+	{ "ALAC",       { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Good,  .lossless=true,  .information_text="It's lossless. FLAC probably has better support." } },
+	//TODO: ranges: opus .5k-256k, vorbis 16k-90k, everything else doesn't care
 };
+
+std::string AudioData::AudioCodecMiscInformation::get_recommendedStr() const {
+	switch (recommendation) {
+		default: [[fallthrough]];
+		case AudioData::AudioCodecMiscInformation::RecommendedLevel::No_Opinion:
+			return "?";
+		case AudioData::AudioCodecMiscInformation::RecommendedLevel::Awful:
+			return "□□□"; //"☆☆☆";
+		case AudioData::AudioCodecMiscInformation::RecommendedLevel::Okay:
+			return "■□□"; //"★☆☆";
+		case AudioData::AudioCodecMiscInformation::RecommendedLevel::Good:
+			return "■■□"; //"★★☆";
+		case AudioData::AudioCodecMiscInformation::RecommendedLevel::Best:
+			return "■■■"; //"★★★";
+	}
+}
 
 bool AudioData::get_audioEncoderIsLossless() const {
 	return codecMiscInformation.at(get_audioEncoder()).lossless;
+}
+std::string AudioData::get_audioEncoderRecommendationStr() const {
+	return codecMiscInformation.at(get_audioEncoder()).get_recommendedStr();
+}
+std::string AudioData::get_audioEncoderInformationText() const {
+	return codecMiscInformation.at(get_audioEncoder()).information_text;
 }
 
 const char** AudioData::get_audioPresetArray() const {

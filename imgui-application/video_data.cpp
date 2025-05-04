@@ -1,7 +1,7 @@
 #include "video_data.h"
 
 const char* VideoData::videoEncoderArray[7] = { "H.264", "H.265 / HEVC", "VP8", "VP9", "AV1", "FFV1", "Ut Video" };
-std::vector<const char*> VideoData::videoPresetArray_H264 = { "default", "ultrafast", "superfast", "veryfast", "faster", "fast", "medium (default)" , "slow", "slower", "veryslow", "placebo (not recommended)" };
+std::vector<const char*> VideoData::videoPresetArray_H264_preset = { "default", "ultrafast", "superfast", "veryfast", "faster", "fast", "medium (default)" , "slow", "slower", "veryslow", "placebo (not recommended)" };
 std::vector<const char*> VideoData::videoPresetArray_VP9_deadline = { "default", "best", "good (default)", "realtime" };
 std::vector<const char*> VideoData::videoPresetArray_AV1_usage    = { "default", "good (default)", "realtime", "allintra" };
 std::vector<const char*> VideoData::videoPresetArray_VP9_cpu_used = { "default", "0", "1 (default)", "2", "3", "4", "5", "6", "7", "8" }; //TODO: the range changes based on the deadline
@@ -11,8 +11,8 @@ const char* VideoData::videoContainerArray[6] = { ".mp4", ".mkv", ".mov", ".webm
 const char* VideoData::fpsArray[9] = { "10", "20", "25", "30", "50", "60", "75", "90", "120" };
 
 const std::unordered_map<std::string, VideoData::CodecPresetInformation> VideoData::codecToPresetArray1 = {
-	{ "H.264",        { "Preset", videoPresetArray_H264 } },
-	{ "H.265 / HEVC", { "Preset", videoPresetArray_H264 } },
+	{ "H.264",        { "Preset", videoPresetArray_H264_preset } },
+	{ "H.265 / HEVC", { "Preset", videoPresetArray_H264_preset } },
 	{ "VP8",          { "Deadline", videoPresetArray_VP9_deadline } },
 	{ "VP9",          { "Deadline", videoPresetArray_VP9_deadline } },
 	{ "AV1",          { "Usage", videoPresetArray_AV1_usage } },
@@ -52,21 +52,45 @@ const std::unordered_map<std::string, VideoData::CrfData> VideoData::codecToCrf 
 */
 
 const std::unordered_map<std::string, VideoData::VideoCodecMiscInformation> VideoData::codecMiscInformation = {
-	{ "H.264",        { .lossless=false, .supportsAlpha=false } },
-	{ "H.265 / HEVC", { .lossless=false, .supportsAlpha=false } },
-	{ "VP8",          { .lossless=false, .supportsAlpha=true  } },
-	{ "VP9",          { .lossless=false, .supportsAlpha=true  } },
-	{ "AV1",          { .lossless=false, .supportsAlpha=false } },
-	{ "FFV1",         { .lossless=true,  .supportsAlpha=true  } },
-	{ "Ut Video",     { .lossless=true,  .supportsAlpha=true  } },
+	{ "H.264",        { .recommendation=VideoData::VideoCodecMiscInformation::RecommendedLevel::Best,  .lossless=false, .supportsAlpha=false, .information_text="The most widespread video codec. Fast encoding times." } },
+	{ "H.265 / HEVC", { .recommendation=VideoData::VideoCodecMiscInformation::RecommendedLevel::Okay,  .lossless=false, .supportsAlpha=false, .information_text="H.264\'s successor. Achieves smaller filesizes, though encoding takes longer. Also compression artifacts may be more noticeable." } },
+	{ "VP8",          { .recommendation=VideoData::VideoCodecMiscInformation::RecommendedLevel::Awful, .lossless=false, .supportsAlpha=true,  .information_text="Succeeded by VP9, and has very poor container support." } },
+	{ "VP9",          { .recommendation=VideoData::VideoCodecMiscInformation::RecommendedLevel::Good,  .lossless=false, .supportsAlpha=true,  .information_text="About the same quality as HEVC with faster encode times." } },
+	{ "AV1",          { .recommendation=VideoData::VideoCodecMiscInformation::RecommendedLevel::Okay,  .lossless=false, .supportsAlpha=false /* the standard seems to support it, but libaom-av1 does not (yet) */, .information_text="VP9\'s successor and fully open-source. Even better quality, however it is extremely slow (like 10x-60x H.264)." } },
+	{ "FFV1",         { .recommendation=VideoData::VideoCodecMiscInformation::RecommendedLevel::Best,  .lossless=true,  .supportsAlpha=true,  .information_text="It's lossless. Might not be supported by your video editor, in which case use Ut Video if you want lossless video." } }, //NBSP for Ut Video
+	{ "Ut Video",     { .recommendation=VideoData::VideoCodecMiscInformation::RecommendedLevel::Best,  .lossless=true,  .supportsAlpha=true,  .information_text="It's lossless, and is the codec used by OBS\'s lossless capture. Faster to encode than FFV1 (though not really for this application) at the cost of larger filesizes." } },
 	//other FFmpeg encoders that support alpha (without strange workarounds): QuickTime Animation (qtrle), Apple ProRes 4444 (prores), Cineform (cfhd)
 };
+
+std::string VideoData::VideoCodecMiscInformation::get_recommendedStr() const {
+	// I wanted to use emojis (✔️❌⚠️) to quickly convey what is good and what should be avoided, but that needs the FreeType library, and I didn't feel like trying to make that work
+	switch (recommendation) {
+		default: [[fallthrough]];
+		case VideoData::VideoCodecMiscInformation::RecommendedLevel::No_Opinion:
+			return "?";
+		case VideoData::VideoCodecMiscInformation::RecommendedLevel::Awful:
+			return "□□□"; //"☆☆☆";
+		case VideoData::VideoCodecMiscInformation::RecommendedLevel::Okay:
+			return "■□□"; //"★☆☆";
+		case VideoData::VideoCodecMiscInformation::RecommendedLevel::Good:
+			return "■■□"; //"★★☆";
+		case VideoData::VideoCodecMiscInformation::RecommendedLevel::Best:
+			return "■■■"; //"★★★";
+		//TODO: the stars are somehow also emojis, guess FreeType is needed
+	}
+}
 
 bool VideoData::get_videoEncoderIsLossless() const {
 	return codecMiscInformation.at(get_videoEncoder()).lossless;
 }
 bool VideoData::get_videoEncoderSupportsAlpha() const {
 	return codecMiscInformation.at(get_videoEncoder()).supportsAlpha;
+}
+std::string VideoData::get_videoEncoderRecommendationStr() const {
+	return codecMiscInformation.at(get_videoEncoder()).get_recommendedStr();
+}
+std::string VideoData::get_videoEncoderInformationText() const {
+	return codecMiscInformation.at(get_videoEncoder()).information_text;
 }
 
 const char** VideoData::get_videoPresetArray1() const {

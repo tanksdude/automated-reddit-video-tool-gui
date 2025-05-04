@@ -20,8 +20,18 @@ struct VideoData {
 	};
 
 	struct VideoCodecMiscInformation {
-		bool lossless; //most codecs have a lossless mode, but this flag is for always lossless
-		bool supportsAlpha; //not used
+		enum class RecommendedLevel : uint8_t {
+			No_Opinion,
+			Awful,
+			Okay,
+			Good,
+			Best,
+		};
+		RecommendedLevel recommendation;
+		bool lossless; //most codecs (used by this program) have a lossless mode, but this flag is for always lossless
+		bool supportsAlpha;
+		std::string information_text;
+		std::string get_recommendedStr() const;
 	};
 
 	/* Passing codec information to the Python script:
@@ -33,7 +43,7 @@ struct VideoData {
 	 * The Python script will ignore everything after the first space. This
 	 * means "medium (default)" will be interpreted the same as "medium".
 	 */
-	static std::vector<const char*> videoPresetArray_H264;
+	static std::vector<const char*> videoPresetArray_H264_preset;
 	static std::vector<const char*> videoPresetArray_VP9_deadline;
 	static std::vector<const char*> videoPresetArray_AV1_usage;
 	static std::vector<const char*> videoPresetArray_VP9_cpu_used;
@@ -55,6 +65,8 @@ struct VideoData {
 	bool video_enableAlpha = false;
 	bool get_videoEncoderIsLossless() const;
 	bool get_videoEncoderSupportsAlpha() const;
+	std::string get_videoEncoderRecommendationStr() const;
+	std::string get_videoEncoderInformationText() const;
 
 	//preset counts: FFV1 zero, H.264 one, VP9 two
 	bool videoCodec_hasPreset1;

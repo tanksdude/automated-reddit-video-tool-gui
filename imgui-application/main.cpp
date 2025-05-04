@@ -66,9 +66,11 @@ void refreshApplicationFont() {
 	ImWchar ranges[] = {
 		0x0020, 0x00FF, // Basic Latin + Latin Supplement
 		0x2190, 0x23FF, //arrows & math
+		//0x2500, 0x257F, //boxes
+		//0x2600, 0x26FF, //stars
+		0x2460, 0x303F, //TODO: for some reason the boxes are in here
 		0xFFFD, 0xFFFD, // Invalid
-		//0x01F300, 0x01F64F, //refresh symbol and emoticons //requires setting IMGUI_USE_WCHAR32 in imconfig.h
-		//TODO: that ^ didn't seem to get added to the font atlas
+		//0x01F300, 0x01F64F, //refresh symbol and emoticons //requires FreeType
 		0,
 		//https://en.wikipedia.org/wiki/Unicode_block
 	};
@@ -278,7 +280,7 @@ int main(int, char**)
     // - Read 'docs/FONTS.md' for more instructions and details.
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
     // - Our Emscripten build process allows embedding fonts to be accessible at runtime from the "fonts/" folder. See Makefile.emscripten for details.
-    io.Fonts->AddFontDefault(); //might need to load this if the user tries to load an invalid font (though then the previous valid font should be used...)
+    //io.Fonts->AddFontDefault(); //TODO: might need to load this if the user tries to load an invalid font (though then the previous valid font should be used...)
     //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
@@ -678,6 +680,7 @@ int main(int, char**)
 						}
 
 						ImGui::Combo("Voice", &adata.voiceArray_current, adata.voiceArray, adata.voiceArray_length);
+						//TODO: some kind of visual indicator when one isn't selected
 						ImGui::SameLine();
 						if (ImGui::Button("Refresh🔃U+1F503\xf0\x9f\x94\x83")) {
 							adata.update_voiceArray();
@@ -688,6 +691,13 @@ int main(int, char**)
 						}
 
 						ImGui::Indent();
+
+						ImGui::Text("Information:");
+						ImGui::SameLine();
+						HelpMarker(adata.get_audioEncoderInformationText().c_str());
+						ImGui::SameLine();
+						ImGui::Text(adata.get_audioEncoderRecommendationStr().c_str());
+
 						if (adata.audioCodec_hasPreset) {
 							ImGui::Combo(adata.audioCodec_presetTerm.c_str(), &adata.audioPresetArray_current, adata.get_audioPresetArray(), adata.get_audioPresetArray_size(), adata.get_audioPresetArray_size());
 						}
@@ -696,6 +706,7 @@ int main(int, char**)
 							//ImGui doesn't support steps for sliders, oh well
 							ImGui::SliderScalar("Bitrate (kbps)", ImGuiDataType_U16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max);
 						}
+
 						ImGui::Unindent();
 
 						ImGui::TableNextColumn();
@@ -721,6 +732,15 @@ int main(int, char**)
 						}
 
 						ImGui::Indent();
+
+						ImGui::Text("Information:");
+						ImGui::SameLine();
+						HelpMarker(vdata.get_videoEncoderInformationText().c_str());
+						ImGui::SameLine();
+						ImGui::Text(vdata.get_videoEncoderRecommendationStr().c_str());
+						ImGui::SameLine();
+						ImGui::Text(("Alpha: " + std::to_string(vdata.get_videoEncoderSupportsAlpha())).c_str());
+
 						if (vdata.videoCodec_hasPreset1) {
 							ImGui::Combo(vdata.videoCodec_preset1Term.c_str(), &vdata.videoPresetArray1_current, vdata.get_videoPresetArray1(), vdata.get_videoPresetArray1_size(), vdata.get_videoPresetArray1_size());
 							//doesn't take flags like ImGuiComboFlags_HeightLargest
