@@ -54,16 +54,18 @@ char evaluated_output_speech_path[1024];
 #ifdef _WIN32
 char application_font_path[1024] = "c:\\Windows\\Fonts\\segoeui.ttf";
 char application_font_size[32] = "24.0";
+float evaluated_font_size = 24.0f;
 #else
 char application_font_path[1024] = "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf";
 char application_font_size[32] = "20.0";
+float evaluated_font_size = 20.0f;
 #endif
 ImFont* currentFont = nullptr;
 bool needToChangeFonts = false;
 
 void refreshApplicationFont() {
-	float size = std::stof(application_font_size); //TODO: const std::invalid_argument&, const std::out_of_range&
-	ImWchar ranges[] = {
+	const float size = std::stof(application_font_size); //TODO: const std::invalid_argument&, const std::out_of_range&
+	const ImWchar ranges[] = {
 		0x0020, 0x00FF, // Basic Latin + Latin Supplement
 		0x2190, 0x23FF, //arrows & math
 		//0x2500, 0x257F, //boxes
@@ -74,6 +76,7 @@ void refreshApplicationFont() {
 		0,
 		//https://en.wikipedia.org/wiki/Unicode_block
 	};
+	static_assert(sizeof(ranges) / sizeof(ranges[0]) % 2 == 1);
 	ImGuiIO& io = ImGui::GetIO();
 	ImFont* newFont = io.Fonts->AddFontFromFileTTF(application_font_path, size, nullptr, ranges); //TODO: check if file exists, also somehow handle the assert when it can't be loaded
 	if (newFont == nullptr) {
@@ -84,6 +87,7 @@ void refreshApplicationFont() {
 	ImGui_ImplOpenGL3_DestroyFontsTexture();
 	ImGui_ImplOpenGL3_CreateFontsTexture();
 	currentFont = newFont;
+	evaluated_font_size = size;
 }
 
 auto integerOnlyPositiveFunc = [] (ImGuiInputTextCallbackData* data) {
@@ -404,7 +408,7 @@ int main(int, char**)
 							ImGui::EndDisabled();
 						}
 
-						if (ImGui::ImageButton("##Lock Icon", filenameIsLocked ? lock_icon_texture : unlock_icon_texture, ImVec2(32.0f, 32.0f))) {
+						if (ImGui::ImageButton("##Lock Icon", filenameIsLocked ? lock_icon_texture : unlock_icon_texture, ImVec2(evaluated_font_size, evaluated_font_size))) {
 							clear_input_data(filenameIsLocked);
 							filenameIsLocked = !filenameIsLocked;
 						}
