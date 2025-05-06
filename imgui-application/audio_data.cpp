@@ -50,13 +50,13 @@ std::string AudioData::AudioCodecMiscInformation::get_recommendedStr() const {
 		case AudioData::AudioCodecMiscInformation::RecommendedLevel::No_Opinion:
 			return "?";
 		case AudioData::AudioCodecMiscInformation::RecommendedLevel::Awful:
-			return "□□□"; //"☆☆☆";
+			return "☆☆☆"; //"□□□";
 		case AudioData::AudioCodecMiscInformation::RecommendedLevel::Okay:
-			return "■□□"; //"★☆☆";
+			return "★☆☆"; //"■□□";
 		case AudioData::AudioCodecMiscInformation::RecommendedLevel::Good:
-			return "■■□"; //"★★☆";
+			return "★★☆"; //"■■□";
 		case AudioData::AudioCodecMiscInformation::RecommendedLevel::Best:
-			return "■■■"; //"★★★";
+			return "★★★"; //"■■■";
 	}
 }
 

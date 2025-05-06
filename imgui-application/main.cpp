@@ -68,9 +68,6 @@ void refreshApplicationFont() {
 	const ImWchar ranges[] = {
 		0x0020, 0x00FF, // Basic Latin + Latin Supplement
 		0x2190, 0x23FF, //arrows & math
-		//0x2500, 0x257F, //boxes
-		//0x2600, 0x26FF, //stars
-		0x2460, 0x303F, //TODO: for some reason the boxes are in here
 		0xFFFD, 0xFFFD, // Invalid
 		//0x01F300, 0x01F64F, //refresh symbol and emoticons //requires FreeType
 		0,
@@ -184,8 +181,8 @@ bool LoadTextureFromMemory(const void* data, size_t data_size, GLuint* out_textu
     stbi_image_free(image_data);
 
     *out_texture = image_texture;
-    *out_width = image_width;
-    *out_height = image_height;
+    if (out_width != NULL) *out_width = image_width;
+    if (out_height != NULL) *out_height = image_height;
 
     return true;
 }
@@ -308,16 +305,32 @@ int main(int, char**)
 	int lock_icon_width = 0;
 	int lock_icon_height = 0;
 	GLuint lock_icon_texture = 0;
-	ret = LoadTextureFromFile("../locked_1f512.png", &lock_icon_texture, &lock_icon_width, &lock_icon_height);
+	ret = LoadTextureFromFile("../res/locked_1f512.png", &lock_icon_texture, &lock_icon_width, &lock_icon_height);
 	IM_ASSERT(ret);
 
 	int unlock_icon_width = 0;
 	int unlock_icon_height = 0;
 	GLuint unlock_icon_texture = 0;
-	ret = LoadTextureFromFile("../unlocked_1f513.png", &unlock_icon_texture, &unlock_icon_width, &unlock_icon_height);
+	ret = LoadTextureFromFile("../res/unlocked_1f513.png", &unlock_icon_texture, &unlock_icon_width, &unlock_icon_height);
 	IM_ASSERT(ret);
 
 	bool filenameIsLocked = false;
+
+	GLuint recommended_awful, recommended_okay, recommended_good, recommended_best, recommended_noopinion;
+	ret = LoadTextureFromFile("../res/cross-mark_274c.png", &recommended_awful, NULL, NULL);
+	ret = LoadTextureFromFile("../res/warning_26a0-fe0f.png", &recommended_okay,  NULL, NULL);
+	ret = LoadTextureFromFile("../res/heavy-check-mark_2714.png", &recommended_good,  NULL, NULL);
+	ret = LoadTextureFromFile("../res/gem-stone_1f48e.png", &recommended_best,  NULL, NULL);
+	ret = LoadTextureFromFile("../res/white-question-mark-ornament_2754.png", &recommended_noopinion, NULL, NULL);
+	//wow, this is a bad emoji: ❎
+
+	std::unordered_map<std::string, GLuint> recommendationStr_toTexId = {
+		{ "☆☆☆", recommended_awful },
+		{ "★☆☆", recommended_okay },
+		{ "★★☆", recommended_good },
+		{ "★★★", recommended_best },
+		{ "?", recommended_noopinion },
+	};
 
     // Main loop
     while (!glfwWindowShouldClose(window))
@@ -696,11 +709,13 @@ int main(int, char**)
 
 						ImGui::Indent();
 
+						ImGui::Text("Recommendation:");
+						ImGui::SameLine();
+						ImGui::Image(recommendationStr_toTexId[adata.get_audioEncoderRecommendationStr()], ImVec2(evaluated_font_size, evaluated_font_size));
+
 						ImGui::Text("Information:");
 						ImGui::SameLine();
 						HelpMarker(adata.get_audioEncoderInformationText().c_str());
-						ImGui::SameLine();
-						ImGui::Text(adata.get_audioEncoderRecommendationStr().c_str());
 
 						if (adata.audioCodec_hasPreset) {
 							ImGui::Combo(adata.audioCodec_presetTerm.c_str(), &adata.audioPresetArray_current, adata.get_audioPresetArray(), adata.get_audioPresetArray_size(), adata.get_audioPresetArray_size());
@@ -737,11 +752,13 @@ int main(int, char**)
 
 						ImGui::Indent();
 
+						ImGui::Text("Recommendation:");
+						ImGui::SameLine();
+						ImGui::Image(recommendationStr_toTexId[vdata.get_videoEncoderRecommendationStr()], ImVec2(evaluated_font_size, evaluated_font_size));
+
 						ImGui::Text("Information:");
 						ImGui::SameLine();
 						HelpMarker(vdata.get_videoEncoderInformationText().c_str());
-						ImGui::SameLine();
-						ImGui::Text(vdata.get_videoEncoderRecommendationStr().c_str());
 						ImGui::SameLine();
 						ImGui::Text(("Alpha: " + std::to_string(vdata.get_videoEncoderSupportsAlpha())).c_str());
 

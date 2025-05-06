@@ -58,25 +58,23 @@ const std::unordered_map<std::string, VideoData::VideoCodecMiscInformation> Vide
 	{ "VP9",          { .recommendation=VideoData::VideoCodecMiscInformation::RecommendedLevel::Good,  .lossless=false, .supportsAlpha=true,  .information_text="About the same quality as HEVC with faster encode times." } },
 	{ "AV1",          { .recommendation=VideoData::VideoCodecMiscInformation::RecommendedLevel::Okay,  .lossless=false, .supportsAlpha=false /* the standard seems to support it, but libaom-av1 does not (yet) */, .information_text="VP9\'s successor and fully open-source. Even better quality, however it is extremely slow (like 10x-60x H.264)." } },
 	{ "FFV1",         { .recommendation=VideoData::VideoCodecMiscInformation::RecommendedLevel::Best,  .lossless=true,  .supportsAlpha=true,  .information_text="It's lossless. Might not be supported by your video editor, in which case use Ut Video if you want lossless video." } }, //NBSP for Ut Video
-	{ "Ut Video",     { .recommendation=VideoData::VideoCodecMiscInformation::RecommendedLevel::Best,  .lossless=true,  .supportsAlpha=true,  .information_text="It's lossless, and is the codec used by OBS\'s lossless capture. Faster to encode than FFV1 (though not really for this application) at the cost of larger filesizes." } },
+	{ "Ut Video",     { .recommendation=VideoData::VideoCodecMiscInformation::RecommendedLevel::Best,  .lossless=true,  .supportsAlpha=true,  .information_text="It's lossless. Faster to encode than FFV1 (though not really for this application) at the cost of larger filesizes. It is the codec used by OBS\'s lossless capture" } },
 	//other FFmpeg encoders that support alpha (without strange workarounds): QuickTime Animation (qtrle), Apple ProRes 4444 (prores), Cineform (cfhd)
 };
 
 std::string VideoData::VideoCodecMiscInformation::get_recommendedStr() const {
-	// I wanted to use emojis (✔️❌⚠️) to quickly convey what is good and what should be avoided, but that needs the FreeType library, and I didn't feel like trying to make that work
 	switch (recommendation) {
 		default: [[fallthrough]];
 		case VideoData::VideoCodecMiscInformation::RecommendedLevel::No_Opinion:
 			return "?";
 		case VideoData::VideoCodecMiscInformation::RecommendedLevel::Awful:
-			return "□□□"; //"☆☆☆";
+			return "☆☆☆"; //"□□□";
 		case VideoData::VideoCodecMiscInformation::RecommendedLevel::Okay:
-			return "■□□"; //"★☆☆";
+			return "★☆☆"; //"■□□";
 		case VideoData::VideoCodecMiscInformation::RecommendedLevel::Good:
-			return "■■□"; //"★★☆";
+			return "★★☆"; //"■■□";
 		case VideoData::VideoCodecMiscInformation::RecommendedLevel::Best:
-			return "■■■"; //"★★★";
-		//TODO: the stars are somehow also emojis, guess FreeType is needed
+			return "★★★"; //"■■■";
 	}
 }
 
