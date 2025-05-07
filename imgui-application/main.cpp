@@ -324,12 +324,12 @@ int main(int, char**)
 	ret = LoadTextureFromFile("../res/white-question-mark-ornament_2754.png", &recommended_noopinion, NULL, NULL);
 	//wow, this is a bad emoji: ❎
 
-	std::unordered_map<std::string, GLuint> recommendationStr_toTexId = {
-		{ "☆☆☆", recommended_awful },
-		{ "★☆☆", recommended_okay },
-		{ "★★☆", recommended_good },
-		{ "★★★", recommended_best },
-		{ "?", recommended_noopinion },
+	std::unordered_map<CodecRecommendedLevel, GLuint> recommendationStr_toTexId = {
+		{ CodecRecommendedLevel::Awful, recommended_awful },
+		{ CodecRecommendedLevel::Okay, recommended_okay },
+		{ CodecRecommendedLevel::Good, recommended_good },
+		{ CodecRecommendedLevel::Best, recommended_best },
+		{ CodecRecommendedLevel::No_Opinion, recommended_noopinion },
 	};
 
     // Main loop
@@ -712,7 +712,7 @@ int main(int, char**)
 
 						ImGui::Text("Recommendation:");
 						ImGui::SameLine();
-						ImGui::Image(recommendationStr_toTexId[adata.get_audioEncoderRecommendationStr()], ImVec2(evaluated_font_size, evaluated_font_size));
+						ImGui::Image(recommendationStr_toTexId[adata.get_audioEncoderRecommendation()], ImVec2(evaluated_font_size, evaluated_font_size));
 
 						ImGui::Text("Information:");
 						ImGui::SameLine();
@@ -724,7 +724,7 @@ int main(int, char**)
 
 						if (!adata.get_audioEncoderIsLossless()) {
 							//ImGui doesn't support steps for sliders, oh well
-							ImGui::SliderScalar("Bitrate (kbps)", ImGuiDataType_U16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max);
+							ImGui::SliderScalar("Bitrate (kbps)", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max);
 						}
 
 						ImGui::Unindent();
@@ -755,7 +755,7 @@ int main(int, char**)
 
 						ImGui::Text("Recommendation:");
 						ImGui::SameLine();
-						ImGui::Image(recommendationStr_toTexId[vdata.get_videoEncoderRecommendationStr()], ImVec2(evaluated_font_size, evaluated_font_size));
+						ImGui::Image(recommendationStr_toTexId[vdata.get_videoEncoderRecommendation()], ImVec2(evaluated_font_size, evaluated_font_size));
 
 						ImGui::Text("Information:");
 						ImGui::SameLine();

@@ -23,7 +23,7 @@ std::vector<const char*> AudioData::audioPresetArray_FLAC = { "default", "0 (fas
 std::vector<const char*> AudioData::audioPresetArray_MP3 =  { "default", "0 (slow)", "1", "2", "3", "4", "5 (default)", "6", "7", "8", "9" }; //default is 5 according to its API
 std::vector<const char*> AudioData::audioPresetArray_empty = {};
 
-const std::unordered_map<std::string, AudioData::CodecPresetInformation> AudioData::codecToPresetArray = {
+const std::unordered_map<std::string, CodecPresetInformation> AudioData::codecToPresetArray = {
 	{ "copy (pcm)", { "", audioPresetArray_empty } },
 	{ "AAC",        { "Encoding Method", audioPresetArray_AAC } },
 	{ "Opus",       { "Compression Level", audioPresetArray_Opus } },
@@ -44,37 +44,21 @@ const std::unordered_map<std::string, AudioData::BitrateData> AudioData::codecTo
 	{ "ALAC",       {  -1,  -1,  -1,  -1,  -1,  -1 } },
 };
 
-const std::unordered_map<std::string, AudioData::AudioCodecMiscInformation> AudioData::codecMiscInformation = {
-	{ "copy (pcm)", { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Okay,  .lossless=true,  .information_text="Uncompressed raw audio. Not very useful." } },
-	{ "AAC",        { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Good,  .lossless=false, .information_text="Very widespread. Opus is faster and higher quality though." } },
-	{ "Opus",       { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Best,  .lossless=false, .information_text="Currently the best lossy audio codec. Very unlikely to encounter compatibility issues." } },
-	{ "FLAC",       { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Best,  .lossless=true,  .information_text="It's lossless. Smaller filesizes than raw audio." } },
-	{ "Vorbis",     { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Okay,  .lossless=false, .information_text="Succeeded by Opus. Not much reason to use it." } }, //I was originally very against Vorbis because it had poor container support, but it's actually supported in every container exposed by this program; it's VP8 that's the problem
-	{ "MP3",        { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Awful, .lossless=false, .information_text="There are better options; at least use its successor AAC." } },
-	{ "ALAC",       { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Good,  .lossless=true,  .information_text="It's lossless. FLAC probably has better support." } },
+const std::unordered_map<std::string, AudioCodecMiscInformation> AudioData::codecMiscInformation = {
+	{ "copy (pcm)", { .recommendation=CodecRecommendedLevel::Okay,  .lossless=true,  .information_text="Uncompressed raw audio. Not very useful." } },
+	{ "AAC",        { .recommendation=CodecRecommendedLevel::Good,  .lossless=false, .information_text="Very widespread. Opus is faster and higher quality though." } },
+	{ "Opus",       { .recommendation=CodecRecommendedLevel::Best,  .lossless=false, .information_text="Currently the best lossy audio codec. Very unlikely to encounter compatibility issues." } },
+	{ "FLAC",       { .recommendation=CodecRecommendedLevel::Best,  .lossless=true,  .information_text="It's lossless. Smaller filesizes than raw audio." } },
+	{ "Vorbis",     { .recommendation=CodecRecommendedLevel::Okay,  .lossless=false, .information_text="Succeeded by Opus. Not much reason to use it." } }, //I was originally very against Vorbis because it had poor container support, but it's actually supported in every container exposed by this program; it's VP8 that's the problem
+	{ "MP3",        { .recommendation=CodecRecommendedLevel::Awful, .lossless=false, .information_text="There are better options; at least use its successor AAC." } },
+	{ "ALAC",       { .recommendation=CodecRecommendedLevel::Good,  .lossless=true,  .information_text="It's lossless. FLAC probably has better support." } },
 };
 
-std::string AudioData::AudioCodecMiscInformation::get_recommendedStr() const {
-	switch (recommendation) {
-		default: [[fallthrough]];
-		case AudioData::AudioCodecMiscInformation::RecommendedLevel::No_Opinion:
-			return "?";
-		case AudioData::AudioCodecMiscInformation::RecommendedLevel::Awful:
-			return "☆☆☆"; //"□□□";
-		case AudioData::AudioCodecMiscInformation::RecommendedLevel::Okay:
-			return "★☆☆"; //"■□□";
-		case AudioData::AudioCodecMiscInformation::RecommendedLevel::Good:
-			return "★★☆"; //"■■□";
-		case AudioData::AudioCodecMiscInformation::RecommendedLevel::Best:
-			return "★★★"; //"■■■";
-	}
+CodecRecommendedLevel AudioData::get_audioEncoderRecommendation() const {
+	return codecMiscInformation.at(get_audioEncoder()).recommendation;
 }
-
 bool AudioData::get_audioEncoderIsLossless() const {
 	return codecMiscInformation.at(get_audioEncoder()).lossless;
-}
-std::string AudioData::get_audioEncoderRecommendationStr() const {
-	return codecMiscInformation.at(get_audioEncoder()).get_recommendedStr();
 }
 std::string AudioData::get_audioEncoderInformationText() const {
 	return codecMiscInformation.at(get_audioEncoder()).information_text;

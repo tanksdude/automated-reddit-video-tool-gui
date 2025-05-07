@@ -2,37 +2,17 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include "av_shared_info.h"
 
 struct AudioData {
 	struct BitrateData {
 		// Bitrate in kbps
-		std::int16_t starting_value;
-		std::int16_t min_value; //"sane" min
-		std::int16_t max_value; //"sane" max
-		std::int16_t codec_default_value; //unused
-		std::int16_t codec_min_value;     //unused
-		std::int16_t codec_max_value;     //unused
-	};
-
-	struct CodecPresetInformation {
-		//yes this is the exact same struct as VideoData, it's whatever
-		std::string term;
-		std::vector<const char*>& presetArray;
-	};
-
-	struct AudioCodecMiscInformation {
-		//yes this is the exact same enum as VideoData, it's whatever
-		enum class RecommendedLevel : uint8_t {
-			No_Opinion,
-			Awful,
-			Okay,
-			Good,
-			Best,
-		};
-		RecommendedLevel recommendation;
-		bool lossless;
-		std::string information_text;
-		std::string get_recommendedStr() const;
+		int16_t starting_value;
+		int16_t min_value; //"sane" min
+		int16_t max_value; //"sane" max
+		int16_t codec_default_value; //unused
+		int16_t codec_min_value;     //unused
+		int16_t codec_max_value;     //unused
 	};
 
 	/* Passing voice engine information to the Python script:
@@ -76,8 +56,8 @@ struct AudioData {
 	static const std::unordered_map<std::string, AudioCodecMiscInformation> codecMiscInformation;
 
 	int audioEncoderArray_current = 0;
+	CodecRecommendedLevel get_audioEncoderRecommendation() const;
 	bool get_audioEncoderIsLossless() const;
-	std::string get_audioEncoderRecommendationStr() const;
 	std::string get_audioEncoderInformationText() const;
 
 	bool audioCodec_hasPreset;
@@ -86,10 +66,10 @@ struct AudioData {
 	const char** get_audioPresetArray() const;
 	int get_audioPresetArray_size() const;
 
-	std::uint16_t audio_bitrate_v = 192;
-	std::uint16_t audio_bitrate_min = 60;
-	std::uint16_t audio_bitrate_max = 300;
-	std::uint16_t audio_bitrate_step = 4; //TODO: unused because ImGui sliders don't support stepping
+	int16_t audio_bitrate_v;
+	int16_t audio_bitrate_min;
+	int16_t audio_bitrate_max;
+	int16_t audio_bitrate_step = 4; //TODO: unused because ImGui sliders don't support stepping
 
 	inline std::string get_voiceEngine() const { return std::string(voiceEngineArray[voiceEngineArray_current]); }
 	inline std::string get_voice() const {

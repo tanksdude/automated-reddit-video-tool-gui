@@ -3,35 +3,16 @@
 #include <vector>
 #include <unordered_map>
 #include <cstring> //strcpy, strcmp
+#include "av_shared_info.h"
 
 struct VideoData {
 	struct CrfData {
-		std::int8_t starting_value;
-		std::int8_t min_value; //"sane" min
-		std::int8_t max_value; //"sane" max
-		std::int8_t codec_default_value; //unused
-		std::int8_t codec_min_value;     //unused
-		std::int8_t codec_max_value;     //unused
-	};
-
-	struct CodecPresetInformation {
-		std::string term;
-		std::vector<const char*>& presetArray;
-	};
-
-	struct VideoCodecMiscInformation {
-		enum class RecommendedLevel : uint8_t {
-			No_Opinion,
-			Awful,
-			Okay,
-			Good,
-			Best,
-		};
-		RecommendedLevel recommendation;
-		bool lossless; //most codecs (used by this program) have a lossless mode, but this flag is for always lossless
-		bool supportsAlpha;
-		std::string information_text;
-		std::string get_recommendedStr() const;
+		int8_t starting_value;
+		int8_t min_value; //"sane" min
+		int8_t max_value; //"sane" max
+		int8_t codec_default_value; //unused
+		int8_t codec_min_value;     //unused
+		int8_t codec_max_value;     //unused
 	};
 
 	/* Passing codec information to the Python script:
@@ -63,9 +44,9 @@ struct VideoData {
 
 	int videoEncoderArray_current = 0;
 	bool video_enableAlpha = false;
+	CodecRecommendedLevel get_videoEncoderRecommendation() const;
 	bool get_videoEncoderIsLossless() const;
 	bool get_videoEncoderSupportsAlpha() const;
-	std::string get_videoEncoderRecommendationStr() const;
 	std::string get_videoEncoderInformationText() const;
 
 	//preset counts: FFV1 zero, H.264 one, VP9 two
@@ -97,9 +78,9 @@ struct VideoData {
 	char fps_numerator_input[32];
 	char fps_denominator_input[32];
 
-	std::int8_t crf_v;
-	std::int8_t crf_min;
-	std::int8_t crf_max;
+	int8_t crf_v;
+	int8_t crf_min;
+	int8_t crf_max;
 
 	inline std::string get_video_replacement_numbers_input() const { return std::string(video_replacement_numbers_input); }
 	inline std::string get_videoEncoder() const { return std::string(videoEncoderArray[videoEncoderArray_current]); }
