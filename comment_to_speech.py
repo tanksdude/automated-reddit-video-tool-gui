@@ -40,7 +40,7 @@ audioCodecLookup = {
 
 audioPresetKeywordLookup = {
 	"copy":     [],
-	"AAC":      ["-aac_coder"],
+	"AAC":      ["-aac_coder"], # enabling anmr requires -strict experimental
 	"Opus":     ["-compression_level"],
 	"FLAC":     ["-compression_level"],
 	"Vorbis":   [],

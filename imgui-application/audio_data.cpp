@@ -33,15 +33,25 @@ const std::unordered_map<std::string, AudioData::CodecPresetInformation> AudioDa
 	{ "ALAC",       { "", audioPresetArray_empty } },
 };
 
+//the recommended range is mostly a guess; maybe quality values should be used instead
+const std::unordered_map<std::string, AudioData::BitrateData> AudioData::codecToBitrate {
+	{ "copy (pcm)", {  -1,  -1,  -1,  -1,  -1,  -1 } },
+	{ "AAC",        { 128,  30, 192, 128,   0, INT16_MAX } }, //codec clamps bitrate when too high/low
+	{ "Opus",       {  96,  30, 128,  64,   1,  256 } }, //actual minimum is .5k
+	{ "FLAC",       {  -1,  -1,  -1,  -1,  -1,  -1 } },
+	{ "Vorbis",     {  90,  45,  90,  40,  16,  90 } }, //default bitrate found empirically (sidenote: ffprobe couldn't read the bitrate from a .mkv, that's annoying); also Vorbis itself seems to support basically any birtate, but libvorbis errors outside that range
+	{ "MP3",        { 128,  64, 256, 128,   0, INT16_MAX } }, //codec clamps bitrate when too high/low
+	{ "ALAC",       {  -1,  -1,  -1,  -1,  -1,  -1 } },
+};
+
 const std::unordered_map<std::string, AudioData::AudioCodecMiscInformation> AudioData::codecMiscInformation = {
 	{ "copy (pcm)", { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Okay,  .lossless=true,  .information_text="Uncompressed raw audio. Not very useful." } },
 	{ "AAC",        { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Good,  .lossless=false, .information_text="Very widespread. Opus is faster and higher quality though." } },
 	{ "Opus",       { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Best,  .lossless=false, .information_text="Currently the best lossy audio codec. Very unlikely to encounter compatibility issues." } },
 	{ "FLAC",       { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Best,  .lossless=true,  .information_text="It's lossless. Smaller filesizes than raw audio." } },
-	{ "Vorbis",     { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Awful, .lossless=false, .information_text="Completely outclassed by Opus, and has very poor container support. Refuses to encode when the bitrate is too high for the source (around >90k)." } },
+	{ "Vorbis",     { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Okay,  .lossless=false, .information_text="Succeeded by Opus. Not much reason to use it." } }, //I was originally very against Vorbis because it had poor container support, but it's actually supported in every container exposed by this program; it's VP8 that's the problem
 	{ "MP3",        { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Awful, .lossless=false, .information_text="There are better options; at least use its successor AAC." } },
 	{ "ALAC",       { .recommendation=AudioData::AudioCodecMiscInformation::RecommendedLevel::Good,  .lossless=true,  .information_text="It's lossless. FLAC probably has better support." } },
-	//TODO: ranges: opus .5k-256k, vorbis 16k-90k, everything else doesn't care
 };
 
 std::string AudioData::AudioCodecMiscInformation::get_recommendedStr() const {
@@ -211,6 +221,14 @@ void AudioData::update_voiceArray() {
 		voiceArray_current = -1;
 		voiceArray_length = voiceList.size();
 	}
+}
+
+void AudioData::update_audioBitrateValues() {
+	const AudioData::BitrateData& data = codecToBitrate.at(get_audioEncoder());
+	audio_bitrate_v = data.starting_value;
+	audio_bitrate_min = data.min_value;
+	audio_bitrate_max = data.max_value;
+	//audio_bitrate_step = 4; //TODO: unused because ImGui sliders don't support stepping
 }
 
 void AudioData::update_audioPresetArray() {

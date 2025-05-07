@@ -704,6 +704,7 @@ int main(int, char**)
 						}
 
 						if (ImGui::Combo("Audio Encoder", &adata.audioEncoderArray_current, adata.audioEncoderArray, IM_ARRAYSIZE(adata.audioEncoderArray))) {
+							adata.update_audioBitrateValues();
 							adata.update_audioPresetArray();
 						}
 

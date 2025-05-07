@@ -4,6 +4,16 @@
 #include <unordered_map>
 
 struct AudioData {
+	struct BitrateData {
+		// Bitrate in kbps
+		std::int16_t starting_value;
+		std::int16_t min_value; //"sane" min
+		std::int16_t max_value; //"sane" max
+		std::int16_t codec_default_value; //unused
+		std::int16_t codec_min_value;     //unused
+		std::int16_t codec_max_value;     //unused
+	};
+
 	struct CodecPresetInformation {
 		//yes this is the exact same struct as VideoData, it's whatever
 		std::string term;
@@ -59,10 +69,10 @@ struct AudioData {
 	static std::vector<const char*> audioPresetArray_FLAC;
 	static std::vector<const char*> audioPresetArray_MP3;
 	static std::vector<const char*> audioPresetArray_empty; //placeholder for the hashmap lookups
-	//other possibilities: flac lpc_coeff_precision, libopus application
+	//other possibilities: flac lpc_coeff_precision, libopus application, aac profile ("low complexity" default, "main", "scalable sampling rate")
 
 	static const std::unordered_map<std::string, CodecPresetInformation> codecToPresetArray;
-	//static const std::unordered_map<std::string, CrfData> codecToCrf; //TODO: maybe have bitrate recommendations?
+	static const std::unordered_map<std::string, BitrateData> codecToBitrate;
 	static const std::unordered_map<std::string, AudioCodecMiscInformation> codecMiscInformation;
 
 	int audioEncoderArray_current = 0;
@@ -91,6 +101,7 @@ struct AudioData {
 	std::string get_audioPreset() const;
 
 	void update_voiceArray(); // updates voiceArray and its related data
+	void update_audioBitrateValues();
 	void update_audioPresetArray();
 	
 	AudioData() {
