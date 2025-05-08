@@ -70,11 +70,11 @@ videoPresetKeywordLookup = {
 
 videoExtraArgsLookup = {
 	"H.264":   [],
-	"H.265":   [],
+	"H.265":   ["-x265-params", "log-level=error"],     # silence unnecessary output, as FFmpeg does not tell libx265 the log level
 	"VP8":     ["-b:v", "1G", "-auto-alt-ref", "0" ],   # bitrate flag possibly required: https://goughlui.com/2023/12/27/video-codec-round-up-2023-part-4-libvpx-vp8/
-	"VP9":     ["-b:v", "0" ],    # definitely required (for CRF mode)
-	"AV1":     [],                # requires FFmpeg 4.3+ to not require "-b:v 0", 4.4+ to avoid a lossless bug
-	"FFV1":    ["-level", "3"],   # version 3
+	"VP9":     ["-b:v", "0" ],                          # definitely required (for CRF mode)
+	"AV1":     [],                                      # requires FFmpeg 4.3+ to not require "-b:v 0", 4.4+ to avoid a lossless bug
+	"FFV1":    [],                                      # no need for -level 3 as that's the default (found empirically, required ffprobe -debug 1)
 	"Ut":      [],
 }
 
@@ -167,7 +167,7 @@ speech_and_image_to_vid_command_args.extend(["-b:a", VIDEO_AUD_BITRATE])
 if VIDEO_AUD_PRESET != "default":
 	speech_and_image_to_vid_command_args.extend([audioPresetKeywordLookup[VIDEO_AUD_CODEC_name][0], VIDEO_AUD_PRESET])
 # FFmpeg other args
-speech_and_image_to_vid_command_args.extend(["-loglevel", "error", "-y"]) # loglevels: quiet, fatal, error, warning
+speech_and_image_to_vid_command_args.extend(["-loglevel", "error", "-y"]) # loglevels: quiet, fatal, error, warning; note that libx265 needs this set separately: none, error, warning
 
 def text_to_speech_func_balabolka(wav_file_name, text_file_name):
 	# make sure to do -w arg before the -f arg, because sometimes it just won't write to a wav file otherwise
