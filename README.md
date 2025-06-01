@@ -45,24 +45,24 @@ Note that these programs must be accessible from a plain command line, meaning t
 
 ### Compiling from source (Windows)
 
-Currently only Windows x64 with MSVC 2022 is supported.
+Currently only Windows x64 with MSVC 2022 is officially supported.
 
-* Enable the MSVC environment variables in your command prompt: `"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"`
-* `cd imgui-application`
-* `build_win64.bat`
-* The executable is in the `Debug` folder (don't `cd`).
+1. Enable the MSVC environment variables in your command prompt: `"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"`
+1. `cd imgui-application`
+1. `build_win64.bat`
+1. The executable is in the `Debug` folder (don't `cd`).
 
 ### Compiling from source (Linux)
 
 Linux support is WIP. Only tested on Ubuntu.
 
-* get a compiler and CMake
-* `sudo apt install libglfw3-dev`
-* `mkdir build && cd build`
-* `cmake ..`
-* `./arvt-gui`
-* in the Python scripts, change `.temp` extensions to `.txt` (will fix this step later)
-* unicode doesn't show in imgui, fix later
+1. Prerequisite: `sudo apt install libglfw3-dev`
+1. `cd imgui-application`
+1. `make -j$(nproc)`
+1. The executable is in the same folder
+1. in the Python scripts, change `.temp` extensions to `.txt` (will fix this step later)
+
+TODO: unicode doesn't show in imgui, fix later
 
 ImageMagick is extremely picky, so you need to fix some of its security policies. Edit `/etc/ImageMagick-6/policy.xml` with the following changes:
 
