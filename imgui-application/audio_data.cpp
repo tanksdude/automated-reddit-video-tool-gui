@@ -35,13 +35,13 @@ const std::unordered_map<std::string, CodecPresetInformation> AudioData::codecTo
 
 //the recommended range is mostly a guess; maybe quality values should be used instead
 const std::unordered_map<std::string, AudioData::BitrateData> AudioData::codecToBitrate {
-	{ "copy (pcm)", {  -1,  -1,  -1,  -1,  -1,  -1 } },
+	{ "copy (pcm)", {   0,   0,   0,   0,   0,   0 } },
 	{ "AAC",        { 128,  30, 192, 128,   0, INT16_MAX } }, //codec clamps bitrate when too high/low
 	{ "Opus",       {  96,  30, 128,  64,   1,  256 } }, //actual minimum is .5k
-	{ "FLAC",       {  -1,  -1,  -1,  -1,  -1,  -1 } },
+	{ "FLAC",       {   0,   0,   0,   0,   0,   0 } },
 	{ "Vorbis",     {  90,  45,  90,  40,  16,  90 } }, //default bitrate found empirically (sidenote: ffprobe couldn't read the bitrate from a .mkv, that's annoying); also Vorbis itself seems to support basically any birtate, but libvorbis errors outside that range
 	{ "MP3",        { 128,  64, 256, 128,   0, INT16_MAX } }, //codec clamps bitrate when too high/low
-	{ "ALAC",       {  -1,  -1,  -1,  -1,  -1,  -1 } },
+	{ "ALAC",       {   0,   0,   0,   0,   0,   0 } },
 };
 
 const std::unordered_map<std::string, AudioCodecMiscInformation> AudioData::codecMiscInformation = {

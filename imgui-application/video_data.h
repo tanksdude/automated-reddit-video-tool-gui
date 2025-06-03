@@ -86,6 +86,7 @@ struct VideoData {
 	inline std::string get_videoEncoder() const { return std::string(videoEncoderArray[videoEncoderArray_current]); }
 	inline std::string get_videoContainer() const { return std::string(videoContainerArray[videoContainerArray_current]); }
 	inline std::string get_fps() const { return fractionalFps ? std::string(fps_numerator_input) + "/" + std::string(fps_denominator_input) : std::string(fpsArray[fpsArray_current]); }
+	inline std::string get_videoCrf() const { return std::to_string(crf_v); }
 	std::string get_videoPreset1() const;
 	std::string get_videoPreset2() const;
 

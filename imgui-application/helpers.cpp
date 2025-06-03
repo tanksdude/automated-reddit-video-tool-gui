@@ -242,7 +242,7 @@ int call_comment_to_speech(const char* name, const ImageData& idata, const Audio
 		std::to_string(vdata.faststart_flag && vdata.get_faststart_available()) + " " +
 
 		vdata.get_fps() + " " +
-		std::to_string(vdata.crf_v) + " ";
+		vdata.get_videoCrf() + " ";
 
 	#ifdef _WIN32
 	if (command.size() > 4000) {

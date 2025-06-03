@@ -37,8 +37,8 @@ const std::unordered_map<std::string, VideoData::CrfData> VideoData::codecToCrf 
 	{ "VP8",          { 12,  5, 30, 32,  4, 63 } }, //0 is the true crf minimum but 4 is the default minimum
 	{ "VP9",          { 31, 15, 35, 32,  0, 63 } },
 	{ "AV1",          { 23, 20, 35, 32,  0, 63 } },
-	{ "FFV1",         { -1, -1, -1, -1, -1, -1 } },
-	{ "Ut Video",     { -1, -1, -1, -1, -1, -1 } },
+	{ "FFV1",         {  0,  0,  0,  0,  0,  0 } },
+	{ "Ut Video",     {  0,  0,  0,  0,  0,  0 } },
 };
 /*
 //Kdenlive range:
