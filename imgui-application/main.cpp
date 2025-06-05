@@ -63,13 +63,14 @@ float evaluated_font_size = 20.0f;
 ImFont* currentFont = nullptr;
 bool needToChangeFonts = false;
 
+bool useExtraCodecs = false; //not in VideoData/AudioData for simplicity
+
 void refreshApplicationFont() {
 	const float size = std::stof(application_font_size); //TODO: const std::invalid_argument&, const std::out_of_range&
 	const ImWchar ranges[] = {
 		0x0020, 0x00FF, // Basic Latin + Latin Supplement
 		0x2190, 0x23FF, //arrows & math
 		0xFFFD, 0xFFFD, // Invalid
-		//0x01F300, 0x01F64F, //refresh symbol and emoticons //requires FreeType
 		0,
 		//https://en.wikipedia.org/wiki/Unicode_block
 	};
@@ -699,11 +700,11 @@ int main(int, char**)
 						ImGui::Combo("Voice", &adata.voiceArray_current, adata.voiceArray, adata.voiceArray_length);
 						//TODO: some kind of visual indicator when one isn't selected
 						ImGui::SameLine();
-						if (ImGui::Button("Refresh🔃U+1F503\xf0\x9f\x94\x83")) {
+						if (ImGui::Button("Refresh")) {
 							adata.update_voiceArray();
 						}
 
-						if (ImGui::Combo("Audio Encoder", &adata.audioEncoderArray_current, adata.audioEncoderArray, IM_ARRAYSIZE(adata.audioEncoderArray))) {
+						if (ImGui::Combo("Audio Encoder", &adata.audioEncoderArray_current, AudioData::get_audioEncoderArray(useExtraCodecs), AudioData::get_audioEncoderArraySize(useExtraCodecs))) {
 							adata.update_audioBitrateValues();
 							adata.update_audioPresetArray();
 						}
@@ -746,7 +747,7 @@ int main(int, char**)
 						}
 						ImGui::Unindent();
 
-						if (ImGui::Combo("Video Encoder", &vdata.videoEncoderArray_current, vdata.videoEncoderArray, IM_ARRAYSIZE(vdata.videoEncoderArray))) {
+						if (ImGui::Combo("Video Encoder", &vdata.videoEncoderArray_current, VideoData::get_videoEncoderArray(useExtraCodecs), VideoData::get_videoEncoderArraySize(useExtraCodecs))) {
 							vdata.update_videoCrfValues();
 							vdata.update_videoPresetArray();
 						}
@@ -761,7 +762,7 @@ int main(int, char**)
 						ImGui::SameLine();
 						HelpMarker(vdata.get_videoEncoderInformationText().c_str());
 						ImGui::SameLine();
-						ImGui::Text(("Alpha: " + std::to_string(vdata.get_videoEncoderSupportsAlpha())).c_str());
+						ImGui::Text(vdata.get_videoEncoderSupportsAlpha() ? "  Alpha channel: Yes" : "  Alpha channel: No");
 
 						if (vdata.videoCodec_hasPreset1) {
 							ImGui::Combo(vdata.videoCodec_preset1Term.c_str(), &vdata.videoPresetArray1_current, vdata.get_videoPresetArray1(), vdata.get_videoPresetArray1_size(), vdata.get_videoPresetArray1_size());
@@ -800,6 +801,21 @@ int main(int, char**)
 						ImGui::InputText("Font Size", application_font_size, IM_ARRAYSIZE(application_font_size), ImGuiInputTextFlags_CharsDecimal);
 						if (ImGui::Button("Refresh##Font")) {
 							needToChangeFonts = true;
+						}
+
+						if (ImGui::Checkbox("Extra Codecs", &useExtraCodecs)) {
+							if (!useExtraCodecs) {
+								if (adata.audioEncoderArray_current >= AudioData::get_audioEncoderArraySize(false)) {
+									adata.audioEncoderArray_current = 0;
+									adata.update_audioBitrateValues();
+									adata.update_audioPresetArray();
+								}
+								if (vdata.videoEncoderArray_current >= VideoData::get_videoEncoderArraySize(false)) {
+									vdata.videoEncoderArray_current = 0;
+									vdata.update_videoCrfValues();
+									vdata.update_videoPresetArray();
+								}
+							}
 						}
 
 						ImGui::SeparatorText("Paths");

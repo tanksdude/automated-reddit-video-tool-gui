@@ -16,7 +16,8 @@
 	const char* AudioData::voiceEngineArray_exeForUpdatingVoiceList[5] = { "espeak --voices", "espeak-ng --voices", "", "", "" }; //note: internal use only
 #endif
 
-const char* AudioData::audioEncoderArray[7] = { "copy (pcm)", "AAC", "Opus", "FLAC", "Vorbis", "MP3", "ALAC" };
+const char* AudioData::audioEncoderArray[7]          = { "copy (pcm)", "AAC", "Opus", "FLAC", "Vorbis", "MP3", "ALAC" };
+const char* AudioData::audioEncoderArrayExtended[13] = { "copy (pcm)", "AAC", "Opus", "FLAC", "Vorbis", "MP3", "ALAC", "AC-3", "E-AC-3", "Speex", "TTA True Audio", "Windows Media Audio (2)", "MPEG-2" };
 std::vector<const char*> AudioData::audioPresetArray_AAC =  { "default", "anmr (not recommended) (NOT SUPPORTED)", "twoloop (default)", "fast" };
 std::vector<const char*> AudioData::audioPresetArray_Opus = { "default", "0 (fast)", "1", "2", "3", "4", "5",           "6", "7", "8", "9", "10 (default)" };
 std::vector<const char*> AudioData::audioPresetArray_FLAC = { "default", "0 (fast)", "1", "2", "3", "4", "5 (default)", "6", "7", "8", "9", "10", "11", "12" };
@@ -31,17 +32,31 @@ const std::unordered_map<std::string, CodecPresetInformation> AudioData::codecTo
 	{ "Vorbis",     { "", audioPresetArray_empty } },
 	{ "MP3",        { "Compression Level", audioPresetArray_MP3 } },
 	{ "ALAC",       { "", audioPresetArray_empty } },
+
+	{ "AC-3",                    { "", audioPresetArray_empty } },
+	{ "E-AC-3",                  { "", audioPresetArray_empty } },
+	{ "Speex",                   { "", audioPresetArray_empty } },
+	{ "TTA True Audio",          { "", audioPresetArray_empty } },
+	{ "Windows Media Audio (2)", { "", audioPresetArray_empty } },
+	{ "MPEG-2",                  { "", audioPresetArray_empty } },
 };
 
 //the recommended range is mostly a guess; maybe quality values should be used instead
 const std::unordered_map<std::string, AudioData::BitrateData> AudioData::codecToBitrate {
 	{ "copy (pcm)", {   0,   0,   0,   0,   0,   0 } },
 	{ "AAC",        { 128,  30, 192, 128,   0, INT16_MAX } }, //codec clamps bitrate when too high/low
-	{ "Opus",       {  96,  30, 128,  64,   1,  256 } }, //actual minimum is .5k
+	{ "Opus",       {  96,  30, 128,  64,   1, 256 } }, //actual minimum is .5k
 	{ "FLAC",       {   0,   0,   0,   0,   0,   0 } },
 	{ "Vorbis",     {  90,  45,  90,  40,  16,  90 } }, //default bitrate found empirically (sidenote: ffprobe couldn't read the bitrate from a .mkv, that's annoying); also Vorbis itself seems to support basically any birtate, but libvorbis errors outside that range
-	{ "MP3",        { 128,  64, 256, 128,   0, INT16_MAX } }, //codec clamps bitrate when too high/low
+	{ "MP3",        { 128,  64, 256, 128,   0, INT16_MAX } }, //codec clamps bitrate when too high/low; seems like the range is 8k-160k per channel
 	{ "ALAC",       {   0,   0,   0,   0,   0,   0 } },
+
+	{ "AC-3",                    { 192,  96, 448,  96,  32, 640 } }, //min bitrate found empirically
+	{ "E-AC-3",                  { 128,  32, 384,  96,  12, 4096 } }, //32k-6144k is the range according to Wikipedia; bitrate depends on sample rate and channels, probably like AC-3
+	{ "Speex",                   {  27,   3,  42,  27,   2,  44 } }, //default bitrate found empirically
+	{ "TTA True Audio",          {   0,   0,   0,   0,   0,   0 } },
+	{ "Windows Media Audio (2)", { 128,  64, 256, 128,  24, INT16_MAX } }, //max bitrate empirically found to be 361267.088k, which is *very* weird, however nothing above ~5644.628k gets any more bits
+	{ "MPEG-2",                  { 128,  64, 160,  79,  32, 160 } }, //bitrate range found empirically
 };
 
 const std::unordered_map<std::string, AudioCodecMiscInformation> AudioData::codecMiscInformation = {
@@ -52,6 +67,13 @@ const std::unordered_map<std::string, AudioCodecMiscInformation> AudioData::code
 	{ "Vorbis",     { .recommendation=CodecRecommendedLevel::Okay,  .lossless=false, .information_text="Succeeded by Opus. Not much reason to use it." } }, //I was originally very against Vorbis because it had poor container support, but it's actually supported in every container exposed by this program; it's VP8 that's the problem
 	{ "MP3",        { .recommendation=CodecRecommendedLevel::Awful, .lossless=false, .information_text="There are better options; at least use its successor AAC." } },
 	{ "ALAC",       { .recommendation=CodecRecommendedLevel::Good,  .lossless=true,  .information_text="It's lossless. FLAC probably has better support." } },
+
+	{ "AC-3",                    { .recommendation=CodecRecommendedLevel::Awful, .lossless=false, .information_text="One of the oldest audio codecs. Still used in modern movies, for some reason." } },
+	{ "E-AC-3",                  { .recommendation=CodecRecommendedLevel::No_Opinion, .lossless=false, .information_text="AC-3's successor, and decently modern. Not a good choice for this program's usage, but definitely used elsewhere." } },
+	{ "Speex",                   { .recommendation=CodecRecommendedLevel::Okay,  .lossless=false, .information_text="Succeeded by Opus. Designed for speech, while Vorbis is more general-purpose." } }, //intended to use a 0-10 quality parameter rather than bitrate
+	{ "TTA True Audio",          { .recommendation=CodecRecommendedLevel::Awful, .lossless=true,  .information_text="It's lossless, but doesn't seem to be used anywhere..." } },
+	{ "Windows Media Audio (2)", { .recommendation=CodecRecommendedLevel::Awful, .lossless=false, .information_text="Competed with MP3. Doesn't reach transparency at any bitrate." } }, // The versions are 1, 2, 9/Pro, and Lossless, but 2 is the one exposed by Kdenlive so that's the one I'll offer (and 9/Pro and Lossless don't have encoders)
+	{ "MPEG-2",                  { .recommendation=CodecRecommendedLevel::Awful, .lossless=false, .information_text="MP3's predecessor, and succeeded by AAC. Still used in DVDs." } },
 };
 
 CodecRecommendedLevel AudioData::get_audioEncoderRecommendation() const {

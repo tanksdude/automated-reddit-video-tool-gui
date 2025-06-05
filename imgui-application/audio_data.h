@@ -40,6 +40,14 @@ struct AudioData {
 	 * means "copy (pcm)" will be interpreted the same as "copy".
 	 */
 	static const char* audioEncoderArray[7];
+	static const char* audioEncoderArrayExtended[13];
+	static inline const char** get_audioEncoderArray(bool extended) {
+		return extended ? audioEncoderArrayExtended : audioEncoderArray;
+	}
+	static inline size_t get_audioEncoderArraySize(bool extended) {
+		return extended ? sizeof(audioEncoderArrayExtended) / sizeof(*audioEncoderArrayExtended)
+		                : sizeof(audioEncoderArray)         / sizeof(*audioEncoderArray);
+	}
 	/* Passing "preset" information to the Python script:
 	 * The Python script will ignore everything after the first space. This
 	 * means "5 (default)" will be interpreted the same as "5".
@@ -76,7 +84,7 @@ struct AudioData {
 		if (voiceArray_current < 0) { return ""; }
 		return std::string(voiceArray[voiceArray_current]);
 	}
-	inline std::string get_audioEncoder() const { return std::string(audioEncoderArray[audioEncoderArray_current]); }
+	inline std::string get_audioEncoder() const { return std::string(audioEncoderArrayExtended[audioEncoderArray_current]); } //TODO: hacky to not check whether to use the extra codecs
 	inline std::string get_audioBitrate() const { return std::to_string(audio_bitrate_v) + "k"; }
 	std::string get_audioPreset() const;
 

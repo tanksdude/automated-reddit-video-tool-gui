@@ -20,6 +20,14 @@ struct VideoData {
 	 * means "H.265 / HEVC" will be interpreted the same as "H.265".
 	 */
 	static const char* videoEncoderArray[7];
+	static const char* videoEncoderArrayExtended[13];
+	static inline const char** get_videoEncoderArray(bool extended) {
+		return extended ? videoEncoderArrayExtended : videoEncoderArray;
+	}
+	static inline size_t get_videoEncoderArraySize(bool extended) {
+		return extended ? sizeof(videoEncoderArrayExtended) / sizeof(*videoEncoderArrayExtended)
+		                : sizeof(videoEncoderArray)         / sizeof(*videoEncoderArray);
+	}
 	/* Passing preset information to the Python script:
 	 * The Python script will ignore everything after the first space. This
 	 * means "medium (default)" will be interpreted the same as "medium".
@@ -30,6 +38,9 @@ struct VideoData {
 	static std::vector<const char*> videoPresetArray_VP9_cpu_used;
 	static std::vector<const char*> videoPresetArray_UtVideo_prediction;
 	static std::vector<const char*> videoPresetArray_empty; //placeholder for the hashmap lookups
+	static std::vector<const char*> videoPresetArray_CineForm_quality;
+	static std::vector<const char*> videoPresetArray_VVC_preset;
+	static std::vector<const char*> videoPresetArray_EVC_preset;
 
 	static const std::unordered_map<std::string, CodecPresetInformation> codecToPresetArray1;
 	static const std::unordered_map<std::string, CodecPresetInformation> codecToPresetArray2;
@@ -83,7 +94,7 @@ struct VideoData {
 	int8_t crf_max;
 
 	inline std::string get_video_replacement_numbers_input() const { return std::string(video_replacement_numbers_input); }
-	inline std::string get_videoEncoder() const { return std::string(videoEncoderArray[videoEncoderArray_current]); }
+	inline std::string get_videoEncoder() const { return std::string(videoEncoderArrayExtended[videoEncoderArray_current]); } //TODO: hacky to not check whether to use the extra codecs
 	inline std::string get_videoContainer() const { return std::string(videoContainerArray[videoContainerArray_current]); }
 	inline std::string get_fps() const { return fractionalFps ? std::string(fps_numerator_input) + "/" + std::string(fps_denominator_input) : std::string(fpsArray[fpsArray_current]); }
 	inline std::string get_videoCrf() const { return std::to_string(crf_v); }

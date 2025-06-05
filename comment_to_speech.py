@@ -36,7 +36,15 @@ audioCodecLookup = {
 	"Vorbis":   "libvorbis",
 	"MP3":      "libmp3lame",
 	"ALAC":     "alac",
+
+	"AC-3":     "ac3",
+	"E-AC-3":   "eac3",
+	"Speex":    "libspeex",
+	"TTA":      "tta",
+	"Windows":  "wmav2",
+	"MPEG-2":   "libtwolame", # mp2 also exists, though it only does 160k bitrate; ffprobe reports this as mp3 either way
 }
+audioCodecIsLosslessList = ["copy", "FLAC", "ALAC", "TTA"]
 
 audioPresetKeywordLookup = {
 	"copy":     [],
@@ -46,6 +54,13 @@ audioPresetKeywordLookup = {
 	"Vorbis":   [],
 	"MP3":      ["-compression_level"],
 	"ALAC":     [],
+
+	"AC-3":     [],
+	"E-AC-3":   [],
+	"Speex":    [],
+	"TTA":      [],
+	"Windows":  [],
+	"MPEG-2":   [],
 }
 
 videoCodecLookup = {
@@ -56,7 +71,15 @@ videoCodecLookup = {
 	"AV1":     "libaom-av1",
 	"FFV1":    "ffv1",
 	"Ut":      "utvideo",
+
+	"Apple":            "prores",
+	"QuickTime":        "qtrle",
+	"CineForm":         "cfhd",
+	"Lossless_H.264":   "libx264", #TODO: libx264rgb?
+	"VVC":              "libvvenc",
+	"EVC":              "libxeve",
 }
+videoCodecIsLosslessList = ["FFV1", "Ut", "QuickTime", "Lossless_H.264"] + ["Apple", "CineForm", "VVC"] # The second list isn't lossless, but they don't support CRF mode
 
 videoPresetKeywordLookup = {
 	"H.264":   ["-preset"],
@@ -66,6 +89,13 @@ videoPresetKeywordLookup = {
 	"AV1":     ["-usage",    "-cpu-used"],
 	"FFV1":    [],
 	"Ut":      ["-pred"],
+
+	"Apple":            [],
+	"QuickTime":        [],
+	"CineForm":         ["-quality"],
+	"Lossless_H.264":   ["-preset"],
+	"VVC":              ["-preset"],
+	"EVC":              ["-preset"],
 }
 
 videoExtraArgsLookup = {
@@ -76,6 +106,13 @@ videoExtraArgsLookup = {
 	"AV1":     [],                                      # requires FFmpeg 4.3+ to not require "-b:v 0", 4.4+ to avoid a lossless bug
 	"FFV1":    [],                                      # no need for -level 3 as that's the default (found empirically, required ffprobe -debug 1)
 	"Ut":      [],
+
+	"Apple":            [],
+	"QuickTime":        [],
+	"CineForm":         [],
+	"Lossless_H.264":   ["-crf", "0"], # not needed if the codec is removed from videoCodecIsLosslessList, however ["-qp", "0"] might be preferred
+	"VVC":              [],
+	"EVC":              [],
 }
 
 #print(sys.argv[1:]);
@@ -158,12 +195,17 @@ if VIDEO_VID_PRESET_1 != "default":
 	speech_and_image_to_vid_command_args.extend([videoPresetKeywordLookup[VIDEO_VID_CODEC_name][0], VIDEO_VID_PRESET_1])
 if VIDEO_VID_PRESET_2 != "default":
 	speech_and_image_to_vid_command_args.extend([videoPresetKeywordLookup[VIDEO_VID_CODEC_name][1], VIDEO_VID_PRESET_2])
-speech_and_image_to_vid_command_args.extend(["-r", VIDEO_FPS, "-crf", VIDEO_VID_CRF])
+speech_and_image_to_vid_command_args.extend(["-r", VIDEO_FPS])
+if VIDEO_VID_CODEC_name not in videoCodecIsLosslessList:
+	# unnecessary check as CRF is ignored for lossless codecs; mainly used for the codecs that don't support CRF mode
+	speech_and_image_to_vid_command_args.extend(["-crf", VIDEO_VID_CRF])
 if VIDEO_VID_FASTSTART:
 	speech_and_image_to_vid_command_args.extend(["-movflags", "+faststart"])
 # FFmpeg audio args
 speech_and_image_to_vid_command_args.extend(["-c:a", VIDEO_AUD_CODEC_lib])
-speech_and_image_to_vid_command_args.extend(["-b:a", VIDEO_AUD_BITRATE])
+if VIDEO_AUD_CODEC_name not in audioCodecIsLosslessList:
+	# unnecessary check as bitrate is ignored for lossless codecs
+	speech_and_image_to_vid_command_args.extend(["-b:a", VIDEO_AUD_BITRATE])
 if VIDEO_AUD_PRESET != "default":
 	speech_and_image_to_vid_command_args.extend([audioPresetKeywordLookup[VIDEO_AUD_CODEC_name][0], VIDEO_AUD_PRESET])
 # FFmpeg other args
