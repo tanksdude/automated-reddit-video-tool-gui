@@ -5,6 +5,9 @@
 #include <iostream> //TODO
 #include <algorithm> //std::max_element
 #include <GLFW/glfw3.h>
+#define MINI_CASE_SENSITIVE
+#include <mini/ini.h>
+#include "ini_helper.h"
 
 
 // Helper to display a little (?) mark which shows a tooltip when hovered.
@@ -305,6 +308,19 @@ int main(int, char**)
 		{ CodecRecommendedLevel::No_Opinion, recommended_noopinion },
 	};
 
+	GLuint return_symbol_texture, circle_arrows_texture;
+	ret = LoadTextureFromFile("../res/leftwards-arrow-with-hook_21a9.png", &return_symbol_texture, NULL, NULL);
+	ret = LoadTextureFromFile("../res/counterclockwise-arrows-button_1f504.png", &circle_arrows_texture, NULL, NULL);
+
+	mINI::INIFile ini_file("../arvt.ini");
+	mINI::INIStructure ini_object;
+	ini_file.read(ini_object);
+
+	ARVT::Fill_ProgramData(pdata, ini_object);
+	ARVT::Fill_ImageData(idata, ini_object);
+	ARVT::Fill_AudioData(adata, ini_object);
+	ARVT::Fill_VideoData(vdata, ini_object);
+
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
@@ -364,14 +380,14 @@ int main(int, char**)
 			ImGui::Begin("Main Window", nullptr);
 
 			if (ImGui::BeginTabBar("MainTabBar", 0)) {
-				ImGuiTabItemFlags tab_flags[5] = { 0, 0, 0, 0, 0 };
+				ImGuiTabItemFlags tab_flags[6] = { 0, 0, 0, 0, 0, 0 };
 				if (set_default_tab) [[unlikely]] {
 					tab_flags[default_tab_idx] |= ImGuiTabItemFlags_SetSelected;
 					set_default_tab = false;
 				}
 
 				if (ImGui::BeginTabItem("Execute", nullptr, tab_flags[0])) {
-					if (ImGui::BeginTable("table1", 4, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_PadOuterX)) {
+					if (ImGui::BeginTable("Execute##table1", 4, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_PadOuterX)) {
 						ImGui::TableSetupColumn("Input Comment");
 						ImGui::TableSetupColumn("Splits");
 						ImGui::TableSetupColumn("Image Parameters");
@@ -654,7 +670,7 @@ int main(int, char**)
 				}
 
 				if (ImGui::BeginTabItem("Configure", nullptr, tab_flags[1])) {
-					if (ImGui::BeginTable("table1", 3, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_PadOuterX)) {
+					if (ImGui::BeginTable("Configure##table1", 3, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_PadOuterX)) {
 						ImGui::TableSetupColumn("Audio");
 						ImGui::TableSetupColumn("Video");
 						ImGui::TableSetupColumn("Other");
@@ -827,18 +843,166 @@ int main(int, char**)
 				}
 
 				/*
-				if (ImGui::BeginTabItem("SSH", nullptr, tab_flags[3])) {
+				if (ImGui::BeginTabItem("SSH", nullptr, tab_flags[2])) {
 					ImGui::Text("TODO");
 					ImGui::EndTabItem();
 				}
 				*/
 
-				if (ImGui::BeginTabItem("Help", nullptr, tab_flags[2])) {
+				if (ImGui::BeginTabItem("Defaults", nullptr, tab_flags[3])) {
+					ImGui::BeginDisabled();
+
+					ImGui::Text("Write Changes:"); ImGui::SameLine();
+					if (ImGui::ImageButton("##Write Changes", return_symbol_texture, ImVec2(pdata.evaluated_font_size, pdata.evaluated_font_size))) {
+						//TODO
+						//ini_file.write(ini_object, true);
+					}
+					ImGui::Text("Load Defaults:"); ImGui::SameLine();
+					if (ImGui::ImageButton("##Load Defaults", circle_arrows_texture, ImVec2(pdata.evaluated_font_size, pdata.evaluated_font_size))) {
+						//TODO
+					}
+
+					if (ImGui::BeginTable("Defaults##table1", 4, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_PadOuterX)) {
+						ImGui::TableSetupColumn("Image");
+						ImGui::TableSetupColumn("Audio");
+						ImGui::TableSetupColumn("Video");
+						ImGui::TableSetupColumn("Other");
+						ImGui::TableHeadersRow();
+						ImGui::TableNextRow();
+
+						ImGui::TableSetColumnIndex(0);
+
+						//TODO: these should all be text inputs
+
+						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
+						ImGui::SeparatorText("Size");
+						ImGui::InputText("Image Width",     idata.image_width_input,    IM_ARRAYSIZE(idata.image_width_input),    ImGuiInputTextFlags_CharsDecimal);
+						ImGui::InputText("Image Height",    idata.image_height_input,   IM_ARRAYSIZE(idata.image_height_input),   ImGuiInputTextFlags_CharsDecimal);
+						ImGui::InputText("Width Border",    idata.image_w_border_input, IM_ARRAYSIZE(idata.image_w_border_input), ImGuiInputTextFlags_CharsDecimal);
+						ImGui::InputText("Height Border",   idata.image_h_border_input, IM_ARRAYSIZE(idata.image_h_border_input), ImGuiInputTextFlags_CharsDecimal);
+
+						ImGui::SeparatorText("Font"); //TODO: align SeparatorText to center
+						ImGui::InputText("Font Size",             idata.font_size_input,           IM_ARRAYSIZE(idata.font_size_input),        ImGuiInputTextFlags_CharsDecimal);
+						ImGui::InputText("Font Color",            idata.font_color_input,          IM_ARRAYSIZE(idata.font_color_input),       ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc);
+						ImGui::InputText("Background Color",      idata.background_color_input,    IM_ARRAYSIZE(idata.background_color_input), ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc); //TODO: think these need to also scrub backslashes
+						ImGui::SliderScalar("Newline Count", ImGuiDataType_U8, &idata.paragraph_newline_v, &idata.paragraph_newline_min, &idata.paragraph_newline_max);
+						ImGui::Checkbox("Paragraph Tabbed Start", &idata.paragraph_tabbed_start_input);
+						ImGui::PopItemWidth();
+
+						ImGui::SeparatorText("Export");
+						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
+						ImGui::Combo("Image Format", &idata.imageFormatArray_current, idata.imageFormatArray, IM_ARRAYSIZE(idata.imageFormatArray));
+						ImGui::PopItemWidth();
+
+						ImGui::TableNextColumn();
+
+						if (ImGui::Combo("Speech Engine", &adata.voiceEngineArray_current, adata.voiceEngineArray, IM_ARRAYSIZE(adata.voiceEngineArray))) {
+							//there was a change
+							adata.update_voiceArray();
+						}
+
+						ImGui::Combo("Voice", &adata.voiceArray_current, adata.voiceArray, adata.voiceArray_length);
+						//TODO: some kind of visual indicator when one isn't selected
+						ImGui::SameLine();
+						if (ImGui::Button("Refresh")) {
+							adata.update_voiceArray();
+						}
+
+						if (ImGui::Combo("Audio Encoder", &adata.audioEncoderArray_current, AudioData::get_audioEncoderArray(pdata.useExtraCodecs), AudioData::get_audioEncoderArraySize(pdata.useExtraCodecs))) {
+							adata.update_audioBitrateValues();
+							adata.update_audioPresetArray();
+						}
+
+						ImGui::Indent();
+
+						if (adata.audioCodec_hasPreset) {
+							ImGui::Combo(adata.audioCodec_presetTerm.c_str(), &adata.audioPresetArray_current, adata.get_audioPresetArray(), adata.get_audioPresetArray_size(), adata.get_audioPresetArray_size());
+						}
+
+						//ImGui doesn't support steps for sliders, oh well
+						ImGui::SliderScalar("Bitrate (kbps)", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max);
+
+						ImGui::Unindent();
+
+						ImGui::TableNextColumn();
+
+						ImGui::Checkbox("Audio Only", &vdata.audio_only_option_input);
+
+						//TODO: probably merge into one InputText
+						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.4f);
+						ImGui::InputText("##FPS Numerator",      vdata.fps_numerator_input,   IM_ARRAYSIZE(vdata.fps_numerator_input),   ImGuiInputTextFlags_CallbackCharFilter, integerOnlyPositiveFunc);
+						ImGui::SameLine();
+						ImGui::Text(" / ");
+						ImGui::SameLine();
+						ImGui::InputText("FPS##FPS Denominator", vdata.fps_denominator_input, IM_ARRAYSIZE(vdata.fps_denominator_input), ImGuiInputTextFlags_CallbackCharFilter, integerOnlyPositiveFunc);
+						ImGui::PopItemWidth();
+						ImGui::Combo("FPS##Integer", &vdata.fpsArray_current, vdata.fpsArray, IM_ARRAYSIZE(vdata.fpsArray), IM_ARRAYSIZE(vdata.fpsArray));
+
+						if (ImGui::Combo("Video Encoder", &vdata.videoEncoderArray_current, VideoData::get_videoEncoderArray(pdata.useExtraCodecs), VideoData::get_videoEncoderArraySize(pdata.useExtraCodecs))) {
+							vdata.update_videoCrfValues();
+							vdata.update_videoPresetArray();
+						}
+
+						ImGui::Indent();
+
+						if (vdata.videoCodec_hasPreset1) {
+							ImGui::Combo(vdata.videoCodec_preset1Term.c_str(), &vdata.videoPresetArray1_current, vdata.get_videoPresetArray1(), vdata.get_videoPresetArray1_size(), vdata.get_videoPresetArray1_size());
+							//doesn't take flags like ImGuiComboFlags_HeightLargest
+							if (vdata.videoCodec_hasPreset2) {
+								ImGui::Combo(vdata.videoCodec_preset2Term.c_str(), &vdata.videoPresetArray2_current, vdata.get_videoPresetArray2(), vdata.get_videoPresetArray2_size(), vdata.get_videoPresetArray2_size());
+							}
+						}
+
+						ImGui::SliderScalar("CRF", ImGuiDataType_S8, &vdata.crf_v, &vdata.crf_min, &vdata.crf_max);
+
+						ImGui::Unindent();
+
+						ImGui::Combo("Container", &vdata.videoContainerArray_current, vdata.videoContainerArray, IM_ARRAYSIZE(vdata.videoContainerArray));
+
+						ImGui::Indent();
+						ImGui::Checkbox("-movflags=+faststart", &vdata.faststart_flag);
+						ImGui::Unindent();
+
+						ImGui::TableNextColumn();
+
+						ImGui::SeparatorText("Application");
+
+						//TODO: fonts have "Scale"
+						ImGui::InputText("Font Path", pdata.application_font_path, IM_ARRAYSIZE(pdata.application_font_path), ImGuiInputTextFlags_CallbackCharFilter, filepathCleaningFunc);
+						ImGui::InputText("Font Size", pdata.application_font_size, IM_ARRAYSIZE(pdata.application_font_size), ImGuiInputTextFlags_CharsDecimal);
+
+						if (ImGui::Checkbox("Extra Codecs", &pdata.useExtraCodecs)) {
+							if (!pdata.useExtraCodecs) {
+								if (adata.audioEncoderArray_current >= AudioData::get_audioEncoderArraySize(false)) {
+									adata.audioEncoderArray_current = 0;
+									adata.update_audioBitrateValues();
+									adata.update_audioPresetArray();
+								}
+								if (vdata.videoEncoderArray_current >= VideoData::get_videoEncoderArraySize(false)) {
+									vdata.videoEncoderArray_current = 0;
+									vdata.update_videoCrfValues();
+									vdata.update_videoPresetArray();
+								}
+							}
+						}
+
+						ImGui::SeparatorText("Paths");
+						ImGui::Text("TODO: three main dirs and a temp dir");
+						//other TODO: display what the commands will be (though maybe this should be in the main section?)
+
+						ImGui::EndDisabled();
+						ImGui::EndTable();
+					}
+
+					ImGui::EndTabItem();
+				}
+
+				if (ImGui::BeginTabItem("Help", nullptr, tab_flags[4])) {
 					ImGui::Text("TODO");
 					ImGui::EndTabItem();
 				}
 
-				if (ImGui::BeginTabItem("About", nullptr, tab_flags[4])) {
+				if (ImGui::BeginTabItem("About", nullptr, tab_flags[5])) {
 					ImGui::Text("License: GNU General Public License v3.0");
 					ImGui::Text("SPDX-License-Identifier: GPL-3.0-only");
 					ImGui::Text("Requirements: TODO");
