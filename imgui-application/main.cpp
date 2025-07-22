@@ -36,37 +36,18 @@ inline float getMultilineInputHeight(float height) {
 #include "image_data.h"
 #include "audio_data.h"
 #include "video_data.h"
+#include "program_data.h"
 
-char the_file_input_name[1024] = "lorem_ipsum";
-char evaluated_input_file_name[1024];
+ImageData idata;
+AudioData adata;
+VideoData vdata;
+ProgramData pdata;
 
-char input_comment_data[16 * 1024] = "";
-bool input_comment_word_wrap = true; //TODO
-
-char evaluated_input_split_1[1024];
-char evaluated_input_split_2[1024];
-char input_split_1_data[16 * 1024] = "";
-char input_split_2_data[16 * 1024] = "";
-
-char evaluated_test_image_path[1024];
-char evaluated_output_speech_path[1024];
-
-#ifdef _WIN32
-char application_font_path[1024] = "c:\\Windows\\Fonts\\segoeui.ttf";
-char application_font_size[32] = "24.0";
-float evaluated_font_size = 24.0f;
-#else
-char application_font_path[1024] = "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf";
-char application_font_size[32] = "20.0";
-float evaluated_font_size = 20.0f;
-#endif
 ImFont* currentFont = nullptr;
 bool needToChangeFonts = false;
 
-bool useExtraCodecs = false; //not in VideoData/AudioData for simplicity
-
 void refreshApplicationFont() {
-	const float size = std::stof(application_font_size); //TODO: const std::invalid_argument&, const std::out_of_range&
+	const float size = std::stof(pdata.application_font_size); //TODO: const std::invalid_argument&, const std::out_of_range&
 	const ImWchar ranges[] = {
 		0x0020, 0x00FF, // Basic Latin + Latin Supplement
 		0x2190, 0x23FF, //arrows & math
@@ -76,7 +57,7 @@ void refreshApplicationFont() {
 	};
 	static_assert(sizeof(ranges) / sizeof(ranges[0]) % 2 == 1);
 	ImGuiIO& io = ImGui::GetIO();
-	ImFont* newFont = io.Fonts->AddFontFromFileTTF(application_font_path, size, nullptr, ranges); //TODO: check if file exists, also somehow handle the assert when it can't be loaded
+	ImFont* newFont = io.Fonts->AddFontFromFileTTF(pdata.application_font_path, size, nullptr, ranges); //TODO: check if file exists, also somehow handle the assert when it can't be loaded
 	if (newFont == nullptr) {
 		//TODO
 		return;
@@ -85,7 +66,7 @@ void refreshApplicationFont() {
 	ImGui_ImplOpenGL3_DestroyFontsTexture();
 	ImGui_ImplOpenGL3_CreateFontsTexture();
 	currentFont = newFont;
-	evaluated_font_size = size;
+	pdata.evaluated_font_size = size;
 }
 
 auto integerOnlyPositiveFunc = [] (ImGuiInputTextCallbackData* data) {
@@ -133,23 +114,14 @@ auto video_replacement_scrubbingFunc = [] (ImGuiInputTextCallbackData* data) {
 void clear_input_data(bool lockNewState) {
 	if (lockNewState) {
 		//now locked
-		strcpy(input_comment_data, "");
-		strcpy(input_split_1_data, "");
-		strcpy(input_split_2_data, "");
+		strcpy(pdata.input_comment_data, "");
+		strcpy(pdata.input_split_1_data, "");
+		strcpy(pdata.input_split_2_data, "");
 	} else {
 		//now unlocked
 		//nothing
 	}
 }
-
-ImageData idata;
-AudioData adata;
-VideoData vdata;
-
-const char* imageDeleteAgeList[] = { "0 seconds", "1 hour", "24 hours", "2 weeks", "1 month", "6 months" };
-const int imageDeleteAgeList_values[] = { 0, 1, 24, 14*24, 30*24, 180*24 };
-static_assert(IM_ARRAYSIZE(imageDeleteAgeList) == IM_ARRAYSIZE(imageDeleteAgeList_values));
-int imageDeleteAgeList_current = 0;
 
 
 
@@ -415,14 +387,14 @@ int main(int, char**)
 
 						ImGui::Text("File Name:"); //TODO: this isn't horizontally or vertically centered
 						ImGui::SameLine();
-						ImGui::InputText("##Main Input Comment", the_file_input_name, IM_ARRAYSIZE(the_file_input_name), ImGuiInputTextFlags_CallbackCharFilter, filenameCleaningFunc);
+						ImGui::InputText("##Main Input Comment", pdata.the_file_input_name, IM_ARRAYSIZE(pdata.the_file_input_name), ImGuiInputTextFlags_CallbackCharFilter, filenameCleaningFunc);
 						ImGui::SameLine();
 
 						if (filenameIsLocked) {
 							ImGui::EndDisabled();
 						}
 
-						if (ImGui::ImageButton("##Lock Icon", filenameIsLocked ? lock_icon_texture : unlock_icon_texture, ImVec2(evaluated_font_size, evaluated_font_size))) {
+						if (ImGui::ImageButton("##Lock Icon", filenameIsLocked ? lock_icon_texture : unlock_icon_texture, ImVec2(pdata.evaluated_font_size, pdata.evaluated_font_size))) {
 							clear_input_data(filenameIsLocked);
 							filenameIsLocked = !filenameIsLocked;
 						}
@@ -430,14 +402,14 @@ int main(int, char**)
 						//HACK: apparently there's ImGui::GetStyle().FramePadding.y*2.0f extra size on image buttons, but that seems like 2px off
 						//regardless, it's irrelevant because this column isn't the largest
 
-						ARVT::copyEvaluatedFileName_toCommentSplitterPath(the_file_input_name, evaluated_input_file_name, IM_ARRAYSIZE(evaluated_input_file_name));
-						ImGui::InputText("##Input Comment Path", evaluated_input_file_name, IM_ARRAYSIZE(evaluated_input_file_name), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
+						ARVT::copyEvaluatedFileName_toCommentSplitterPath(pdata.the_file_input_name, pdata.evaluated_input_file_name, IM_ARRAYSIZE(pdata.evaluated_input_file_name));
+						ImGui::InputText("##Input Comment Path", pdata.evaluated_input_file_name, IM_ARRAYSIZE(pdata.evaluated_input_file_name), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 						ImGui::SameLine();
 
 						if (ImGui::Button("Preview File##Input Comment")) { //TODO: add?: https://github.com/mlabbe/nativefiledialog
-							int result = ARVT::copyFileToCStr(evaluated_input_file_name, input_comment_data, IM_ARRAYSIZE(input_comment_data));
+							int result = ARVT::copyFileToCStr(pdata.evaluated_input_file_name, pdata.input_comment_data, IM_ARRAYSIZE(pdata.input_comment_data));
 							if (result) {
-								strcpy(input_comment_data, "error"); //TODO: red text
+								strcpy(pdata.input_comment_data, "error"); //TODO: red text
 							}
 						}
 						if (ImGui::BeginItemTooltip()) {
@@ -452,11 +424,11 @@ int main(int, char**)
 						//TODO: doesn't seem like word wrap affects TextMultiline so remove this option
 						*/
 
-						if (input_comment_word_wrap) {
+						if (pdata.input_comment_word_wrap) {
 							ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + ImGui::GetContentRegionAvail().x - 400.f);
 						}
-						ImGui::InputTextMultiline("##input comment", input_comment_data, IM_ARRAYSIZE(input_comment_data), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
-						if (input_comment_word_wrap) {
+						ImGui::InputTextMultiline("##input comment", pdata.input_comment_data, IM_ARRAYSIZE(pdata.input_comment_data), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
+						if (pdata.input_comment_word_wrap) {
 							ImGui::PopTextWrapPos();
 						}
 
@@ -468,35 +440,35 @@ int main(int, char**)
 
 						ImGui::SeparatorText("Image Text");
 
-						ARVT::copyEvaluatedFileName_toCommentTestImagePath_Text(the_file_input_name, evaluated_input_split_1, IM_ARRAYSIZE(evaluated_input_split_1));
-						ARVT::copyEvaluatedFileName_toCommentTestImagePath_Speech(the_file_input_name, evaluated_input_split_2, IM_ARRAYSIZE(evaluated_input_split_2));
+						ARVT::copyEvaluatedFileName_toCommentTestImagePath_Text(pdata.the_file_input_name, pdata.evaluated_input_split_1, IM_ARRAYSIZE(pdata.evaluated_input_split_1));
+						ARVT::copyEvaluatedFileName_toCommentTestImagePath_Speech(pdata.the_file_input_name, pdata.evaluated_input_split_2, IM_ARRAYSIZE(pdata.evaluated_input_split_2));
 
-						ImGui::InputText("##Input Split 1 Path", evaluated_input_split_1, IM_ARRAYSIZE(evaluated_input_split_1), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
+						ImGui::InputText("##Input Split 1 Path", pdata.evaluated_input_split_1, IM_ARRAYSIZE(pdata.evaluated_input_split_1), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 						ImGui::SameLine();
 						if (ImGui::Button("Preview File##Input Split 1")) {
-							int result = ARVT::copyFileToCStr(evaluated_input_split_1, input_split_1_data, IM_ARRAYSIZE(input_split_1_data));
+							int result = ARVT::copyFileToCStr(pdata.evaluated_input_split_1, pdata.input_split_1_data, IM_ARRAYSIZE(pdata.input_split_1_data));
 							if (result) {
-								strcpy(input_split_1_data, "error"); //TODO: red text
+								strcpy(pdata.input_split_1_data, "error"); //TODO: red text
 							}
 						}
 
-						ImGui::InputTextMultiline("##Input Split 1 Data", input_split_1_data, IM_ARRAYSIZE(input_split_1_data), ImVec2(-FLT_MIN, 0), ImGuiInputTextFlags_ReadOnly);
+						ImGui::InputTextMultiline("##Input Split 1 Data", pdata.input_split_1_data, IM_ARRAYSIZE(pdata.input_split_1_data), ImVec2(-FLT_MIN, 0), ImGuiInputTextFlags_ReadOnly);
 						//TODO: there should be a third box for ImageMagick text, which basically just replaces "&" with "&amp;" and other stuff
 						if (ImGui::Button("Reveal in File Explorer##Input Split 1")) {
-							int result = ARVT::revealFileExplorer(evaluated_input_split_1);
+							int result = ARVT::revealFileExplorer(pdata.evaluated_input_split_1);
 							if (result) {
-								strcpy(input_split_2_data, "error"); //TODO: red text
+								strcpy(pdata.input_split_2_data, "error"); //TODO: red text
 							}
 						}
 						ImGui::SameLine();
 						if (ImGui::Button("↓ Make Copy ↓")) {
-							int result = ARVT::copy_file(evaluated_input_split_1, evaluated_input_split_2);
+							int result = ARVT::copy_file(pdata.evaluated_input_split_1, pdata.evaluated_input_split_2);
 							if (result) {
-								strcpy(input_split_2_data, "error copying"); //TODO: red text
+								strcpy(pdata.input_split_2_data, "error copying"); //TODO: red text
 							} else {
-								int result = ARVT::copyFileToCStr(evaluated_input_split_2, input_split_2_data, IM_ARRAYSIZE(input_split_2_data));
+								int result = ARVT::copyFileToCStr(pdata.evaluated_input_split_2, pdata.input_split_2_data, IM_ARRAYSIZE(pdata.input_split_2_data));
 								if (result) {
-									strcpy(input_split_2_data, "error"); //TODO: red text
+									strcpy(pdata.input_split_2_data, "error"); //TODO: red text
 								}
 							}
 						}
@@ -511,20 +483,20 @@ int main(int, char**)
 							//pushes to disabled stack
 						}
 
-						ImGui::InputText("##Input Split 2 Path", evaluated_input_split_2, IM_ARRAYSIZE(evaluated_input_split_2), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
+						ImGui::InputText("##Input Split 2 Path", pdata.evaluated_input_split_2, IM_ARRAYSIZE(pdata.evaluated_input_split_2), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 						ImGui::SameLine();
 						if (ImGui::Button("Preview File##Input Split 2")) {
-							int result = ARVT::copyFileToCStr(evaluated_input_split_2, input_split_2_data, IM_ARRAYSIZE(input_split_2_data));
+							int result = ARVT::copyFileToCStr(pdata.evaluated_input_split_2, pdata.input_split_2_data, IM_ARRAYSIZE(pdata.input_split_2_data));
 							if (result) {
-								strcpy(input_split_2_data, "error"); //TODO: red text
+								strcpy(pdata.input_split_2_data, "error"); //TODO: red text
 							}
 						}
 
-						ImGui::InputTextMultiline("##Input Split 2 Data", input_split_2_data, IM_ARRAYSIZE(input_split_2_data), ImVec2(-FLT_MIN, 0), ImGuiInputTextFlags_ReadOnly);
+						ImGui::InputTextMultiline("##Input Split 2 Data", pdata.input_split_2_data, IM_ARRAYSIZE(pdata.input_split_2_data), ImVec2(-FLT_MIN, 0), ImGuiInputTextFlags_ReadOnly);
 						if (ImGui::Button("Reveal in File Explorer##Input Split 2")) {
-							int result = ARVT::revealFileExplorer(evaluated_input_split_2);
+							int result = ARVT::revealFileExplorer(pdata.evaluated_input_split_2);
 							if (result) {
-								strcpy(input_split_2_data, "error"); //TODO: red text
+								strcpy(pdata.input_split_2_data, "error"); //TODO: red text
 							}
 						}
 
@@ -565,13 +537,13 @@ int main(int, char**)
 						ImGui::Combo("Image Format", &idata.imageFormatArray_current, idata.imageFormatArray, IM_ARRAYSIZE(idata.imageFormatArray));
 						ImGui::PopItemWidth();
 
-						ARVT::copyEvaluatedFileName_toCommentTestImagePath_TestImage(the_file_input_name, idata, evaluated_test_image_path, IM_ARRAYSIZE(evaluated_test_image_path));
-						ImGui::InputText("##Test Image Path", evaluated_test_image_path, IM_ARRAYSIZE(evaluated_test_image_path), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
+						ARVT::copyEvaluatedFileName_toCommentTestImagePath_TestImage(pdata.the_file_input_name, idata, pdata.evaluated_test_image_path, IM_ARRAYSIZE(pdata.evaluated_test_image_path));
+						ImGui::InputText("##Test Image Path", pdata.evaluated_test_image_path, IM_ARRAYSIZE(pdata.evaluated_test_image_path), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 
 						if (ImGui::Button("Create →", ImVec2(-FLT_MIN, 0.0f))) {
-							ARVT::call_comment_test_image(the_file_input_name, idata);
+							ARVT::call_comment_test_image(pdata.the_file_input_name, idata);
 							//TODO: check if success
-							ret = LoadTextureFromFile(evaluated_test_image_path, &my_image_texture, &my_image_width, &my_image_height);
+							ret = LoadTextureFromFile(pdata.evaluated_test_image_path, &my_image_texture, &my_image_width, &my_image_height);
 						}
 
 						ImGui::SeparatorText("Video Settings (optional)");
@@ -584,8 +556,8 @@ int main(int, char**)
 						ImGui::PopItemWidth();
 						ImGui::Checkbox("Audio Only", &vdata.audio_only_option_input);
 
-						ARVT::copyEvaluatedFileName_toCommentToSpeechPath(the_file_input_name, vdata, evaluated_output_speech_path, IM_ARRAYSIZE(evaluated_output_speech_path));
-						ImGui::InputText("##Output Videos Path", evaluated_output_speech_path, IM_ARRAYSIZE(evaluated_output_speech_path), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
+						ARVT::copyEvaluatedFileName_toCommentToSpeechPath(pdata.the_file_input_name, vdata, pdata.evaluated_output_speech_path, IM_ARRAYSIZE(pdata.evaluated_output_speech_path));
+						ImGui::InputText("##Output Videos Path", pdata.evaluated_output_speech_path, IM_ARRAYSIZE(pdata.evaluated_output_speech_path), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 
 						if (!filenameIsLocked) {
 							ImGui::EndDisabled();
@@ -633,8 +605,8 @@ int main(int, char**)
 						}
 
 						if (ImGui::Button("Split!", ImVec2(-FLT_MIN, 0.0f))) {
-							ARVT::call_comment_splitter(the_file_input_name);
-							ARVT::copyFileToCStr(ARVT::inputFileName_toCommentTestImagePath_Text(the_file_input_name).c_str(), input_split_1_data, IM_ARRAYSIZE(input_split_1_data));
+							ARVT::call_comment_splitter(pdata.the_file_input_name);
+							ARVT::copyFileToCStr(ARVT::inputFileName_toCommentTestImagePath_Text(pdata.the_file_input_name).c_str(), pdata.input_split_1_data, IM_ARRAYSIZE(pdata.input_split_1_data));
 						}
 						if (ImGui::BeginItemTooltip()) {
 							ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
@@ -658,14 +630,14 @@ int main(int, char**)
 						if (adata.voiceArray_current < 0) { ImGui::BeginDisabled(); }
 						if (ImGui::Button("GO!", ImVec2(-FLT_MIN, 0.0f))) {
 							//TODO: progress bar and async
-							ARVT::call_comment_to_speech(the_file_input_name, idata, adata, vdata);
+							ARVT::call_comment_to_speech(pdata.the_file_input_name, idata, adata, vdata);
 							//TODO: at program start-up, check programs' existence and maybe ffmpeg version
 						}
 						if (adata.voiceArray_current < 0) { ImGui::EndDisabled(); }
 						if (ImGui::Button("Reveal in File Explorer##final video", ImVec2(-FLT_MIN, 0.0f))) {
 							//TODO: this should open in the folder if the file doesn't exist
 							//yes it's *kinda* a hack to open on just the first video, but it's better than iterating through every file in the folder and checking what's available
-							int result = ARVT::revealFileExplorer(ARVT::inputFileName_toCommentToSpeechPath_getFileExplorerName(the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current], vdata.audio_only_option_input).c_str());
+							int result = ARVT::revealFileExplorer(ARVT::inputFileName_toCommentToSpeechPath_getFileExplorerName(pdata.the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current], vdata.audio_only_option_input).c_str());
 							if (result) {
 								//strcpy(, "error"); //TODO: red text
 							}
@@ -704,7 +676,7 @@ int main(int, char**)
 							adata.update_voiceArray();
 						}
 
-						if (ImGui::Combo("Audio Encoder", &adata.audioEncoderArray_current, AudioData::get_audioEncoderArray(useExtraCodecs), AudioData::get_audioEncoderArraySize(useExtraCodecs))) {
+						if (ImGui::Combo("Audio Encoder", &adata.audioEncoderArray_current, AudioData::get_audioEncoderArray(pdata.useExtraCodecs), AudioData::get_audioEncoderArraySize(pdata.useExtraCodecs))) {
 							adata.update_audioBitrateValues();
 							adata.update_audioPresetArray();
 						}
@@ -713,7 +685,7 @@ int main(int, char**)
 
 						ImGui::Text("Recommendation:");
 						ImGui::SameLine();
-						ImGui::Image(recommendationStr_toTexId[adata.get_audioEncoderRecommendation()], ImVec2(evaluated_font_size, evaluated_font_size));
+						ImGui::Image(recommendationStr_toTexId[adata.get_audioEncoderRecommendation()], ImVec2(pdata.evaluated_font_size, pdata.evaluated_font_size));
 
 						ImGui::Text("Information:");
 						ImGui::SameLine();
@@ -747,7 +719,7 @@ int main(int, char**)
 						}
 						ImGui::Unindent();
 
-						if (ImGui::Combo("Video Encoder", &vdata.videoEncoderArray_current, VideoData::get_videoEncoderArray(useExtraCodecs), VideoData::get_videoEncoderArraySize(useExtraCodecs))) {
+						if (ImGui::Combo("Video Encoder", &vdata.videoEncoderArray_current, VideoData::get_videoEncoderArray(pdata.useExtraCodecs), VideoData::get_videoEncoderArraySize(pdata.useExtraCodecs))) {
 							vdata.update_videoCrfValues();
 							vdata.update_videoPresetArray();
 						}
@@ -756,7 +728,7 @@ int main(int, char**)
 
 						ImGui::Text("Recommendation:");
 						ImGui::SameLine();
-						ImGui::Image(recommendationStr_toTexId[vdata.get_videoEncoderRecommendation()], ImVec2(evaluated_font_size, evaluated_font_size));
+						ImGui::Image(recommendationStr_toTexId[vdata.get_videoEncoderRecommendation()], ImVec2(pdata.evaluated_font_size, pdata.evaluated_font_size));
 
 						ImGui::Text("Information:");
 						ImGui::SameLine();
@@ -797,14 +769,14 @@ int main(int, char**)
 						ImGui::SeparatorText("Application");
 
 						//TODO: fonts have "Scale"
-						ImGui::InputText("Font Path", application_font_path, IM_ARRAYSIZE(application_font_path), ImGuiInputTextFlags_CallbackCharFilter, filepathCleaningFunc);
-						ImGui::InputText("Font Size", application_font_size, IM_ARRAYSIZE(application_font_size), ImGuiInputTextFlags_CharsDecimal);
+						ImGui::InputText("Font Path", pdata.application_font_path, IM_ARRAYSIZE(pdata.application_font_path), ImGuiInputTextFlags_CallbackCharFilter, filepathCleaningFunc);
+						ImGui::InputText("Font Size", pdata.application_font_size, IM_ARRAYSIZE(pdata.application_font_size), ImGuiInputTextFlags_CharsDecimal);
 						if (ImGui::Button("Refresh##Font")) {
 							needToChangeFonts = true;
 						}
 
-						if (ImGui::Checkbox("Extra Codecs", &useExtraCodecs)) {
-							if (!useExtraCodecs) {
+						if (ImGui::Checkbox("Extra Codecs", &pdata.useExtraCodecs)) {
+							if (!pdata.useExtraCodecs) {
 								if (adata.audioEncoderArray_current >= AudioData::get_audioEncoderArraySize(false)) {
 									adata.audioEncoderArray_current = 0;
 									adata.update_audioBitrateValues();
@@ -828,18 +800,18 @@ int main(int, char**)
 
 						ImGui::BeginDisabled(); //TODO: un-disable when there's saving and loading of video settings
 						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
-						ImGui::Combo("File Delete Age", &imageDeleteAgeList_current, imageDeleteAgeList, IM_ARRAYSIZE(imageDeleteAgeList));
+						ImGui::Combo("File Delete Age", &pdata.imageDeleteAgeList_current, pdata.imageDeleteAgeList, IM_ARRAYSIZE(pdata.imageDeleteAgeList));
 						ImGui::PopItemWidth();
 						ImGui::SameLine();
 						if (ImGui::Button("Delete videos")) {
-							int result = ARVT::deleteAllOldFiles(ARVT::OUTPUT_SPEECH.c_str(), imageDeleteAgeList_values[imageDeleteAgeList_current]);
+							int result = ARVT::deleteAllOldFiles(ARVT::OUTPUT_SPEECH.c_str(), pdata.imageDeleteAgeList_values[pdata.imageDeleteAgeList_current]);
 							if (result) {
 								//TODO
 							}
 						}
 						ImGui::SameLine();
 						if (ImGui::Button("Delete images")) {
-							int result = ARVT::deleteAllOldFiles(ARVT::TEST_IMAGES.c_str(), imageDeleteAgeList_values[imageDeleteAgeList_current]);
+							int result = ARVT::deleteAllOldFiles(ARVT::TEST_IMAGES.c_str(), pdata.imageDeleteAgeList_values[pdata.imageDeleteAgeList_current]);
 							if (result) {
 								//TODO
 							}
