@@ -105,6 +105,7 @@ GNU General Public License v3.0
 * ImGui: MIT
 * GLFW: zlib
 * stb_image: MIT or The Unlicense
+* mINI: MIT
 
 ## Acknowledgments
 

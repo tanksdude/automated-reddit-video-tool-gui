@@ -11,7 +11,7 @@ LINUX_GL_LIBS = -lGL
 
 CXXFLAGS = -std=c++20 -I$(IMGUI_DIR)
 CXXFLAGS += -g -Wall -Wformat
-LIBS =
+LIBS = -L/libs/mINI
 
 ##---------------------------------------------------------------------
 ## BUILD FLAGS PER PLATFORM
