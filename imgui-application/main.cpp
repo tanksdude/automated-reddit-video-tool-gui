@@ -312,14 +312,15 @@ int main(int, char**)
 	ret = LoadTextureFromFile("../res/leftwards-arrow-with-hook_21a9.png", &return_symbol_texture, NULL, NULL);
 	ret = LoadTextureFromFile("../res/counterclockwise-arrows-button_1f504.png", &circle_arrows_texture, NULL, NULL);
 
+	ARVT::CreateDefaultIniIfNeeded("../arvt.ini");
 	mINI::INIFile ini_file("../arvt.ini");
 	mINI::INIStructure ini_object;
 	ini_file.read(ini_object);
 
 	ARVT::Fill_ProgramData(pdata, ini_object);
 	ARVT::Fill_ImageData(idata, ini_object);
-	ARVT::Fill_AudioData(adata, ini_object);
-	ARVT::Fill_VideoData(vdata, ini_object);
+	ARVT::Fill_AudioData(adata, ini_object, pdata.useExtraCodecs);
+	ARVT::Fill_VideoData(vdata, ini_object, pdata.useExtraCodecs);
 
     // Main loop
     while (!glfwWindowShouldClose(window))
