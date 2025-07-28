@@ -1,41 +1,18 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
-#include <stdio.h>
-#include <iostream> //TODO
+
+#include <stdio.h> //fprintf for glfwSetErrorCallback
 #include <algorithm> //std::max_element
+
 #include <GLFW/glfw3.h>
 #define MINI_CASE_SENSITIVE
 #include <mini/ini.h>
+
+#include "imgui_helpers.h"
+#include "arvt_helpers.h"
 #include "ini_helper.h"
 
-
-// Helper to display a little (?) mark which shows a tooltip when hovered.
-// In your own code you may want to display an actual icon if you are using a merged icon fonts (see docs/FONTS.md)
-static void HelpMarker(const char* desc)
-{
-    ImGui::TextDisabled("(?)");
-    if (ImGui::BeginItemTooltip())
-    {
-        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-        ImGui::TextUnformatted(desc);
-        ImGui::PopTextWrapPos();
-        ImGui::EndTooltip();
-    }
-}
-
-inline float getMultilineInputHeight(float height) {
-	if (height <= 0) {
-		height = ImGui::GetTextLineHeight() * 8.0f;
-		//default height found in imgui_widgets.cpp:
-		//const ImVec2 frame_size = CalcItemSize(size_arg, CalcItemWidth(), (is_multiline ? g.FontSize * 8.0f : label_size.y) + style.FramePadding.y * 2.0f); // Arbitrary default of 8 lines high for multi-line
-	}
-	return height + 2 * ImGui::GetStyle().ItemSpacing.y;
-}
-
-
-
-#include "helpers.h"
 #include "image_data.h"
 #include "audio_data.h"
 #include "video_data.h"
@@ -125,63 +102,6 @@ void clear_input_data(bool lockNewState) {
 		//nothing
 	}
 }
-
-
-
-#define _CRT_SECURE_NO_WARNINGS
-#define STB_IMAGE_IMPLEMENTATION
-#include "libs/stb_image.h"
-
-// Simple helper function to load an image into a OpenGL texture with common settings
-bool LoadTextureFromMemory(const void* data, size_t data_size, GLuint* out_texture, int* out_width, int* out_height)
-{
-    // Load from file
-    int image_width = 0;
-    int image_height = 0;
-    unsigned char* image_data = stbi_load_from_memory((const unsigned char*)data, (int)data_size, &image_width, &image_height, NULL, 4);
-    if (image_data == NULL)
-        return false;
-
-    // Create a OpenGL texture identifier
-    GLuint image_texture;
-    glGenTextures(1, &image_texture);
-    glBindTexture(GL_TEXTURE_2D, image_texture);
-
-    // Setup filtering parameters for display
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // Upload pixels into texture
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
-    stbi_image_free(image_data);
-
-    *out_texture = image_texture;
-    if (out_width != NULL) *out_width = image_width;
-    if (out_height != NULL) *out_height = image_height;
-
-    return true;
-}
-
-// Open and read a file, then forward to LoadTextureFromMemory()
-bool LoadTextureFromFile(const char* file_name, GLuint* out_texture, int* out_width, int* out_height)
-{
-    FILE* f = fopen(file_name, "rb");
-    if (f == NULL)
-        return false;
-    fseek(f, 0, SEEK_END);
-    size_t file_size = (size_t)ftell(f);
-    if (file_size == -1)
-        return false;
-    fseek(f, 0, SEEK_SET);
-    void* file_data = IM_ALLOC(file_size);
-    fread(file_data, 1, file_size, f);
-    bool ret = LoadTextureFromMemory(file_data, file_size, out_texture, out_width, out_height);
-    IM_FREE(file_data);
-    return ret;
-}
-
-
 
 
 
@@ -281,23 +201,23 @@ int main(int, char**)
 	int lock_icon_width = 0;
 	int lock_icon_height = 0;
 	GLuint lock_icon_texture = 0;
-	ret = LoadTextureFromFile("../res/locked_1f512.png", &lock_icon_texture, &lock_icon_width, &lock_icon_height);
+	ret = ImGuiHelpers::LoadTextureFromFile("../res/locked_1f512.png", &lock_icon_texture, &lock_icon_width, &lock_icon_height);
 	IM_ASSERT(ret);
 
 	int unlock_icon_width = 0;
 	int unlock_icon_height = 0;
 	GLuint unlock_icon_texture = 0;
-	ret = LoadTextureFromFile("../res/unlocked_1f513.png", &unlock_icon_texture, &unlock_icon_width, &unlock_icon_height);
+	ret = ImGuiHelpers::LoadTextureFromFile("../res/unlocked_1f513.png", &unlock_icon_texture, &unlock_icon_width, &unlock_icon_height);
 	IM_ASSERT(ret);
 
 	bool filenameIsLocked = false;
 
 	GLuint recommended_awful, recommended_okay, recommended_good, recommended_best, recommended_noopinion;
-	ret = LoadTextureFromFile("../res/cross-mark_274c.png", &recommended_awful, NULL, NULL);
-	ret = LoadTextureFromFile("../res/warning_26a0-fe0f.png", &recommended_okay,  NULL, NULL);
-	ret = LoadTextureFromFile("../res/heavy-check-mark_2714.png", &recommended_good,  NULL, NULL);
-	ret = LoadTextureFromFile("../res/gem-stone_1f48e.png", &recommended_best,  NULL, NULL);
-	ret = LoadTextureFromFile("../res/white-question-mark-ornament_2754.png", &recommended_noopinion, NULL, NULL);
+	ret = ImGuiHelpers::LoadTextureFromFile("../res/cross-mark_274c.png", &recommended_awful, NULL, NULL);
+	ret = ImGuiHelpers::LoadTextureFromFile("../res/warning_26a0-fe0f.png", &recommended_okay,  NULL, NULL);
+	ret = ImGuiHelpers::LoadTextureFromFile("../res/heavy-check-mark_2714.png", &recommended_good,  NULL, NULL);
+	ret = ImGuiHelpers::LoadTextureFromFile("../res/gem-stone_1f48e.png", &recommended_best,  NULL, NULL);
+	ret = ImGuiHelpers::LoadTextureFromFile("../res/white-question-mark-ornament_2754.png", &recommended_noopinion, NULL, NULL);
 	//wow, this is a bad emoji: ❎
 
 	std::unordered_map<CodecRecommendedLevel, GLuint> recommendationStr_toTexId = {
@@ -309,8 +229,8 @@ int main(int, char**)
 	};
 
 	GLuint return_symbol_texture, circle_arrows_texture;
-	ret = LoadTextureFromFile("../res/leftwards-arrow-with-hook_21a9.png", &return_symbol_texture, NULL, NULL);
-	ret = LoadTextureFromFile("../res/counterclockwise-arrows-button_1f504.png", &circle_arrows_texture, NULL, NULL);
+	ret = ImGuiHelpers::LoadTextureFromFile("../res/leftwards-arrow-with-hook_21a9.png", &return_symbol_texture, NULL, NULL);
+	ret = ImGuiHelpers::LoadTextureFromFile("../res/counterclockwise-arrows-button_1f504.png", &circle_arrows_texture, NULL, NULL);
 
 	ARVT::CreateDefaultIniIfNeeded("../arvt.ini");
 	mINI::INIFile ini_file("../arvt.ini");
@@ -560,7 +480,7 @@ int main(int, char**)
 						if (ImGui::Button("Create →", ImVec2(-FLT_MIN, 0.0f))) {
 							ARVT::call_comment_test_image(pdata.the_file_input_name, idata);
 							//TODO: check if success
-							ret = LoadTextureFromFile(pdata.evaluated_test_image_path, &my_image_texture, &my_image_width, &my_image_height);
+							ret = ImGuiHelpers::LoadTextureFromFile(pdata.evaluated_test_image_path, &my_image_texture, &my_image_width, &my_image_height);
 						}
 
 						ImGui::SeparatorText("Video Settings (optional)");
@@ -568,8 +488,8 @@ int main(int, char**)
 						ImGui::InputText("Video Replacement", vdata.video_replacement_numbers_input, IM_ARRAYSIZE(vdata.video_replacement_numbers_input), ImGuiInputTextFlags_CallbackCharFilter, video_replacement_scrubbingFunc);
 						//TODO: clear these when unlocking?
 						ImGui::SameLine();
-						HelpMarker("ex. \"1,2,3\" or \"4,6-8,15,20-30\"\n"
-						           "\"-3\" is start to 3; \"30-\" is 30 to end");
+						ImGuiHelpers::HelpMarker("ex. \"1,2,3\" or \"4,6-8,15,20-30\"\n"
+						                         "\"-3\" is start to 3; \"30-\" is 30 to end");
 						ImGui::PopItemWidth();
 						ImGui::Checkbox("Audio Only", &vdata.audio_only_option_input);
 
@@ -599,8 +519,8 @@ int main(int, char**)
 						//sizing: https://github.com/ocornut/imgui/issues/3714
 
 						float columnHeights[3];
-						columnHeights[0] = lock_icon_frame_height + ImGui::GetFrameHeightWithSpacing() + getMultilineInputHeight(ImGui::GetTextLineHeight() * 16);
-						columnHeights[1] = 7 * ImGui::GetFrameHeightWithSpacing() + 2 * getMultilineInputHeight(0);
+						columnHeights[0] = lock_icon_frame_height + ImGui::GetFrameHeightWithSpacing() + ImGuiHelpers::getMultilineInputHeight(ImGui::GetTextLineHeight() * 16);
+						columnHeights[1] = 7 * ImGui::GetFrameHeightWithSpacing() + 2 * ImGuiHelpers::getMultilineInputHeight(0);
 						columnHeights[2] = (5 + 6 + 4 + 4) * ImGui::GetFrameHeightWithSpacing() + no_voice_height;
 
 						const float largestColumn = *std::max_element(columnHeights, columnHeights + IM_ARRAYSIZE(columnHeights));
@@ -706,7 +626,7 @@ int main(int, char**)
 
 						ImGui::Text("Information:");
 						ImGui::SameLine();
-						HelpMarker(adata.get_audioEncoderInformationText().c_str());
+						ImGuiHelpers::HelpMarker(adata.get_audioEncoderInformationText().c_str());
 
 						if (adata.audioCodec_hasPreset) {
 							ImGui::Combo(adata.audioCodec_presetTerm.c_str(), &adata.audioPresetArray_current, adata.get_audioPresetArray(), adata.get_audioPresetArray_size(), adata.get_audioPresetArray_size());
@@ -749,7 +669,7 @@ int main(int, char**)
 
 						ImGui::Text("Information:");
 						ImGui::SameLine();
-						HelpMarker(vdata.get_videoEncoderInformationText().c_str());
+						ImGuiHelpers::HelpMarker(vdata.get_videoEncoderInformationText().c_str());
 						ImGui::SameLine();
 						ImGui::Text(vdata.get_videoEncoderSupportsAlpha() ? "  Alpha channel: Yes" : "  Alpha channel: No");
 
@@ -776,8 +696,8 @@ int main(int, char**)
 						if (!vdata.get_faststart_available()) { ImGui::BeginDisabled(); }
 						ImGui::Checkbox("-movflags=+faststart", &vdata.faststart_flag);
 						ImGui::SameLine();
-						HelpMarker("Moves the \"start\" information from the end to the front.\n"
-						           "Makes starting playing the video faster but unnecessary for this program's typical usage.");
+						ImGuiHelpers::HelpMarker("Moves the \"start\" information from the end to the front.\n"
+						                         "Makes starting playing the video faster but unnecessary for this program's typical usage.");
 						if (!vdata.get_faststart_available()) { ImGui::EndDisabled(); }
 						ImGui::Unindent();
 

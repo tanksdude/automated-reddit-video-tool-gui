@@ -1,5 +1,5 @@
 #include "audio_data.h"
-#include "helpers.h"
+#include "arvt_helpers.h"
 #include <cstring> //strcpy
 #include <cstdlib> //system()
 #include <fstream>
@@ -8,20 +8,20 @@
 #include <iostream>
 
 #ifdef _WIN32
-	const char* AudioData::voiceEngineArray[4] = { "Balabolka", "Espeak", "Espeak NG", "Windows Narrator (TODO)" };
-	const char* AudioData::voiceEngineArray_exeForUpdatingVoiceList[4] = { "\"balcon\" -l", "\"espeak\" --voices=en", "\"espeak-ng\" --voices=en", "" }; //note: internal use only
-	//TODO: look into whether nvaccess/nvda has compatible command line support
+const char* AudioData::voiceEngineArray[4] = { "Balabolka", "Espeak", "Espeak NG", "Windows Narrator (TODO)" };
+const char* AudioData::voiceEngineArray_exeForUpdatingVoiceList[4] = { "\"balcon\" -l", "\"espeak\" --voices=en", "\"espeak-ng\" --voices=en", "" }; //note: internal use only
+//TODO: look into whether nvaccess/nvda has compatible command line support
 #else
-	const char* AudioData::voiceEngineArray[5] = { "Espeak", "Espeak NG", "say (TODO)", "spd-say (TODO)", "Festival (TODO)" }; //TODO: https://askubuntu.com/questions/501910/how-to-text-to-speech-output-using-command-line/501917#501917
-	const char* AudioData::voiceEngineArray_exeForUpdatingVoiceList[5] = { "espeak --voices", "espeak-ng --voices", "", "", "" }; //note: internal use only
+const char* AudioData::voiceEngineArray[5] = { "Espeak", "Espeak NG", "say (TODO)", "spd-say (TODO)", "Festival (TODO)" }; //TODO: https://askubuntu.com/questions/501910/how-to-text-to-speech-output-using-command-line/501917#501917
+const char* AudioData::voiceEngineArray_exeForUpdatingVoiceList[5] = { "espeak --voices", "espeak-ng --voices", "", "", "" }; //note: internal use only
 #endif
 
 const char* AudioData::audioEncoderArray[7]          = { "copy (pcm)", "AAC", "Opus", "FLAC", "Vorbis", "MP3", "ALAC" };
 const char* AudioData::audioEncoderArrayExtended[13] = { "copy (pcm)", "AAC", "Opus", "FLAC", "Vorbis", "MP3", "ALAC", "AC-3", "E-AC-3", "Speex", "TTA True Audio", "Windows Media Audio (2)", "MPEG-2" };
-std::vector<const char*> AudioData::audioPresetArray_AAC =  { "default", "anmr (not recommended) (NOT SUPPORTED)", "twoloop (default)", "fast" };
+std::vector<const char*> AudioData::audioPresetArray_AAC  = { "default", "anmr (not recommended) (NOT SUPPORTED)", "twoloop (default)", "fast" };
 std::vector<const char*> AudioData::audioPresetArray_Opus = { "default", "0 (fast)", "1", "2", "3", "4", "5",           "6", "7", "8", "9", "10 (default)" };
 std::vector<const char*> AudioData::audioPresetArray_FLAC = { "default", "0 (fast)", "1", "2", "3", "4", "5 (default)", "6", "7", "8", "9", "10", "11", "12" };
-std::vector<const char*> AudioData::audioPresetArray_MP3 =  { "default", "0 (slow)", "1", "2", "3", "4", "5 (default)", "6", "7", "8", "9" }; //default is 5 according to its API
+std::vector<const char*> AudioData::audioPresetArray_MP3  = { "default", "0 (slow)", "1", "2", "3", "4", "5 (default)", "6", "7", "8", "9" }; //default is 5 according to its API
 std::vector<const char*> AudioData::audioPresetArray_empty = {};
 
 const std::unordered_map<std::string, CodecPresetInformation> AudioData::codecToPresetArray = {

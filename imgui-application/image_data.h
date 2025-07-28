@@ -1,6 +1,5 @@
 #pragma once
 #include <string>
-#include <cstring> //strcpy
 
 struct ImageData {
 	char image_width_input[32];
@@ -17,7 +16,7 @@ struct ImageData {
 	uint8_t paragraph_newline_max = 4;
 	bool paragraph_tabbed_start_input = false;
 
-	const char* imageFormatArray[6] = { ".png", ".jpg", ".avif", ".webp", ".tiff", ".bmp" };
+	static const char* imageFormatArray[6];
 	int imageFormatArray_current = 0;
 
 	inline std::string get_image_width_input() const { return std::string(image_width_input); }
@@ -30,14 +29,5 @@ struct ImageData {
 	inline std::string get_background_color_input() const { return std::string(background_color_input); }
 	inline std::string get_imageFormat() const { return std::string(imageFormatArray[imageFormatArray_current]); }
 
-	ImageData() {
-		strcpy(image_width_input, "960");
-		strcpy(image_height_input, "640");
-		strcpy(image_w_border_input, "32");
-		strcpy(image_h_border_input, "32");
-
-		strcpy(font_size_input, "16");
-		strcpy(font_color_input, "white");
-		strcpy(background_color_input, "black");
-	}
+	ImageData();
 };

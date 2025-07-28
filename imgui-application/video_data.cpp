@@ -2,15 +2,15 @@
 
 const char* VideoData::videoEncoderArray[7]          = { "H.264", "H.265 / HEVC", "VP8", "VP9", "AV1", "FFV1", "Ut Video" };
 const char* VideoData::videoEncoderArrayExtended[13] = { "H.264", "H.265 / HEVC", "VP8", "VP9", "AV1", "FFV1", "Ut Video", "Apple ProRes", "QuickTime Animation", "CineForm", "Lossless_H.264", "VVC / H.266", "EVC / MPEG-5 Part 1" };
-std::vector<const char*> VideoData::videoPresetArray_H264_preset = { "default", "ultrafast", "superfast", "veryfast", "faster", "fast", "medium (default)" , "slow", "slower", "veryslow", "placebo (not recommended)" };
+std::vector<const char*> VideoData::videoPresetArray_H264_preset = { "default", "ultrafast", "superfast", "veryfast", "faster", "fast", "medium (default)", "slow", "slower", "veryslow", "placebo (not recommended)" };
 std::vector<const char*> VideoData::videoPresetArray_VP9_deadline = { "default", "best", "good (default)", "realtime" };
 std::vector<const char*> VideoData::videoPresetArray_AV1_usage    = { "default", "good (default)", "realtime", "allintra" };
 std::vector<const char*> VideoData::videoPresetArray_VP9_cpu_used = { "default", "0", "1 (default)", "2", "3", "4", "5", "6", "7", "8" }; //TODO: the range changes based on the deadline
 std::vector<const char*> VideoData::videoPresetArray_UtVideo_prediction = { "default", "none", "left (default)", "gradient (NOT SUPPORTED)", "median" }; //https://ffmpeg.org/doxygen/3.0/libutvideoenc_8cpp.html
 std::vector<const char*> VideoData::videoPresetArray_empty = {};
 std::vector<const char*> VideoData::videoPresetArray_CineForm_quality = { "default", "film3+ (default)", "film3", "film2+", "film2", "film1.5", "film1+", "film1", "high+", "high", "medium+", "medium", "low+", "low" };
-std::vector<const char*> VideoData::videoPresetArray_VVC_preset = { "default", "faster", "fast", "medium (default)" , "slow", "slower" };
-std::vector<const char*> VideoData::videoPresetArray_EVC_preset = { "default",           "fast", "medium (default)" , "slow", "placebo" };
+std::vector<const char*> VideoData::videoPresetArray_VVC_preset = { "default", "faster", "fast", "medium (default)", "slow", "slower" };
+std::vector<const char*> VideoData::videoPresetArray_EVC_preset = { "default",           "fast", "medium (default)", "slow", "placebo" };
 const char* VideoData::videoContainerArray[6] = { ".mp4", ".mkv", ".mov", ".webm", ".ogg", ".avi" }; //TODO: .ogg has really poor support for codecs, so find a way to communicate that or disable/warn on certain codecs; could remove codecs based on the container or vice versa
 const char* VideoData::fpsArray[9] = { "10", "20", "25", "30", "50", "60", "75", "90", "120" };
 

@@ -102,10 +102,10 @@ GNU General Public License v3.0
 
 ### Externals' licenses
 
-* ImGui: MIT
-* GLFW: zlib
-* stb_image: MIT or The Unlicense
-* mINI: MIT
+* [ImGui](https://github.com/ocornut/imgui): MIT
+* [GLFW](https://www.glfw.org/): zlib
+* [stb_image](https://github.com/nothings/stb): MIT or The Unlicense
+* [mINI](https://github.com/metayeti/mINI): MIT
 
 ## Acknowledgments
 

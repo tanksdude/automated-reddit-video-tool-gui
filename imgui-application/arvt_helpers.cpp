@@ -1,4 +1,4 @@
-#include "helpers.h"
+#include "arvt_helpers.h"
 #include <cstdlib> //system()
 #include <cstring> //strncpy
 #include <fstream>
@@ -191,16 +191,16 @@ int call_comment_splitter(const char* name) {
 int call_comment_test_image(const char* name, const ImageData& idata) {
 	const std::string text_path = inputFileName_toCommentTestImagePath_Text(name);
 	const std::string image_path = inputFileName_toCommentTestImagePath_TestImage(name, idata.get_imageFormat().c_str());
-	const std::string command = PYTHON_CMD + " ../comment_test_image.py \"" + std::string(text_path) + "\" \"" + std::string(image_path) + "\" " +
-		idata.get_image_width_input() + " " +
-		idata.get_image_height_input() + " " +
-		idata.get_image_w_border_input() + " " +
-		idata.get_image_h_border_input() + " " +
-		idata.get_font_size_input() + " " +
-		"\"" + idata.get_font_color_input() + "\" " +
-		"\"" + idata.get_background_color_input() + "\" " +
-		std::to_string(idata.paragraph_newline_v) + " " +
-		std::to_string(idata.paragraph_tabbed_start_input) + " ";
+	const std::string command = PYTHON_CMD + " ../comment_test_image.py \"" + std::string(text_path) + "\" \"" + std::string(image_path) + "\"" +
+		" "   + idata.get_image_width_input() +
+		" "   + idata.get_image_height_input() +
+		" "   + idata.get_image_w_border_input() +
+		" "   + idata.get_image_h_border_input() +
+		" "   + idata.get_font_size_input() +
+		" \"" + idata.get_font_color_input() + "\"" +
+		" \"" + idata.get_background_color_input() + "\"" +
+		" "   + std::to_string(idata.paragraph_newline_v) +
+		" "   + std::to_string(idata.paragraph_tabbed_start_input);
 
 	#ifdef _WIN32
 	if (command.size() > 4000) {
@@ -215,34 +215,34 @@ int call_comment_to_speech(const char* name, const ImageData& idata, const Audio
 	const std::string text_path = inputFileName_toCommentTestImagePath_Text(name);
 	const std::string speech_path = inputFileName_toCommentTestImagePath_Speech(name);
 	const std::string video_path = inputFileName_toCommentToSpeechPath(name, vdata.get_videoContainer().c_str(), vdata.audio_only_option_input);
-	const std::string command = PYTHON_CMD + " ../comment_to_speech.py \"" + std::string(text_path) + "\" \"" + std::string(video_path) + "\" " +
-		(vdata.use_speech_text ? "-s \"" + std::string(speech_path) + "\" " : "") +
-		idata.get_image_width_input() + " " +
-		idata.get_image_height_input() + " " +
-		idata.get_image_w_border_input() + " " +
-		idata.get_image_h_border_input() + " " +
-		idata.get_font_size_input() + " " +
-		"\"" + idata.get_font_color_input() + "\" " +
-		"\"" + idata.get_background_color_input() + "\" " +
-		std::to_string(idata.paragraph_newline_v) + " " +
-		std::to_string(idata.paragraph_tabbed_start_input) + " " +
-		idata.get_imageFormat() + " " +
+	const std::string command = PYTHON_CMD + " ../comment_to_speech.py \"" + std::string(text_path) + "\" \"" + std::string(video_path) + "\"" +
+		(vdata.use_speech_text ? (" -s \"" + std::string(speech_path) + "\"") : "") +
+		" "   + idata.get_image_width_input() +
+		" "   + idata.get_image_height_input() +
+		" "   + idata.get_image_w_border_input() +
+		" "   + idata.get_image_h_border_input() +
+		" "   + idata.get_font_size_input() +
+		" \"" + idata.get_font_color_input() + "\"" +
+		" \"" + idata.get_background_color_input() + "\"" +
+		" "   + std::to_string(idata.paragraph_newline_v) +
+		" "   + std::to_string(idata.paragraph_tabbed_start_input) +
+		" "   + idata.get_imageFormat() +
 
-		"-n \"" + vdata.get_video_replacement_numbers_input() + "\" " + //needs the -n flag, otherwise Python's argparse will treat something like "-3" as an argument and get confused (pretty sure it's allowed because "-3" is a negative number)
-		(vdata.audio_only_option_input ? "-a " : "") +
+		" -n \"" + vdata.get_video_replacement_numbers_input() + "\"" + //needs the -n flag, otherwise Python's argparse will treat something like "-3" as an argument and get confused (pretty sure it's allowed because "-3" is a negative number)
+		(vdata.audio_only_option_input ? " -a" : "") +
 
-		"\"" + adata.get_voiceEngine() + "\" " +
-		"\"" + adata.get_voice() + "\" " +
-		"\"" + adata.get_audioEncoder() + "\" " +
-		adata.get_audioBitrate() + " " +
-		"\"" + adata.get_audioPreset() + "\" " +
-		"\"" + vdata.get_videoEncoder() + "\" " +
-		"\"" + vdata.get_videoPreset1() + "\" " +
-		"\"" + vdata.get_videoPreset2() + "\" " +
-		std::to_string(vdata.faststart_flag && vdata.get_faststart_available()) + " " +
+		" \"" + adata.get_voiceEngine() + "\"" +
+		" \"" + adata.get_voice() + "\"" +
+		" \"" + adata.get_audioEncoder() + "\"" +
+		" "   + adata.get_audioBitrate() +
+		" \"" + adata.get_audioPreset() + "\"" +
+		" \"" + vdata.get_videoEncoder() + "\"" +
+		" \"" + vdata.get_videoPreset1() + "\"" +
+		" \"" + vdata.get_videoPreset2() + "\"" +
+		" "   + std::to_string(vdata.faststart_flag && vdata.get_faststart_available()) +
 
-		vdata.get_fps() + " " +
-		vdata.get_videoCrf() + " ";
+		" "   + vdata.get_fps() +
+		" "   + vdata.get_videoCrf();
 
 	#ifdef _WIN32
 	if (command.size() > 4000) {
