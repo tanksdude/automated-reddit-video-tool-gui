@@ -20,6 +20,7 @@ struct ProgramData {
 
 	bool input_comment_word_wrap = true; //TODO
 	bool useExtraCodecs = false; //used for VideoData/AudioData
+	int default_tab_idx = 0; //only used on program startup; *not* clamped to valid range
 
 	static const char* imageDeleteAgeList[6];
 	static const int imageDeleteAgeList_values[6];

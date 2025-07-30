@@ -191,7 +191,6 @@ int main(int, char**)
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 	bool set_default_tab = true;
-	int default_tab_idx = 0;
 
 	int my_image_width = 0;
 	int my_image_height = 0;
@@ -303,7 +302,9 @@ int main(int, char**)
 			if (ImGui::BeginTabBar("MainTabBar", 0)) {
 				ImGuiTabItemFlags tab_flags[6] = { 0, 0, 0, 0, 0, 0 };
 				if (set_default_tab) [[unlikely]] {
-					tab_flags[default_tab_idx] |= ImGuiTabItemFlags_SetSelected;
+					//instead of clamping, set to zero on a bad value, because that's more obvious (maybe Help or About would be better?):
+					const int idx = (pdata.default_tab_idx > 6 || pdata.default_tab_idx < 0) ? 0 : pdata.default_tab_idx;
+					tab_flags[idx] |= ImGuiTabItemFlags_SetSelected;
 					set_default_tab = false;
 				}
 

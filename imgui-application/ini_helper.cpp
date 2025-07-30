@@ -383,6 +383,19 @@ void Fill_ProgramData(ProgramData& pdata, const mINI::INIStructure& ini_object) 
 			std::cerr << ("Unknown value for [APPLICATION].UseExtraCodecs: \"" + get + "\"") << std::endl;
 		}
 	}
+
+	if (ini_object.get("APPLICATION").has("InitialOpenTab")) {
+		std::string get = ini_object.get("APPLICATION").get("InitialOpenTab");
+		if (!get.empty()) {
+			try {
+				int val = std::stoi(get);
+				pdata.default_tab_idx = val;
+			}
+			catch (const std::exception&) {
+				std::cerr << ("Unable to parse [APPLICATION].InitialOpenTab: \"" + get + "\"") << std::endl;
+			}
+		}
+	}
 }
 
 } // namespace ARVT
