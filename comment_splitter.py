@@ -78,4 +78,4 @@ for line in file_sentences:
 output_file.close()
 
 end_time = time.time()
-print("Wrote " + output_file_path + " in " + str(end_time - start_time) + "s")
+print(f"Wrote {output_file_path} in {(end_time - start_time):.3f}s")

@@ -95,4 +95,4 @@ result = text_to_image_func(output_img_file_path, output_img_file_path+".temp")
 os.remove(output_img_file_path+".temp")
 
 end_time = time.time()
-print("Test image made in " + str(end_time - start_time) + "s")
+print(f"Test image made in {(end_time - start_time):.3f}s")

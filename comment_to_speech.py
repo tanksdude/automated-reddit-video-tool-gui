@@ -365,7 +365,7 @@ for i in range(len(image_text_file_lines)):
 
 end_time = time.time()
 if replaced_files_count == files_count:
-	print("Made " + str(files_count) + " videos in " + str(end_time - start_time) + "s")
+	print(f"Made {files_count} videos in {(end_time - start_time):.3f}s")
 else:
-	print("Replaced " + str(replaced_files_count) + " videos in " + str(end_time - start_time) + "s")
+	print(f"Replaced {replaced_files_count} videos in {(end_time - start_time):.3f}s")
 	#TODO: state which videos were replaced?
