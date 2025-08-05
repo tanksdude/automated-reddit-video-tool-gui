@@ -188,8 +188,6 @@ int main(int, char**)
 
     // Our state
     bool show_demo_window = false;
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
 	bool set_default_tab = true;
 
 	int my_image_width = 0;
@@ -267,37 +265,15 @@ int main(int, char**)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
-
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
-        {
-            static float f = 0.0f;
-            static int counter = 0;
-
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-            ImGui::End();
-        }
-
 
 		// main window
 		{
+			int window_width, window_height;
+			glfwGetWindowSize(window, &window_width, &window_height);
 			ImGui::PushFont(currentFont);
-			ImGui::Begin("Main Window", nullptr);
+			ImGui::Begin("Main Window", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings);
+			ImGui::SetWindowPos(ImVec2(-1, -1)); //shift position to avoid the 1px border on every window
+			ImGui::SetWindowSize("Main Window", ImVec2(window_width+2, window_height+2));
 
 			if (ImGui::BeginTabBar("MainTabBar", 0)) {
 				ImGuiTabItemFlags tab_flags[6] = { 0, 0, 0, 0, 0, 0 };
@@ -728,6 +704,8 @@ int main(int, char**)
 							}
 						}
 
+						ImGui::ColorEdit3("Background Color", (float*)&pdata.background_color);
+
 						ImGui::SeparatorText("Paths");
 						ImGui::Text("TODO: three main dirs and a temp dir");
 						//other TODO: display what the commands will be (though maybe this should be in the main section?)
@@ -757,6 +735,10 @@ int main(int, char**)
 						ImGui::EndDisabled();
 
 						ImGui::Text("TODO: reset all to default button");
+
+						#if 1
+						ImGui::Checkbox("Demo Window", &show_demo_window);
+						#endif
 
 						ImGui::EndTable();
 					}
@@ -908,6 +890,8 @@ int main(int, char**)
 							}
 						}
 
+						ImGui::ColorEdit3("Background Color", (float*)&pdata.background_color);
+
 						ImGui::SeparatorText("Paths");
 						ImGui::Text("TODO: three main dirs and a temp dir");
 						//other TODO: display what the commands will be (though maybe this should be in the main section?)
@@ -939,13 +923,15 @@ int main(int, char**)
 			ImGui::PopFont();
 		}
 
+		if (show_demo_window)
+			ImGui::ShowDemoWindow(&show_demo_window);
 
         // Rendering
         ImGui::Render();
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
-        glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+        glClearColor(pdata.background_color.x * pdata.background_color.w, pdata.background_color.y * pdata.background_color.w, pdata.background_color.z * pdata.background_color.w, pdata.background_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

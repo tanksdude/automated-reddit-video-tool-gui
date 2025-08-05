@@ -11,13 +11,16 @@ void CreateDefaultIniIfNeeded(const std::string& path) {
 		return;
 	}
 
-	static std::string ini_string =
+	static const std::string ini_string =
 
 	"[APPLICATION]\n"
 	"\n"
 	"ApplicationFont =\n"
 	"ApplicationFontSize =\n"
+	"; Accepts hex codes and RGB floats:\n"
+	"ApplicationBackgroundColor = (0.45, 0.55, 0.60)\n"
 	"\n"
+	"InitialOpenTab = 0\n"
 	"UseExtraCodecs = false\n"
 	"\n"
 
@@ -393,6 +396,58 @@ void Fill_ProgramData(ProgramData& pdata, const mINI::INIStructure& ini_object) 
 			}
 			catch (const std::exception&) {
 				std::cerr << ("Unable to parse [APPLICATION].InitialOpenTab: \"" + get + "\"") << std::endl;
+			}
+		}
+	}
+
+	// This is actually the most complicated case, even beating video FPS. If
+	// the first character is '#', it's a hex code, and fail on anything not 6
+	// digits. If the first character is '(', it's a vec3. Other cases not
+	// supported... though there aren't very many.
+	//TODO: this is in a "good enough" state, but should finish it eventually
+	if (ini_object.get("APPLICATION").has("ApplicationBackgroundColor")) {
+		std::string get = ini_object.get("APPLICATION").get("ApplicationBackgroundColor");
+		if (!get.empty()) {
+			if (get[0] == '#') {
+				if (get.size() == 7) {
+					try {
+						int r = std::stoi(get.substr(1, 2), nullptr, 16);
+						int g = std::stoi(get.substr(3, 2), nullptr, 16);
+						int b = std::stoi(get.substr(5, 2), nullptr, 16);
+						if (r < 0 || g < 0 || b < 0) {
+							std::cerr << ("Unable to parse [APPLICATION].ApplicationBackgroundColor: \"" + get + "\"") << std::endl;
+						} else {
+							pdata.background_color = ImVec4(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
+						}
+					}
+					catch (const std::exception&) {
+						std::cerr << ("Unable to parse [APPLICATION].ApplicationBackgroundColor: \"" + get + "\"") << std::endl;
+					}
+				} else {
+					std::cerr << ("Unable to parse [APPLICATION].ApplicationBackgroundColor: \"" + get + "\"") << std::endl;
+				}
+			} else if (get[0] == '(') {
+				if ((get[get.size()-1] == ')') && (std::count(get.begin(), get.end(), ',') == 2)) {
+					size_t pos1 = get.find(',');
+					size_t pos2 = get.find(',', pos1 + 1);
+					try {
+						float r = std::stof(get.substr(1,        pos1             - 1));
+						float g = std::stof(get.substr(pos1 + 1, pos2             - (pos1 + 1)));
+						float b = std::stof(get.substr(pos2 + 1, (get.size() - 1) - (pos2 + 1)));
+						if ((r < 0 || g < 0 || b < 0) || (r > 1 || g > 1 || b > 1)) {
+							std::cerr << ("Unable to parse [APPLICATION].ApplicationBackgroundColor: \"" + get + "\"") << std::endl;
+						} else {
+							pdata.background_color = ImVec4(r, g, b, 1.0f);
+						}
+					}
+					catch (const std::exception&) {
+						std::cerr << ("Unable to parse [APPLICATION].ApplicationBackgroundColor: \"" + get + "\"") << std::endl;
+					}
+				} else {
+					std::cerr << ("Unable to parse [APPLICATION].ApplicationBackgroundColor: \"" + get + "\"") << std::endl;
+				}
+			} else {
+				std::cerr << ("Unable to parse [APPLICATION].ApplicationBackgroundColor: \"" + get + "\"") << std::endl;
 			}
 		}
 	}

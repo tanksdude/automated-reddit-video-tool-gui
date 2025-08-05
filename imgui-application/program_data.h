@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "imgui/imgui.h"
 
 struct ProgramData {
 	char the_file_input_name[1024];
@@ -21,6 +22,8 @@ struct ProgramData {
 	bool input_comment_word_wrap = true; //TODO
 	bool useExtraCodecs = false; //used for VideoData/AudioData
 	int default_tab_idx = 0; //only used on program startup; *not* clamped to valid range
+
+	ImVec4 background_color;
 
 	static const char* imageDeleteAgeList[6];
 	static const int imageDeleteAgeList_values[6];
