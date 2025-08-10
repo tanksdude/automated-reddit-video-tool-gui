@@ -23,30 +23,26 @@ AudioData adata;
 VideoData vdata;
 ProgramData pdata;
 
-ImFont* currentFont = nullptr;
 bool needToChangeFonts = false;
 
-void refreshApplicationFont() {
-	const float size = std::stof(pdata.application_font_size); //TODO: const std::invalid_argument&, const std::out_of_range&
-	const ImWchar ranges[] = {
-		0x0020, 0x00FF, // Basic Latin + Latin Supplement
-		0x2190, 0x23FF, //arrows & math
-		0xFFFD, 0xFFFD, // Invalid
-		0,
-		//https://en.wikipedia.org/wiki/Unicode_block
-	};
-	static_assert(sizeof(ranges) / sizeof(ranges[0]) % 2 == 1);
+void refreshApplicationFontName() {
 	ImGuiIO& io = ImGui::GetIO();
-	ImFont* newFont = io.Fonts->AddFontFromFileTTF(pdata.application_font_path, size, nullptr, ranges); //TODO: check if file exists, also somehow handle the assert when it can't be loaded
+	ImFont* newFont = io.Fonts->AddFontFromFileTTF(pdata.application_font_path);
 	if (newFont == nullptr) {
-		//TODO
+		//TODO: error handle
 		return;
 	}
-	io.Fonts->Build();
-	ImGui_ImplOpenGL3_DestroyFontsTexture();
-	ImGui_ImplOpenGL3_CreateFontsTexture();
-	currentFont = newFont;
-	pdata.evaluated_font_size = size;
+	io.FontDefault = newFont;
+
+	//ideally this would be used but it doesn't change the font for some reason:
+	//ImGui::PushFont(newFont, newSize);
+}
+
+void refreshApplicationFontSize() {
+	//TODO: change this when ImGui fixes it
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.FontSizeBase = pdata.application_font_size;
+	style._NextFrameFontSizeBase = style.FontSizeBase; // FIXME: Temporary hack until we finish remaining work.
 }
 
 auto integerOnlyPositiveFunc = [] (ImGuiInputTextCallbackData* data) {
@@ -147,6 +143,7 @@ int main(int, char**)
 #endif
 
     // Create window with graphics context
+    float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()); // Valid on GLFW 3.3+ only
     GLFWwindow* window = glfwCreateWindow(1600, 900, "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
     if (window == nullptr)
         return 1;
@@ -164,6 +161,11 @@ int main(int, char**)
     ImGui::StyleColorsDark();
     //ImGui::StyleColorsLight();
 
+    // Setup scaling
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.ScaleAllSizes(main_scale);        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
+    style.FontScaleDpi = main_scale;        // Set initial font scale. (using io.ConfigDpiScaleFonts=true makes this unnecessary. We leave both here for documentation purpose)
+
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
@@ -172,19 +174,19 @@ int main(int, char**)
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
     // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
     // - If the file cannot be loaded, the function will return a nullptr. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
-    // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
     // - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use Freetype for higher quality font rendering.
     // - Read 'docs/FONTS.md' for more instructions and details.
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
     // - Our Emscripten build process allows embedding fonts to be accessible at runtime from the "fonts/" folder. See Makefile.emscripten for details.
-    //io.Fonts->AddFontDefault(); //TODO: might need to load this if the user tries to load an invalid font (though then the previous valid font should be used...)
-    //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
-    //IM_ASSERT(font != nullptr);
-	refreshApplicationFont();
+    //style.FontSizeBase = 20.0f;
+    //io.Fonts->AddFontDefault();
+    //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf");
+    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf");
+    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf");
+    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf");
+    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf");
+	refreshApplicationFontSize();
+	refreshApplicationFontName();
 
     // Our state
     bool show_demo_window = false;
@@ -244,7 +246,7 @@ int main(int, char**)
     {
 		// Font handling
 		if (needToChangeFonts) [[unlikely]] {
-			refreshApplicationFont();
+			refreshApplicationFontName();
 			needToChangeFonts = false;
 		}
 
@@ -261,7 +263,7 @@ int main(int, char**)
         }
 
         // Start the Dear ImGui frame
-        ImGui_ImplOpenGL3_NewFrame(); //indirectly calls io.Fonts->Build()
+        ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
@@ -270,7 +272,6 @@ int main(int, char**)
 		{
 			int window_width, window_height;
 			glfwGetWindowSize(window, &window_width, &window_height);
-			ImGui::PushFont(currentFont);
 			ImGui::Begin("Main Window", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings);
 			ImGui::SetWindowPos(ImVec2(-1, -1)); //shift position to avoid the 1px border on every window
 			ImGui::SetWindowSize("Main Window", ImVec2(window_width+2, window_height+2));
@@ -308,7 +309,7 @@ int main(int, char**)
 							ImGui::EndDisabled();
 						}
 
-						if (ImGui::ImageButton("##Lock Icon", filenameIsLocked ? lock_icon_texture : unlock_icon_texture, ImVec2(pdata.evaluated_font_size, pdata.evaluated_font_size))) {
+						if (ImGui::ImageButton("##Lock Icon", filenameIsLocked ? lock_icon_texture : unlock_icon_texture, ImVec2(pdata.application_font_size, pdata.application_font_size))) {
 							clear_input_data(filenameIsLocked);
 							filenameIsLocked = !filenameIsLocked;
 						}
@@ -599,7 +600,7 @@ int main(int, char**)
 
 						ImGui::Text("Recommendation:");
 						ImGui::SameLine();
-						ImGui::Image(recommendationStr_toTexId[adata.get_audioEncoderRecommendation()], ImVec2(pdata.evaluated_font_size, pdata.evaluated_font_size));
+						ImGui::Image(recommendationStr_toTexId[adata.get_audioEncoderRecommendation()], ImVec2(pdata.application_font_size, pdata.application_font_size));
 
 						ImGui::Text("Information:");
 						ImGui::SameLine();
@@ -642,7 +643,7 @@ int main(int, char**)
 
 						ImGui::Text("Recommendation:");
 						ImGui::SameLine();
-						ImGui::Image(recommendationStr_toTexId[vdata.get_videoEncoderRecommendation()], ImVec2(pdata.evaluated_font_size, pdata.evaluated_font_size));
+						ImGui::Image(recommendationStr_toTexId[vdata.get_videoEncoderRecommendation()], ImVec2(pdata.application_font_size, pdata.application_font_size));
 
 						ImGui::Text("Information:");
 						ImGui::SameLine();
@@ -682,12 +683,17 @@ int main(int, char**)
 
 						ImGui::SeparatorText("Application");
 
-						//TODO: fonts have "Scale"
+						//TODO: change this to a loader, then use the example font selector?
 						ImGui::InputText("Font Path", pdata.application_font_path, IM_ARRAYSIZE(pdata.application_font_path), ImGuiInputTextFlags_CallbackCharFilter, filepathCleaningFunc);
-						ImGui::InputText("Font Size", pdata.application_font_size, IM_ARRAYSIZE(pdata.application_font_size), ImGuiInputTextFlags_CharsDecimal);
-						if (ImGui::Button("Refresh##Font")) {
+						ImGui::SameLine();
+						if (ImGui::Button("Refresh##Font Path")) {
 							needToChangeFonts = true;
 						}
+						if (ImGui::DragFloat("Font Size", &pdata.application_font_size, 0.20f, 8.0f, 60.0f, "%.0f")) {
+							refreshApplicationFontSize();
+						}
+
+						ImGui::ColorEdit3("Background Color", (float*)&pdata.background_color);
 
 						if (ImGui::Checkbox("Extra Codecs", &pdata.useExtraCodecs)) {
 							if (!pdata.useExtraCodecs) {
@@ -703,8 +709,6 @@ int main(int, char**)
 								}
 							}
 						}
-
-						ImGui::ColorEdit3("Background Color", (float*)&pdata.background_color);
 
 						ImGui::SeparatorText("Paths");
 						ImGui::Text("TODO: three main dirs and a temp dir");
@@ -757,12 +761,12 @@ int main(int, char**)
 					ImGui::BeginDisabled();
 
 					ImGui::Text("Write Changes:"); ImGui::SameLine();
-					if (ImGui::ImageButton("##Write Changes", return_symbol_texture, ImVec2(pdata.evaluated_font_size, pdata.evaluated_font_size))) {
+					if (ImGui::ImageButton("##Write Changes", return_symbol_texture, ImVec2(pdata.application_font_size, pdata.application_font_size))) {
 						//TODO
 						//ini_file.write(ini_object, true);
 					}
 					ImGui::Text("Load Defaults:"); ImGui::SameLine();
-					if (ImGui::ImageButton("##Load Defaults", circle_arrows_texture, ImVec2(pdata.evaluated_font_size, pdata.evaluated_font_size))) {
+					if (ImGui::ImageButton("##Load Defaults", circle_arrows_texture, ImVec2(pdata.application_font_size, pdata.application_font_size))) {
 						//TODO
 					}
 
@@ -871,9 +875,10 @@ int main(int, char**)
 
 						ImGui::SeparatorText("Application");
 
-						//TODO: fonts have "Scale"
 						ImGui::InputText("Font Path", pdata.application_font_path, IM_ARRAYSIZE(pdata.application_font_path), ImGuiInputTextFlags_CallbackCharFilter, filepathCleaningFunc);
-						ImGui::InputText("Font Size", pdata.application_font_size, IM_ARRAYSIZE(pdata.application_font_size), ImGuiInputTextFlags_CharsDecimal);
+						ImGui::DragFloat("Font Size", &pdata.application_font_size, 0.20f, 8.0f, 60.0f, "%.0f");
+
+						ImGui::ColorEdit3("Background Color", (float*)&pdata.background_color);
 
 						if (ImGui::Checkbox("Extra Codecs", &pdata.useExtraCodecs)) {
 							if (!pdata.useExtraCodecs) {
@@ -889,8 +894,6 @@ int main(int, char**)
 								}
 							}
 						}
-
-						ImGui::ColorEdit3("Background Color", (float*)&pdata.background_color);
 
 						ImGui::SeparatorText("Paths");
 						ImGui::Text("TODO: three main dirs and a temp dir");
@@ -920,7 +923,6 @@ int main(int, char**)
 			}
 
 			ImGui::End();
-			ImGui::PopFont();
 		}
 
 		if (show_demo_window)

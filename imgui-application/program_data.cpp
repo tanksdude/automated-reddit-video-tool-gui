@@ -19,11 +19,9 @@ ProgramData::ProgramData() {
 
 	#ifdef _WIN32
 	strcpy(application_font_path, "C:\\Windows\\Fonts\\segoeui.ttf");
-	strcpy(application_font_size, "24.0");
-	evaluated_font_size = 24.0f;
+	application_font_size = 20.0f;
 	#else
 	strcpy(application_font_path, "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf");
-	strcpy(application_font_size, "20.0");
-	evaluated_font_size = 20.0f;
+	application_font_size = 16.0f;
 	#endif
 }

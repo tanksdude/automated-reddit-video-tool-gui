@@ -367,8 +367,7 @@ void Fill_ProgramData(ProgramData& pdata, const mINI::INIStructure& ini_object) 
 		if (!get.empty()) {
 			try {
 				float val = std::stof(get);
-				strncpy_s(pdata.application_font_size, sizeof(pdata.application_font_size)/sizeof(*pdata.application_font_size), get.c_str(), get.size());
-				pdata.evaluated_font_size = val;
+				pdata.application_font_size = val;
 			}
 			catch (const std::exception&) {
 				std::cerr << ("Unable to parse [APPLICATION].ApplicationFontSize: \"" + get + "\"") << std::endl;
