@@ -270,10 +270,12 @@ int main(int, char**)
 
 		// main window
 		{
+			const auto old_style_WindowBorderSize = style.WindowBorderSize; //push
+			style.WindowBorderSize = 0.0f;
 			int window_width, window_height;
 			glfwGetWindowSize(window, &window_width, &window_height);
 			ImGui::Begin("Main Window", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings);
-			ImGui::SetWindowPos(ImVec2(-1, -1)); //shift position to avoid the 1px border on every window
+			ImGui::SetWindowPos(ImVec2(0, 0));
 			ImGui::SetWindowSize("Main Window", ImVec2(window_width+2, window_height+2));
 
 			if (ImGui::BeginTabBar("MainTabBar", 0)) {
@@ -923,6 +925,7 @@ int main(int, char**)
 			}
 
 			ImGui::End();
+			style.WindowBorderSize = old_style_WindowBorderSize; //pop
 		}
 
 		if (show_demo_window)
