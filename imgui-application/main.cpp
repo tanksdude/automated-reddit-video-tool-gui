@@ -185,8 +185,6 @@ int main(int, char**)
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf");
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf");
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf");
-	refreshApplicationFontSize();
-	refreshApplicationFontName();
 
     // Our state
     bool show_demo_window = false;
@@ -240,6 +238,9 @@ int main(int, char**)
 	ARVT::Fill_ImageData(idata, ini_object);
 	ARVT::Fill_AudioData(adata, ini_object, pdata.useExtraCodecs);
 	ARVT::Fill_VideoData(vdata, ini_object, pdata.useExtraCodecs);
+
+	refreshApplicationFontSize();
+	refreshApplicationFontName();
 
     // Main loop
     while (!glfwWindowShouldClose(window))
