@@ -192,9 +192,9 @@ int main(int, char**)
     bool show_demo_window = false;
 	bool set_default_tab = true;
 
-	int my_image_width = 0;
-	int my_image_height = 0;
-	GLuint my_image_texture = 0;
+	int createdTestImage_width = 0;
+	int createdTestImage_height = 0;
+	GLuint createdTestImage_texture = 0;
 	bool ret;
 
 	int lock_icon_width = 0;
@@ -460,7 +460,7 @@ int main(int, char**)
 						if (ImGui::Button("Create →", ImVec2(-FLT_MIN, 0.0f))) {
 							ARVT::call_comment_test_image(pdata.the_file_input_name, idata);
 							//TODO: check if success
-							ret = ImGuiHelpers::LoadTextureFromFile(pdata.evaluated_test_image_path, &my_image_texture, &my_image_width, &my_image_height);
+							ret = ImGuiHelpers::LoadTextureFromFile(pdata.evaluated_test_image_path, &createdTestImage_texture, &createdTestImage_width, &createdTestImage_height);
 						}
 
 						ImGui::SeparatorText("Video Settings (optional)");
@@ -508,10 +508,10 @@ int main(int, char**)
 						const float availableHeight = std::max(0.0f, std::min(largestColumn, contentAvailableY));
 						const float availableWidth = std::max(0.0f, ImGui::GetContentRegionAvail().x);
 
-						if ((availableWidth / my_image_width) * my_image_height > availableHeight) {
-							ImGui::Image((ImTextureID)(intptr_t)my_image_texture, ImVec2((availableHeight / my_image_height) * my_image_width, availableHeight));
+						if ((availableWidth / createdTestImage_width) * createdTestImage_height > availableHeight) {
+							ImGui::Image((ImTextureID)(intptr_t)createdTestImage_texture, ImVec2((availableHeight / createdTestImage_height) * createdTestImage_width, availableHeight));
 						} else {
-							ImGui::Image((ImTextureID)(intptr_t)my_image_texture, ImVec2(availableWidth, (availableWidth / my_image_width) * my_image_height));
+							ImGui::Image((ImTextureID)(intptr_t)createdTestImage_texture, ImVec2(availableWidth, (availableWidth / createdTestImage_width) * createdTestImage_height));
 						}
 
 						ImGui::TableNextRow();
