@@ -4,6 +4,7 @@ test_images
 output_speech
 imgui-application/Debug
 imgui-application/imgui.ini
+automated-reddit-video-tool-gui
 
 ### C++ ###
 

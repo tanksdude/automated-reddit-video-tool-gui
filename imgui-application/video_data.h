@@ -53,8 +53,7 @@ struct VideoData {
 	char video_replacement_numbers_input[64];
 	bool audio_only_option_input = false;
 
-	int videoEncoderArray_current = 0;
-	bool video_enableAlpha = false;
+	int videoEncoderArray_current;
 	CodecRecommendedLevel get_videoEncoderRecommendation() const;
 	bool get_videoEncoderIsLossless() const;
 	bool get_videoEncoderSupportsAlpha() const;
@@ -105,6 +104,8 @@ struct VideoData {
 	void update_videoPresetArray();
 
 	VideoData() {
+		videoEncoderArray_current = 0;
+
 		strcpy(video_replacement_numbers_input, "");
 		strcpy(fps_numerator_input, "2997");
 		strcpy(fps_denominator_input, "100");

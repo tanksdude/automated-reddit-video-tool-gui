@@ -63,7 +63,7 @@ struct AudioData {
 	static const std::unordered_map<std::string, BitrateData> codecToBitrate;
 	static const std::unordered_map<std::string, AudioCodecMiscInformation> codecMiscInformation;
 
-	int audioEncoderArray_current = 0;
+	int audioEncoderArray_current;
 	CodecRecommendedLevel get_audioEncoderRecommendation() const;
 	bool get_audioEncoderIsLossless() const;
 	std::string get_audioEncoderInformationText() const;
@@ -93,6 +93,8 @@ struct AudioData {
 	void update_audioPresetArray();
 	
 	AudioData() {
+		audioEncoderArray_current = 1;
+
 		update_voiceArray();
 		update_audioPresetArray();
 	}

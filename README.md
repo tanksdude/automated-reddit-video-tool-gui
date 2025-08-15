@@ -74,6 +74,10 @@ I have spent many hours trying to get ImageMagick to work. If you want something
 
 If you know how to get it working, please do share, because you would probably be the only person on the Internet that knows how to fix this issue. Which I find exceedingly strange no one has documented a fix for this, because if ImageMagick is truly as critical to infrastructure as [this xkcd comic claims (read the alt text)](https://xkcd.com/2347/), then it has to be running on a lot more Linux machines than Windows, so this should be a very-well documented solution.
 
+## Option list (WIP)
+
+By default, this program uses H.264 and AAC codecs by default for high compatibility, however these are not the "recommended" codecs. You will probably want lossless codecs, especially when the filesize increase is rather small. I recommend changing H.264 to FFV1, or Ut Video if your video editor does not support FFV1, and change AAC to FLAC.
+
 ## TODO list
 
 * ~~make all the options do something~~

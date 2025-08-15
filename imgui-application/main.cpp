@@ -156,7 +156,7 @@ int main(int, char**)
 
     // Create window with graphics context
     float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()); // Valid on GLFW 3.3+ only
-    GLFWwindow* window = glfwCreateWindow(pdata.initial_windowWidth, pdata.initial_windowHeight, "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(pdata.initial_windowWidth, pdata.initial_windowHeight, "Automated Reddit Video Tool GUI v0.4.0", nullptr, nullptr);
     if (window == nullptr)
         return 1;
     glfwMakeContextCurrent(window);
@@ -763,6 +763,7 @@ int main(int, char**)
 				*/
 
 				if (ImGui::BeginTabItem("Defaults", nullptr, tab_flags[3])) {
+					ImGui::Text("TODO");
 					ImGui::BeginDisabled();
 
 					ImGui::Text("Write Changes:"); ImGui::SameLine();

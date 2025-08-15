@@ -1,8 +1,10 @@
-0.4.0 (WIP)
+0.4.0 "release"
 * mostly complete Linux support
 * preliminary INI settings
 * added more codecs, added comments on the various codecs
 * the Unicode arrows now render correctly
+* the ImGui window is now fullscreen
+* renamed the executable
 
 0.3.0
 * every input works
