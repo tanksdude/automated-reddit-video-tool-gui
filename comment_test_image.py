@@ -86,13 +86,13 @@ for line in image_text_file_lines:
 		continue
 	curr_file_read += line
 
-output_file = open(output_img_file_path+".temp", "w", encoding="utf8")
+output_file = open(output_img_file_path+".txt", "w", encoding="utf8")
 output_file.write(curr_file_read)
 output_file.close()
 
-result = text_to_image_func(output_img_file_path, output_img_file_path+".temp")
+result = text_to_image_func(output_img_file_path, output_img_file_path+".txt")
 #print(result)
-os.remove(output_img_file_path+".temp")
+os.remove(output_img_file_path+".txt")
 
 end_time = time.time()
 print(f"Test image made in {(end_time - start_time):.3f}s")

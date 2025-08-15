@@ -1,5 +1,5 @@
 #include "ini_helper.h"
-#include <cstring> //strncpy_s, strcpy
+#include <cstring> //strcpy, memcpy
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -75,6 +75,20 @@ void CreateDefaultIniIfNeeded(const std::string& path) {
 	}
 }
 
+// I wanted to use strncpy_s for this function as that's the "correct" (and
+// "safe") way to copy the user input to the char buffers. However, strncpy_s
+// is a C function that does not exist in C++. (I didn't know that was a
+// thing...) Anyway, a careful memcpy accomplishes the same thing.
+// Note: "length" here is the number of characters before the null terminator.
+static void copyUserStringToCharBuffer(char* dest, size_t dest_size, const char* src, size_t src_length) {
+	if (dest_size - 1 <= src_length) {
+		strcpy(dest, src);
+	} else {
+		memcpy(dest, src, dest_size - 1);
+		dest[dest_size - 1] = '\0';
+	}
+}
+
 void Fill_ImageData(ImageData& idata, const mINI::INIStructure& ini_object) {
 	if (!ini_object.has("IMAGE")) {
 		return;
@@ -82,35 +96,35 @@ void Fill_ImageData(ImageData& idata, const mINI::INIStructure& ini_object) {
 
 	if (ini_object.get("IMAGE").has("ImageWidth")) {
 		std::string get = ini_object.get("IMAGE").get("ImageWidth");
-		strncpy_s(idata.image_width_input, sizeof(idata.image_width_input)/sizeof(*idata.image_width_input), get.c_str(), get.size());
+		copyUserStringToCharBuffer(idata.image_width_input, sizeof(idata.image_width_input)/sizeof(*idata.image_width_input), get.c_str(), get.size());
 	}
 	if (ini_object.get("IMAGE").has("ImageHeight")) {
 		std::string get = ini_object.get("IMAGE").get("ImageHeight");
-		strncpy_s(idata.image_height_input, sizeof(idata.image_height_input)/sizeof(*idata.image_height_input), get.c_str(), get.size());
+		copyUserStringToCharBuffer(idata.image_height_input, sizeof(idata.image_height_input)/sizeof(*idata.image_height_input), get.c_str(), get.size());
 	}
 
 	if (ini_object.get("IMAGE").has("ImageBorderW")) {
 		std::string get = ini_object.get("IMAGE").get("ImageBorderW");
-		strncpy_s(idata.image_w_border_input, sizeof(idata.image_w_border_input)/sizeof(*idata.image_w_border_input), get.c_str(), get.size());
+		copyUserStringToCharBuffer(idata.image_w_border_input, sizeof(idata.image_w_border_input)/sizeof(*idata.image_w_border_input), get.c_str(), get.size());
 	}
 	if (ini_object.get("IMAGE").has("ImageBorderH")) {
 		std::string get = ini_object.get("IMAGE").get("ImageBorderH");
-		strncpy_s(idata.image_h_border_input, sizeof(idata.image_h_border_input)/sizeof(*idata.image_h_border_input), get.c_str(), get.size());
+		copyUserStringToCharBuffer(idata.image_h_border_input, sizeof(idata.image_h_border_input)/sizeof(*idata.image_h_border_input), get.c_str(), get.size());
 	}
 
 	if (ini_object.get("IMAGE").has("FontSize")) {
 		std::string get = ini_object.get("IMAGE").get("FontSize");
-		strncpy_s(idata.font_size_input, sizeof(idata.font_size_input)/sizeof(*idata.font_size_input), get.c_str(), get.size());
+		copyUserStringToCharBuffer(idata.font_size_input, sizeof(idata.font_size_input)/sizeof(*idata.font_size_input), get.c_str(), get.size());
 	}
 
 	if (ini_object.get("IMAGE").has("FontColor")) {
 		std::string get = ini_object.get("IMAGE").get("FontColor");
-		strncpy_s(idata.font_color_input, sizeof(idata.font_color_input)/sizeof(*idata.font_color_input), get.c_str(), get.size());
+		copyUserStringToCharBuffer(idata.font_color_input, sizeof(idata.font_color_input)/sizeof(*idata.font_color_input), get.c_str(), get.size());
 	}
 
 	if (ini_object.get("IMAGE").has("BackgroundColor")) {
 		std::string get = ini_object.get("IMAGE").get("BackgroundColor");
-		strncpy_s(idata.background_color_input, sizeof(idata.background_color_input)/sizeof(*idata.background_color_input), get.c_str(), get.size());
+		copyUserStringToCharBuffer(idata.background_color_input, sizeof(idata.background_color_input)/sizeof(*idata.background_color_input), get.c_str(), get.size());
 	}
 
 	if (ini_object.get("IMAGE").has("ParagraphNewlineCount")) {
@@ -279,8 +293,8 @@ void Fill_VideoData(VideoData& vdata, const mINI::INIStructure& ini_object, bool
 				long long val_den = std::stoll(get.substr(pos+1));
 				std::string numerator   = std::to_string(val_num);
 				std::string denominator = std::to_string(val_den);
-				strncpy_s(vdata.fps_numerator_input,   sizeof(vdata.fps_numerator_input)/sizeof(*vdata.fps_numerator_input),     numerator.c_str(),   numerator.size());
-				strncpy_s(vdata.fps_denominator_input, sizeof(vdata.fps_denominator_input)/sizeof(*vdata.fps_denominator_input), denominator.c_str(), denominator.size());
+				copyUserStringToCharBuffer(vdata.fps_numerator_input,   sizeof(vdata.fps_numerator_input)/sizeof(*vdata.fps_numerator_input),     numerator.c_str(),   numerator.size());
+				copyUserStringToCharBuffer(vdata.fps_denominator_input, sizeof(vdata.fps_denominator_input)/sizeof(*vdata.fps_denominator_input), denominator.c_str(), denominator.size());
 				vdata.fractionalFps = true;
 			}
 			catch (const std::exception&) {
@@ -294,7 +308,7 @@ void Fill_VideoData(VideoData& vdata, const mINI::INIStructure& ini_object, bool
 				try {
 					long long val = std::stoll(get);
 					std::string integer = std::to_string(val);
-					strncpy_s(vdata.fps_numerator_input, sizeof(vdata.fps_numerator_input)/sizeof(*vdata.fps_numerator_input), integer.c_str(), integer.size());
+					copyUserStringToCharBuffer(vdata.fps_numerator_input, sizeof(vdata.fps_numerator_input)/sizeof(*vdata.fps_numerator_input), integer.c_str(), integer.size());
 					strcpy(vdata.fps_denominator_input, "1");
 					vdata.fractionalFps = true;
 				}
@@ -358,7 +372,7 @@ void Fill_ProgramData(ProgramData& pdata, const mINI::INIStructure& ini_object) 
 	if (ini_object.get("APPLICATION").has("ApplicationFont")) {
 		std::string get = ini_object.get("APPLICATION").get("ApplicationFont");
 		if (!get.empty()) {
-			strncpy_s(pdata.application_font_path, sizeof(pdata.application_font_path)/sizeof(*pdata.application_font_path), get.c_str(), get.size());
+			copyUserStringToCharBuffer(pdata.application_font_path, sizeof(pdata.application_font_path)/sizeof(*pdata.application_font_path), get.c_str(), get.size());
 		}
 	}
 

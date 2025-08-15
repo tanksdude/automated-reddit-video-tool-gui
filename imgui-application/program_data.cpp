@@ -21,7 +21,7 @@ ProgramData::ProgramData() {
 	strcpy(application_font_path, "C:\\Windows\\Fonts\\segoeui.ttf");
 	application_font_size = 20.0f;
 	#else
-	strcpy(application_font_path, "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf");
-	application_font_size = 16.0f;
+	strcpy(application_font_path, "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc");
+	application_font_size = 24.0f;
 	#endif
 }

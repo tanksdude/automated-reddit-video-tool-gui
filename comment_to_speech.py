@@ -338,21 +338,21 @@ for i in range(len(image_text_file_lines)):
 
 	if files_count in video_replacement_set:
 		# speech file:
-		output_file = open(gen_output_wav_file_path(files_count)+".temp", "w", encoding="utf8")
+		output_file = open(gen_output_wav_file_path(files_count)+".txt", "w", encoding="utf8")
 		output_file.write(speech_line)
 		output_file.close()
 
-		result = text_to_speech_func(gen_output_wav_file_path(files_count), gen_output_wav_file_path(files_count)+".temp")
-		os.remove(gen_output_wav_file_path(files_count)+".temp")
+		result = text_to_speech_func(gen_output_wav_file_path(files_count), gen_output_wav_file_path(files_count)+".txt")
+		os.remove(gen_output_wav_file_path(files_count)+".txt")
 
 		if not AUDIO_ONLY:
 			# image file:
-			output_file = open(gen_output_img_file_path(files_count)+".temp", "w", encoding="utf8")
+			output_file = open(gen_output_img_file_path(files_count)+".txt", "w", encoding="utf8")
 			output_file.write(curr_text_file_read)
 			output_file.close()
 
-			result = text_to_image_func(gen_output_img_file_path(files_count), gen_output_img_file_path(files_count)+".temp")
-			os.remove(gen_output_img_file_path(files_count)+".temp")
+			result = text_to_image_func(gen_output_img_file_path(files_count), gen_output_img_file_path(files_count)+".txt")
+			os.remove(gen_output_img_file_path(files_count)+".txt")
 
 			# video:
 			result = speech_and_image_to_vid_func(gen_output_vid_file_path(files_count), gen_output_wav_file_path(files_count), gen_output_img_file_path(files_count))

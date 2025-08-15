@@ -21,26 +21,24 @@ This program does not automate the entire process of making a "Reddit reading" v
 
 ## System Requirements
 
-The minmums listed here are "recommended" minimums, not true minimums. Anything lower might work but no guarantees.
-
 Windows:
 
 * OS: Windows 10
 * GPU: OpenGL 3 compatible
 
-Linux: Currently not supported. Will be added later.
+Linux:
+
+* GPU: OpenGL 3 compatible
 
 Mac OS: Not supported. Source code is right here though, so feel free to try your luck.
 
 ## Program Requirements
 
-### Pre-built binaries (TODO)
-
 Note that these programs must be accessible from a plain command line, meaning they must be local to wherever this program is running or be on the system PATH.
 
 * Python 3.8+
-* ImageMagick
-* Balabolka or eSpeak
+* ImageMagick (Linux: see below for issues)
+* Windows: Balabolka or eSpeak | Linux: eSpeak
 * FFmpeg 4.4+ (corresponds to Ubuntu 22.04 (Jammy Jellyfish) or higher)
 
 ### Compiling from source (Windows)
@@ -52,41 +50,44 @@ Currently only Windows x64 with MSVC 2022 is officially supported.
 1. `build_win64.bat`
 1. The executable is in the `Debug` folder (don't `cd`).
 
+[Pre-compiled executables](https://github.com/tanksdude/automated-reddit-video-tool-gui/releases) are provided for Windows.
+
 ### Compiling from source (Linux)
 
-Linux support is WIP. Only tested on Ubuntu.
+Linux mostly works. Only tested on Ubuntu.
 
 1. Prerequisite: `sudo apt install libglfw3-dev`
 1. `cd imgui-application`
 1. `make -j$(nproc)`
 1. The executable is in the same folder
-1. in the Python scripts, change `.temp` extensions to `.txt` (will fix this step later)
 
-TODO: unicode doesn't show in imgui, fix later
+I have spent many hours trying to get ImageMagick to work. If you want something that "just works", you should [compile from source](https://imagemagick.org/script/install-source.php#linux), as you won't have to worry about all sorts of stupid permission issues. If you want to use your distro's package manager, this is the best I could come up with:
 
-ImageMagick is extremely picky, so you need to fix some of its security policies. Edit `/etc/ImageMagick-6/policy.xml` with the following changes:
+* Edit `/etc/ImageMagick-<6 or 7 or whatever>/policy.xml` with the following changes:
+* add: `<policy domain="coder" rights="read|write" pattern="{GIF,JPEG,PNG,WEBP,TXT}" />`
+* add: `<policy domain="delegate" rights="read|write" pattern="{GIF,JPEG,PNG,WEBP,TXT}" />`
+* add: `<policy domain="module" rights="read|write" pattern="{GIF,JPEG,PNG,WEBP,TXT}" />`
+* add: `<policy domain="filter" rights="read|write" pattern="{GIF,JPEG,PNG,WEBP,TXT}" />`
+* add: `<policy domain="coder" rights="read|write" pattern="PANGO" />` (this is supposedly the only "officially" required part)
+* remove conflicting policies (mainly this: `<policy domain="path" rights="none" pattern="@*"/>` (this might be the only thing that *has* to be changed))
+* In ImageMagick 6, this doesn't actually work, despite what documentation I could find saying this should be more than enough. In ImageMagick 7, the background color works just fine, but not the text color.
 
-* Fix this comment not ending, just so the syntax highlighter stops being confused: `<!-- <policy domain="cache" name="shared-secret" value="passphrase" stealth="true"/>`
-* add: `<policy domain="coder" rights="read|write" pattern="{GIF,JPEG,PNG,WEBP}" />`
-* add: `<policy domain="coder" rights="read|write" pattern="PANGO" />`
-* add: `<policy domain="path" rights="read" pattern="*" />` (might not be needed)
-* remove conflicting policies (mainly this: `<policy domain="path" rights="none" pattern="@*"/>`)
-
-Currently can't execute an ImageMagick command because `pango@*` is treated like a file instead of telling pango to open the file. Will hopefully fix later (and if not, then no Linux support... unless compiling ImageMagick from source is different).
+If you know how to get it working, please do share, because you would probably be the only person on the Internet that knows how to fix this issue. Which I find exceedingly strange no one has documented a fix for this, because if ImageMagick is truly as critical to infrastructure as [this xkcd comic claims (read the alt text)](https://xkcd.com/2347/), then it has to be running on a lot more Linux machines than Windows, so this should be a very-well documented solution.
 
 ## TODO list
 
 * ~~make all the options do something~~
 * *robustness*
-* ImGui window fullscreen
-* support for other platforms and compilers (use Cmake)
+* handle cmd errors and python errors
+* ~~ImGui window fullscreen~~
+* support for other platforms and compilers
 * ClangFormat
 * Doxygen
 * an INI file for saving and loading settings
 * support for SSH-ing into a virtual machine (don't count on it) (plus pack up files using zstd)
 * option to embed subtitles in the videos (would anyone use it?) (supposedly needs a .mkv but it seems to work in a .mp4)
 * unit tests (GTest)
-* ~~other font options~~ (should be a bit easier though)
+* ~~other font options~~
 
 ## Audio-only note
 

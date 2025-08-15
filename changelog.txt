@@ -1,8 +1,8 @@
 0.4.0 (WIP)
+* mostly complete Linux support
 * preliminary INI settings
 * added more codecs, added comments on the various codecs
 * the Unicode arrows now render correctly
-* partial Linux support
 
 0.3.0
 * every input works
