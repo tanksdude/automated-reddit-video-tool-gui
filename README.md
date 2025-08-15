@@ -1,6 +1,4 @@
-# (Semi-)Automated Reddit Video Tool with a GUI [post-BETA ("GAMMA"?)]
-
-**NOTE**: This software is in a post-beta ("gamma") state. Some things don't work without explanations or warnings (sometimes crashing), but there shouldn't be anything that seriously breaks.
+# (Semi-)Automated Reddit Video Tool with a GUI
 
 A program that takes text input and can generate the sentence-by-sentence reading and text-to-speech stuff that's common in Reddit reading videos. Now with a GUI!
 
@@ -59,7 +57,7 @@ Linux mostly works. Only tested on Ubuntu.
 1. Prerequisite: `sudo apt install libglfw3-dev`
 1. `cd imgui-application`
 1. `make -j$(nproc)`
-1. The executable is in the same folder
+1. The executable is in the same folder.
 
 I have spent many hours trying to get ImageMagick to work. If you want something that "just works", you should [compile from source](https://imagemagick.org/script/install-source.php#linux), as you won't have to worry about all sorts of stupid permission issues. If you want to use your distro's package manager, this is the best I could come up with:
 
