@@ -109,6 +109,16 @@ static void glfw_error_callback(int error, const char* description)
 // Main code
 int main(int, char**)
 {
+	ARVT::CreateDefaultIniIfNeeded("../arvt.ini");
+	mINI::INIFile ini_file("../arvt.ini");
+	mINI::INIStructure ini_object;
+	ini_file.read(ini_object);
+
+	ARVT::Fill_ProgramData(pdata, ini_object);
+	ARVT::Fill_ImageData(idata, ini_object);
+	ARVT::Fill_AudioData(adata, ini_object, pdata.useExtraCodecs);
+	ARVT::Fill_VideoData(vdata, ini_object, pdata.useExtraCodecs);
+
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
         return 1;
@@ -144,7 +154,7 @@ int main(int, char**)
 
     // Create window with graphics context
     float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()); // Valid on GLFW 3.3+ only
-    GLFWwindow* window = glfwCreateWindow(1600, 900, "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(pdata.initial_windowWidth, pdata.initial_windowHeight, "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
     if (window == nullptr)
         return 1;
     glfwMakeContextCurrent(window);
@@ -228,16 +238,6 @@ int main(int, char**)
 	GLuint return_symbol_texture, circle_arrows_texture;
 	ret = ImGuiHelpers::LoadTextureFromFile("../res/leftwards-arrow-with-hook_21a9.png", &return_symbol_texture, NULL, NULL);
 	ret = ImGuiHelpers::LoadTextureFromFile("../res/counterclockwise-arrows-button_1f504.png", &circle_arrows_texture, NULL, NULL);
-
-	ARVT::CreateDefaultIniIfNeeded("../arvt.ini");
-	mINI::INIFile ini_file("../arvt.ini");
-	mINI::INIStructure ini_object;
-	ini_file.read(ini_object);
-
-	ARVT::Fill_ProgramData(pdata, ini_object);
-	ARVT::Fill_ImageData(idata, ini_object);
-	ARVT::Fill_AudioData(adata, ini_object, pdata.useExtraCodecs);
-	ARVT::Fill_VideoData(vdata, ini_object, pdata.useExtraCodecs);
 
 	refreshApplicationFontSize();
 	refreshApplicationFontName();

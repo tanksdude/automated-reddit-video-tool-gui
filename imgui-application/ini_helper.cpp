@@ -389,6 +389,32 @@ void Fill_ProgramData(ProgramData& pdata, const mINI::INIStructure& ini_object) 
 		}
 	}
 
+	if (ini_object.get("APPLICATION").has("ApplicationWindowWidth")) {
+		std::string get = ini_object.get("APPLICATION").get("ApplicationWindowWidth");
+		if (!get.empty()) {
+			try {
+				int val = std::stoi(get);
+				pdata.initial_windowWidth = val;
+			}
+			catch (const std::exception&) {
+				std::cerr << ("Unable to parse [APPLICATION].ApplicationWindowWidth: \"" + get + "\"") << std::endl;
+			}
+		}
+	}
+
+	if (ini_object.get("APPLICATION").has("ApplicationWindowHeight")) {
+		std::string get = ini_object.get("APPLICATION").get("ApplicationWindowHeight");
+		if (!get.empty()) {
+			try {
+				int val = std::stoi(get);
+				pdata.initial_windowHeight = val;
+			}
+			catch (const std::exception&) {
+				std::cerr << ("Unable to parse [APPLICATION].ApplicationWindowHeight: \"" + get + "\"") << std::endl;
+			}
+		}
+	}
+
 	if (ini_object.get("APPLICATION").has("UseExtraCodecs")) {
 		std::string get = ini_object.get("APPLICATION").get("UseExtraCodecs");
 		if (get == "true" || get == "True" || get == "TRUE" || get == "1") {
