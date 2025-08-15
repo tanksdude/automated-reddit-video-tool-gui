@@ -1,7 +1,7 @@
-input_comments/
-input_splits/
-test_images/
-output_speech/
+input_comments
+input_splits
+test_images
+output_speech
 imgui-application/Debug
 imgui-application/imgui.ini
 

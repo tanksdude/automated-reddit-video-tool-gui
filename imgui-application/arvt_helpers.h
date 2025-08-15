@@ -9,7 +9,7 @@ namespace ARVT {
 const std::string INPUT_COMMENTS = "../input_comments/";
 const std::string INPUT_SPLITS = "../input_splits/";
 const std::string TEST_IMAGES = "../test_images/";
-const std::string TEST_IMAGE_DATA = "../test_image_data/"; //TODO
+//const std::string TEST_IMAGE_DATA = "../test_image_data/"; //TODO
 const std::string OUTPUT_SPEECH = "../output_speech/";
 #ifdef _WIN32
 const std::string COMMAND_QUOTE = "\""; //TODO: actually use
@@ -20,6 +20,8 @@ const std::string PYTHON_CMD = "python3";
 #endif
 
 // Public methods:
+
+void CreateApplicationFoldersIfNeeded();
 
 void copyEvaluatedFileName_toCommentSplitterPath(const char* name, char* dest, size_t buf_size);
 void copyEvaluatedFileName_toCommentTestImagePath_Text(const char* name, char* dest, size_t buf_size);

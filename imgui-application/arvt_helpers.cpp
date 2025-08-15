@@ -16,6 +16,27 @@
 
 namespace ARVT {
 
+void CreateApplicationFoldersIfNeeded() {
+	//TODO: filesystem errors
+
+	const auto create_dir = [] (const std::string& dir) -> void {
+		const std::string FOLDER = (dir[dir.size()-1] == '/') ? dir.substr(0, dir.size()-1) : dir;
+		if (!std::filesystem::exists(FOLDER)) {
+			std::filesystem::create_directory(FOLDER);
+		} else {
+			if (!std::filesystem::is_directory(FOLDER)) {
+				std::cerr << ("ERROR: \"" + FOLDER + "\" is not a folder!") << std::endl;
+			}
+		}
+	};
+
+	create_dir(INPUT_COMMENTS);
+	create_dir(INPUT_SPLITS);
+	create_dir(TEST_IMAGES);
+	//create_dir(TEST_IMAGE_DATA);
+	create_dir(OUTPUT_SPEECH);
+}
+
 void copyEvaluatedFileName_toCommentSplitterPath(const char* name, char* dest, size_t buf_size) {
 	strncpy(dest, inputFileName_toCommentSplitterPath(name).c_str(), buf_size);
 }

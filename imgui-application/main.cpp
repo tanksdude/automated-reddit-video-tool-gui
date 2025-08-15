@@ -119,6 +119,8 @@ int main(int, char**)
 	ARVT::Fill_AudioData(adata, ini_object, pdata.useExtraCodecs);
 	ARVT::Fill_VideoData(vdata, ini_object, pdata.useExtraCodecs);
 
+	ARVT::CreateApplicationFoldersIfNeeded();
+
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
         return 1;
