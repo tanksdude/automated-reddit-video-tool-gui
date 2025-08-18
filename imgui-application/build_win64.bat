@@ -11,5 +11,5 @@ if not exist %OUT_DIR% (
 	mkdir %OUT_DIR%
 )
 
-@REM NOTE: if you are building this for your own use, you should add "/O2" to the line below
+@REM NOTE: If you are building this for your own use, you should replace "/Zi" with "/O2" on the line below
 cl /std:c++20 /nologo /Zi /MD /MP /utf-8 %INCLUDES% %SOURCES% /Fe%OUT_DIR%\%OUT_EXE%.exe /Fo%OUT_DIR%\ /link %LIBS% /SUBSYSTEM:windows /ENTRY:mainCRTStartup
