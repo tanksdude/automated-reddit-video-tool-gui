@@ -17,6 +17,7 @@ struct ProgramData {
 
 	char application_font_path[1024];
 	float application_font_size;
+	bool application_scale_to_monitor;
 
 	bool input_comment_word_wrap = true; //TODO
 	bool useExtraCodecs = false; //used for VideoData/AudioData

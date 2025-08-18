@@ -5,6 +5,7 @@ const char* ProgramData::imageDeleteAgeList[6] = { "0 seconds", "1 hour", "24 ho
 const int ProgramData::imageDeleteAgeList_values[6] = { 0, 1, 24, 14*24, 30*24, 180*24 };
 
 ProgramData::ProgramData() {
+	application_scale_to_monitor = true;
 	background_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 	initial_windowWidth = 1600;
 	initial_windowHeight = 900;

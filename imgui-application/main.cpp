@@ -36,6 +36,8 @@ void refreshApplicationFontName() {
 
 	//ideally this would be used but it doesn't change the font for some reason:
 	//ImGui::PushFont(newFont, newSize);
+
+	//TODO: should re-scale for the monitor's scale factor again
 }
 
 void refreshApplicationFontSize() {
@@ -43,6 +45,8 @@ void refreshApplicationFontSize() {
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.FontSizeBase = pdata.application_font_size;
 	style._NextFrameFontSizeBase = style.FontSizeBase; // FIXME: Temporary hack until we finish remaining work.
+
+	//TODO: should re-scale for the monitor's scale factor again
 }
 
 auto integerOnlyPositiveFunc = [] (ImGuiInputTextCallbackData* data) {
@@ -155,8 +159,9 @@ int main(int, char**)
 #endif
 
     // Create window with graphics context
+	glfwWindowHint(GLFW_SCALE_TO_MONITOR, pdata.application_scale_to_monitor ? GLFW_TRUE : GLFW_FALSE);
     float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()); // Valid on GLFW 3.3+ only
-    GLFWwindow* window = glfwCreateWindow(pdata.initial_windowWidth, pdata.initial_windowHeight, "Automated Reddit Video Tool GUI v0.4.0", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(pdata.initial_windowWidth, pdata.initial_windowHeight, "Automated Reddit Video Tool GUI v0.4.1", nullptr, nullptr);
     if (window == nullptr)
         return 1;
     glfwMakeContextCurrent(window);

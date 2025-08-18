@@ -1,3 +1,6 @@
+0.4.1
+* option to scale the window with the monitor's scale factor
+
 0.4.0 "release"
 * mostly complete Linux support
 * preliminary INI settings

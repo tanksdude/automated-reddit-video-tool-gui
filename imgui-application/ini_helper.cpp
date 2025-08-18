@@ -19,6 +19,7 @@ void CreateDefaultIniIfNeeded(const std::string& path) {
 	"ApplicationFontSize =\n"
 	"ApplicationWindowWidth = 1600\n"
 	"ApplicationWindowHeight = 900\n"
+	"ApplicationScaleWithMonitorScale = true\n"
 	"\n"
 	"; Accepts hex codes and RGB floats:\n"
 	"ApplicationBackgroundColor = (0.45, 0.55, 0.60)\n"
@@ -458,6 +459,19 @@ void Fill_ProgramData(ProgramData& pdata, const mINI::INIStructure& ini_object) 
 			}
 			catch (const std::exception&) {
 				std::cerr << ("Unable to parse [APPLICATION].ApplicationWindowHeight: \"" + get + "\"") << std::endl;
+			}
+		}
+	}
+
+	if (ini_object.get("APPLICATION").has("ApplicationScaleWithMonitorScale")) {
+		std::string get = ini_object.get("APPLICATION").get("ApplicationScaleWithMonitorScale");
+		if (!get.empty()) {
+			if (get == "true" || get == "True" || get == "TRUE" || get == "1") {
+				pdata.application_scale_to_monitor = true;
+			} else if (get == "false" || get == "False" || get == "FALSE" || get == "0") {
+				pdata.application_scale_to_monitor = false;
+			} else {
+				std::cerr << ("Unknown value for [APPLICATION].ApplicationScaleWithMonitorScale: \"" + get + "\"") << std::endl;
 			}
 		}
 	}
