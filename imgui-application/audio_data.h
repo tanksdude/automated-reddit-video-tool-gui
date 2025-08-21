@@ -22,11 +22,12 @@ struct AudioData {
 #ifdef _WIN32
 	static const char* voiceEngineArray[4];
 	static const char* voiceEngineArray_exeForUpdatingVoiceList[4]; //note: internal use only
+	int voiceEngineArray_current = 0;
 #else
 	static const char* voiceEngineArray[5];
 	static const char* voiceEngineArray_exeForUpdatingVoiceList[5]; //note: internal use only
+	int voiceEngineArray_current = 1;
 #endif
-	int voiceEngineArray_current = 0;
 
 	char** voiceArray = nullptr;
 	int voiceArray_current;

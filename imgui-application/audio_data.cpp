@@ -129,9 +129,12 @@ void AudioData::getVoiceListFromExe_Balabolka(std::vector<std::string>& file_lin
 }
 
 void AudioData::getVoiceListFromExe_Espeak(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList) {
+	// IMPORTANT: SAPI voices will not appear in eSpeak's command line version: https://sourceforge.net/p/espeak/discussion/538921/thread/257f8ce6/
+	// Also see function espeak_ListVoices() at https://github.com/espeak-ng/espeak-ng/blob/master/src/include/espeak-ng/speak_lib.h
+
 	// The first line is formatting information, everything else is the languages
 	// Columns are separated by spaces, simply go through until the 4th column
-	// Assumes every VoiceName does not have spaces. The docs suggest it's not a requirement but every included voice seems to follow it.
+	// VoiceName does not have spaces, as they are replaced with underscores when printed: see function DisplayVoices() at https://github.com/espeak-ng/espeak-ng/blob/master/src/espeak-ng.c
 
 	file_lines.erase(file_lines.begin()); //remove formatting information
 	for (std::string& l : file_lines) {
