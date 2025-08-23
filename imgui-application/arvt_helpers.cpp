@@ -172,9 +172,12 @@ int revealFileExplorer(const char* path) {
 	//TODO: HACK: prepend powershell to avoid replacing slashes
 	return system_helper(command.c_str(), true);
 	#else
-	//LINUX TODO
-	//#error "file explorer stuff"
-	return 0;
+	// Current temporary solution: open on the folder; not great but it's better than nothing
+	std::string temp_path = std::string(path);
+	size_t pos = temp_path.find_last_of("/");
+	temp_path = temp_path.substr(0, pos);
+	return system_helper(("xdg-open " + temp_path).c_str(), true);
+	//TODO: better solution
 	#endif
 }
 
