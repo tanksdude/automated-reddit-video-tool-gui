@@ -132,6 +132,8 @@ parser.add_argument("font_color_input")
 parser.add_argument("background_color_input")
 parser.add_argument("paragraph_newline_count")
 parser.add_argument("paragraph_tabbed_start")
+parser.add_argument("font_name")
+parser.add_argument("font_is_family")
 parser.add_argument("imageFormat")
 
 parser.add_argument("-n", "--video_replacement_numbers", metavar="video_replacement_numbers", required=False, help="update/generate a specific video")
@@ -159,6 +161,8 @@ IMAGE_TEXT_COLOR = args.font_color_input
 IMAGE_BACKGROUND_COLOR = args.background_color_input
 IMAGE_PARAGRAPH_SEP = "\n" * int(args.paragraph_newline_count)
 IMAGE_PARAGRAPH_START = "\t" if int(args.paragraph_tabbed_start) else ""
+IMAGE_FONT_NAME = args.font_name
+IMAGE_FONT_IS_FAMILY = int(args.font_is_family)
 IMAGE_FORMAT = args.imageFormat
 # evaluated image parameters:
 IMAGE_SIZE = str(IMAGE_WIDTH) + "x" + str(IMAGE_HEIGHT)
@@ -228,8 +232,13 @@ ttsFunctionLookup = {
 text_to_speech_func = ttsFunctionLookup[args.speechEngine]
 
 def text_to_image_func(img_file_name, text_file_name):
-	#return subprocess.run([MAGICK_CMD, "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_TEXT_COLOR, "-family", "Times New Roman", "-pointsize", IMAGE_FONT_SIZE, "pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])
-	return subprocess.run([MAGICK_CMD, "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_TEXT_COLOR, "-font", "Verdana", "-pointsize", IMAGE_FONT_SIZE, "pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])
+	command_args = [MAGICK_CMD, "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_TEXT_COLOR]
+	if IMAGE_FONT_IS_FAMILY:
+		command_args.extend(["-family", IMAGE_FONT_NAME])
+	else:
+		command_args.extend(["-font", IMAGE_FONT_NAME])
+	command_args.extend(["-pointsize", IMAGE_FONT_SIZE, "pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])
+	return subprocess.run(command_args)
 	# https://imagemagick.org/Usage/text/#caption
 
 def speech_and_image_to_vid_func(vid_file_name, wav_file_name, img_file_name):

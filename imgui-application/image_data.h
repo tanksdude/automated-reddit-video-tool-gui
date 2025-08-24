@@ -16,6 +16,9 @@ struct ImageData {
 	uint8_t paragraph_newline_max = 4;
 	bool paragraph_tabbed_start_input = false;
 
+	bool font_is_family;
+	char font_name[256]; //there are some fonts with really long names
+
 	static const char* imageFormatArray[6];
 	int imageFormatArray_current = 0;
 

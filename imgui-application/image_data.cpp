@@ -12,4 +12,7 @@ ImageData::ImageData()  {
 	strcpy(font_size_input, "16");
 	strcpy(font_color_input, "white");
 	strcpy(background_color_input, "black");
+
+	font_is_family = false;
+	strcpy(font_name, "Verdana");
 }

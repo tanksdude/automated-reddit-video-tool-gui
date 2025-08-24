@@ -453,6 +453,18 @@ int main(int, char**)
 						ImGui::InputText("Background Color",      idata.background_color_input,    IM_ARRAYSIZE(idata.background_color_input), ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc); //TODO: think these need to also scrub backslashes
 						ImGui::SliderScalar("Newline Count", ImGuiDataType_U8, &idata.paragraph_newline_v, &idata.paragraph_newline_min, &idata.paragraph_newline_max);
 						ImGui::Checkbox("Paragraph Tabbed Start", &idata.paragraph_tabbed_start_input);
+						ImGui::InputText("Font Name",             idata.font_name,                 IM_ARRAYSIZE(idata.font_name),              ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc);
+						ImGui::Indent();
+						ImGui::Checkbox("Font is a family",       &idata.font_is_family);
+						ImGui::SameLine();
+						ImGuiHelpers::HelpMarker("Every individual font has its own name, but they're often grouped under a family.\n"
+						                         "Bold/Italic/Bold+Italic/SemiLight/whatever versions of the font are part of the font's family.\n"
+						#ifdef _WIN32
+						                         "See `magick -list font` for the list of available fonts.");
+						#else
+						                         "See `convert -list font` for the list of available fonts.");
+						#endif
+						ImGui::Unindent();
 						ImGui::PopItemWidth();
 
 						//TODO: export/import settings (use INI file) (buttons: export, quick import (same file name), import specific (file select)) (also a separate gui for batch remake, where it will re-run the script with the settings files)
