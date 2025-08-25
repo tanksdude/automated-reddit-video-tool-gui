@@ -4,6 +4,7 @@
 
 #include <stdio.h> //fprintf for glfwSetErrorCallback
 #include <algorithm> //std::max_element
+#include <cstring> //strerror
 
 #include <GLFW/glfw3.h>
 #define MINI_CASE_SENSITIVE
@@ -12,6 +13,7 @@
 #include "imgui_helpers.h"
 #include "arvt_helpers.h"
 #include "ini_helper.h"
+#include "arvt_logger.h"
 
 #include "image_data.h"
 #include "audio_data.h"
@@ -22,6 +24,8 @@ ImageData idata;
 AudioData adata;
 VideoData vdata;
 ProgramData pdata;
+
+ARVT_Logger global_log;
 
 bool needToChangeFonts = false;
 
@@ -103,6 +107,17 @@ void clear_input_data(bool lockNewState) {
 	}
 }
 
+void lock_filename_tooltip(bool filenameIsLocked) {
+	if (!filenameIsLocked) {
+		if (ImGui::BeginItemTooltip()) {
+			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+			ImGui::TextUnformatted("Lock the file name before clicking this!");
+			ImGui::PopTextWrapPos();
+			ImGui::EndTooltip();
+		}
+	}
+}
+
 
 
 static void glfw_error_callback(int error, const char* description)
@@ -161,7 +176,7 @@ int main(int, char**)
     // Create window with graphics context
 	glfwWindowHint(GLFW_SCALE_TO_MONITOR, pdata.application_scale_to_monitor ? GLFW_TRUE : GLFW_FALSE);
     float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()); // Valid on GLFW 3.3+ only
-    GLFWwindow* window = glfwCreateWindow(pdata.initial_windowWidth, pdata.initial_windowHeight, "Automated Reddit Video Tool GUI v0.4.1", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(pdata.initial_windowWidth, pdata.initial_windowHeight, "Automated Reddit Video Tool GUI v0.4.1 DEV", nullptr, nullptr);
     if (window == nullptr)
         return 1;
     glfwMakeContextCurrent(window);
@@ -249,6 +264,8 @@ int main(int, char**)
 	refreshApplicationFontSize();
 	refreshApplicationFontName();
 
+	global_log.AddLog("[%.2fs] [info] %s\n", ImGui::GetTime(), "Startup");
+
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
@@ -284,7 +301,7 @@ int main(int, char**)
 			glfwGetWindowSize(window, &window_width, &window_height);
 			ImGui::Begin("Main Window", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings);
 			ImGui::SetWindowPos(ImVec2(0, 0));
-			ImGui::SetWindowSize("Main Window", ImVec2(window_width+2, window_height+2));
+			ImGui::SetWindowSize("Main Window", ImVec2(window_width, window_height));
 
 			if (ImGui::BeginTabBar("MainTabBar", 0)) {
 				ImGuiTabItemFlags tab_flags[6] = { 0, 0, 0, 0, 0, 0 };
@@ -335,6 +352,7 @@ int main(int, char**)
 							int result = ARVT::copyFileToCStr(pdata.evaluated_input_file_name, pdata.input_comment_data, IM_ARRAYSIZE(pdata.input_comment_data));
 							if (result) {
 								strcpy(pdata.input_comment_data, "error"); //TODO: red text
+								global_log.AddLog("[%.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Preview", strerror(result));
 							}
 						}
 						if (ImGui::BeginItemTooltip()) {
@@ -374,6 +392,7 @@ int main(int, char**)
 							int result = ARVT::copyFileToCStr(pdata.evaluated_input_split_1, pdata.input_split_1_data, IM_ARRAYSIZE(pdata.input_split_1_data));
 							if (result) {
 								strcpy(pdata.input_split_1_data, "error"); //TODO: red text
+								global_log.AddLog("[%.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Preview", strerror(result));
 							}
 						}
 
@@ -382,7 +401,8 @@ int main(int, char**)
 						if (ImGui::Button("Reveal in File Explorer##Input Split 1")) {
 							int result = ARVT::revealFileExplorer(pdata.evaluated_input_split_1);
 							if (result) {
-								strcpy(pdata.input_split_2_data, "error"); //TODO: red text
+								strcpy(pdata.input_split_1_data, "error"); //TODO: red text
+								global_log.AddLog("[%.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
 							}
 						}
 						ImGui::SameLine();
@@ -397,7 +417,6 @@ int main(int, char**)
 								}
 							}
 						}
-						//TODO: docs/fonts.md
 
 						ImGui::SeparatorText("Speech Text (optional)");
 
@@ -414,6 +433,7 @@ int main(int, char**)
 							int result = ARVT::copyFileToCStr(pdata.evaluated_input_split_2, pdata.input_split_2_data, IM_ARRAYSIZE(pdata.input_split_2_data));
 							if (result) {
 								strcpy(pdata.input_split_2_data, "error"); //TODO: red text
+								global_log.AddLog("[%.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Preview", strerror(result));
 							}
 						}
 
@@ -422,6 +442,7 @@ int main(int, char**)
 							int result = ARVT::revealFileExplorer(pdata.evaluated_input_split_2);
 							if (result) {
 								strcpy(pdata.input_split_2_data, "error"); //TODO: red text
+								global_log.AddLog("[%.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
 							}
 						}
 
@@ -478,10 +499,16 @@ int main(int, char**)
 						ImGui::InputText("##Test Image Path", pdata.evaluated_test_image_path, IM_ARRAYSIZE(pdata.evaluated_test_image_path), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 
 						if (ImGui::Button("Create →", ImVec2(-FLT_MIN, 0.0f))) {
-							ARVT::call_comment_test_image(pdata.the_file_input_name, idata);
-							//TODO: check if success
-							ret = ImGuiHelpers::LoadTextureFromFile(pdata.evaluated_test_image_path, &createdTestImage_texture, &createdTestImage_width, &createdTestImage_height);
+							int result = ARVT::call_comment_test_image(pdata.the_file_input_name, idata);
+							if (result) {
+								//TODO: better messages
+								global_log.AddLog("[%.2fs] [error] %s: %s\n", ImGui::GetTime(), "Image", strerror(result));
+							} else {
+								ret = ImGuiHelpers::LoadTextureFromFile(pdata.evaluated_test_image_path, &createdTestImage_texture, &createdTestImage_width, &createdTestImage_height);
+								//TODO: check if success
+							}
 						}
+						lock_filename_tooltip(filenameIsLocked);
 
 						ImGui::SeparatorText("Video Settings (optional)");
 						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
@@ -542,15 +569,15 @@ int main(int, char**)
 						}
 
 						if (ImGui::Button("Split!", ImVec2(-FLT_MIN, 0.0f))) {
-							ARVT::call_comment_splitter(pdata.the_file_input_name);
-							ARVT::copyFileToCStr(ARVT::inputFileName_toCommentTestImagePath_Text(pdata.the_file_input_name).c_str(), pdata.input_split_1_data, IM_ARRAYSIZE(pdata.input_split_1_data));
+							int result = ARVT::call_comment_splitter(pdata.the_file_input_name);
+							if (result) {
+								//TODO: better messages
+								global_log.AddLog("[%.2fs] [error] %s: %s\n", ImGui::GetTime(), "Splitter", strerror(result));
+							} else {
+								ARVT::copyFileToCStr(ARVT::inputFileName_toCommentTestImagePath_Text(pdata.the_file_input_name).c_str(), pdata.input_split_1_data, IM_ARRAYSIZE(pdata.input_split_1_data));
+							}
 						}
-						if (ImGui::BeginItemTooltip()) {
-							ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-							ImGui::TextUnformatted("Lock the file name before clicking this!");
-							ImGui::PopTextWrapPos();
-							ImGui::EndTooltip();
-						}
+						lock_filename_tooltip(filenameIsLocked);
 
 						if (!filenameIsLocked) {
 							ImGui::EndDisabled();
@@ -567,9 +594,14 @@ int main(int, char**)
 						if (adata.voiceArray_current < 0) { ImGui::BeginDisabled(); }
 						if (ImGui::Button("GO!", ImVec2(-FLT_MIN, 0.0f))) {
 							//TODO: progress bar and async
-							ARVT::call_comment_to_speech(pdata.the_file_input_name, idata, adata, vdata);
+							int result = ARVT::call_comment_to_speech(pdata.the_file_input_name, idata, adata, vdata);
+							if (result) {
+								//TODO: better messages
+								global_log.AddLog("[%.2fs] [error] %s: %s\n", ImGui::GetTime(), "Video", strerror(result));
+							}
 							//TODO: at program start-up, check programs' existence and maybe ffmpeg version
 						}
+						lock_filename_tooltip(filenameIsLocked);
 						if (adata.voiceArray_current < 0) { ImGui::EndDisabled(); }
 						if (ImGui::Button("Reveal in File Explorer##final video", ImVec2(-FLT_MIN, 0.0f))) {
 							//TODO: this should open in the folder if the file doesn't exist
@@ -577,6 +609,7 @@ int main(int, char**)
 							int result = ARVT::revealFileExplorer(ARVT::inputFileName_toCommentToSpeechPath_getFileExplorerName(pdata.the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current], vdata.audio_only_option_input).c_str());
 							if (result) {
 								//strcpy(, "error"); //TODO: red text
+								global_log.AddLog("[%.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
 							}
 						}
 
@@ -944,6 +977,10 @@ int main(int, char**)
 
 				ImGui::EndTabBar();
 			}
+
+			//the "long text display" example is another option, but more utility is better for this situation
+			//maybe use monospace font?
+			global_log.Draw();
 
 			ImGui::End();
 			style.WindowBorderSize = old_style_WindowBorderSize; //pop

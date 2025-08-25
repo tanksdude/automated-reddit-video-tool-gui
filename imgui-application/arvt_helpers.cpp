@@ -106,10 +106,13 @@ inline int system_helper(const char* command, bool no_cmd) {
 		}
 
 		WaitForSingleObject( pi.hProcess, INFINITE );
+		DWORD exitCode;
+		GetExitCodeProcess(pi.hProcess, &exitCode);
+
 		CloseHandle( pi.hProcess );
 		CloseHandle( pi.hThread );
 
-		return 0;
+		return (int)exitCode;
 	} else {
 		return system(command);
 	}

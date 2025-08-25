@@ -354,6 +354,9 @@ for i in range(len(image_text_file_lines)):
 		result = text_to_speech_func(gen_output_wav_file_path(files_count), gen_output_wav_file_path(files_count)+".txt")
 		os.remove(gen_output_wav_file_path(files_count)+".txt")
 
+		if result.returncode:
+			sys.exit("ERROR: Could not generate the audio file for video " + str(files_count))
+
 		if not AUDIO_ONLY:
 			# image file:
 			output_file = open(gen_output_img_file_path(files_count)+".txt", "w", encoding="utf8")
@@ -363,12 +366,19 @@ for i in range(len(image_text_file_lines)):
 			result = text_to_image_func(gen_output_img_file_path(files_count), gen_output_img_file_path(files_count)+".txt")
 			os.remove(gen_output_img_file_path(files_count)+".txt")
 
+			if result.returncode:
+				os.remove(gen_output_wav_file_path(files_count))
+				sys.exit("ERROR: Could not generate the image file for video " + str(files_count))
+
 			# video:
 			result = speech_and_image_to_vid_func(gen_output_vid_file_path(files_count), gen_output_wav_file_path(files_count), gen_output_img_file_path(files_count))
 
 			# cleanup:
 			os.remove(gen_output_wav_file_path(files_count))
 			os.remove(gen_output_img_file_path(files_count))
+
+			if result.returncode:
+				sys.exit("ERROR: Could not generate the video file for video " + str(files_count))
 
 		replaced_files_count += 1
 
