@@ -23,6 +23,7 @@ void CreateDefaultIniIfNeeded(const std::string& path) {
 	"\n"
 	"; Accepts hex codes and RGB floats:\n"
 	"ApplicationBackgroundColor = (0.45, 0.55, 0.60)\n"
+	";ApplicationWindowColor = (0.06, 0.06, 0.06, 0.94)\n"
 	"\n"
 	"UseExtraCodecs = false\n"
 	"InitialOpenTab = 0\n"
@@ -41,6 +42,9 @@ void CreateDefaultIniIfNeeded(const std::string& path) {
 	"\n"
 	"ParagraphNewlineCount = 2\n"
 	"ParagraphTabbedStart = false\n"
+	"\n"
+	"FontName = Verdana\n"
+	"FontIsFamily = false\n"
 	"\n"
 	"ImageFormat = .png\n"
 	"\n"
@@ -168,6 +172,26 @@ void Fill_ImageData(ImageData& idata, const mINI::INIStructure& ini_object) {
 				idata.paragraph_tabbed_start_input = false;
 			} else {
 				std::cerr << ("Unknown value for [IMAGE].ParagraphTabbedStart: \"" + get + "\"") << std::endl;
+			}
+		}
+	}
+
+	if (ini_object.get("IMAGE").has("FontName")) {
+		std::string get = ini_object.get("IMAGE").get("FontName");
+		if (!get.empty()) {
+			copyUserStringToCharBuffer(idata.font_name, sizeof(idata.font_name)/sizeof(*idata.font_name), get.c_str(), get.size());
+		}
+	}
+
+	if (ini_object.get("IMAGE").has("FontIsFamily")) {
+		std::string get = ini_object.get("IMAGE").get("FontIsFamily");
+		if (!get.empty()) {
+			if (get == "true" || get == "True" || get == "TRUE" || get == "1") {
+				idata.font_is_family = true;
+			} else if (get == "false" || get == "False" || get == "FALSE" || get == "0") {
+				idata.font_is_family = false;
+			} else {
+				std::cerr << ("Unknown value for [IMAGE].FontIsFamily: \"" + get + "\"") << std::endl;
 			}
 		}
 	}
@@ -507,6 +531,7 @@ void Fill_ProgramData(ProgramData& pdata, const mINI::INIStructure& ini_object) 
 	// digits. If the first character is '(', it's a vec3. Other cases not
 	// supported... though there aren't very many.
 	//TODO: this is in a "good enough" state, but should finish it eventually
+	//TODO: # is an official comment character, so something is gonna have to be done to handle that situation...
 	if (ini_object.get("APPLICATION").has("ApplicationBackgroundColor")) {
 		std::string get = ini_object.get("APPLICATION").get("ApplicationBackgroundColor");
 		if (!get.empty()) {
@@ -550,6 +575,57 @@ void Fill_ProgramData(ProgramData& pdata, const mINI::INIStructure& ini_object) 
 				}
 			} else {
 				std::cerr << ("Unable to parse [APPLICATION].ApplicationBackgroundColor: \"" + get + "\"") << std::endl;
+			}
+		}
+	}
+
+	//this has alpha
+	if (ini_object.get("APPLICATION").has("ApplicationWindowColor")) {
+		std::string get = ini_object.get("APPLICATION").get("ApplicationWindowColor");
+		if (!get.empty()) {
+			if (get[0] == '#') {
+				if (get.size() == 7 || get.size() == 9) {
+					try {
+						int r = std::stoi(get.substr(1, 2), nullptr, 16);
+						int g = std::stoi(get.substr(3, 2), nullptr, 16);
+						int b = std::stoi(get.substr(5, 2), nullptr, 16);
+						int a = get.size() == 9 ? std::stoi(get.substr(7, 2), nullptr, 16) : 0xFF;
+						if (r < 0 || g < 0 || b < 0 || a < 0) {
+							std::cerr << ("Unable to parse [APPLICATION].ApplicationWindowColor: \"" + get + "\"") << std::endl;
+						} else {
+							pdata.window_color = ImVec4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
+						}
+					}
+					catch (const std::exception&) {
+						std::cerr << ("Unable to parse [APPLICATION].ApplicationWindowColor: \"" + get + "\"") << std::endl;
+					}
+				} else {
+					std::cerr << ("Unable to parse [APPLICATION].ApplicationWindowColor: \"" + get + "\"") << std::endl;
+				}
+			} else if (get[0] == '(') {
+				if ((get[get.size()-1] == ')') && (std::count(get.begin(), get.end(), ',') == 3)) {
+					size_t pos1 = get.find(',');
+					size_t pos2 = get.find(',', pos1 + 1);
+					size_t pos3 = get.find(',', pos2 + 1);
+					try {
+						float r = std::stof(get.substr(1,        pos1             - 1));
+						float g = std::stof(get.substr(pos1 + 1, pos2             - (pos1 + 1)));
+						float b = std::stof(get.substr(pos2 + 1, pos3             - (pos2 + 1)));
+						float a = std::stof(get.substr(pos3 + 1, (get.size() - 1) - (pos3 + 1)));
+						if ((r < 0 || g < 0 || b < 0 || a < 0) || (r > 1 || g > 1 || b > 1 || a > 1)) {
+							std::cerr << ("Unable to parse [APPLICATION].ApplicationWindowColor: \"" + get + "\"") << std::endl;
+						} else {
+							pdata.window_color = ImVec4(r, g, b, a);
+						}
+					}
+					catch (const std::exception&) {
+						std::cerr << ("Unable to parse [APPLICATION].ApplicationWindowColor: \"" + get + "\"") << std::endl;
+					}
+				} else {
+					std::cerr << ("Unable to parse [APPLICATION].ApplicationWindowColor: \"" + get + "\"") << std::endl;
+				}
+			} else {
+				std::cerr << ("Unable to parse [APPLICATION].ApplicationWindowColor: \"" + get + "\"") << std::endl;
 			}
 		}
 	}

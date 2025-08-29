@@ -263,6 +263,7 @@ int main(int, char**)
 
 	refreshApplicationFontSize();
 	refreshApplicationFontName();
+	style.Colors[ImGuiCol_WindowBg] = pdata.window_color; //TODO: have the color selector be for pdata.window_color, so the style is updated every frame
 
 	global_log.AddLog("[%06.2fs] [info] %s\n", ImGui::GetTime(), "Startup");
 
@@ -551,7 +552,7 @@ int main(int, char**)
 						float columnHeights[3];
 						columnHeights[0] = lock_icon_frame_height + ImGui::GetFrameHeightWithSpacing() + ImGuiHelpers::getMultilineInputHeight(ImGui::GetTextLineHeight() * 16);
 						columnHeights[1] = 7 * ImGui::GetFrameHeightWithSpacing() + 2 * ImGuiHelpers::getMultilineInputHeight(0);
-						columnHeights[2] = (5 + 6 + 4 + 4) * ImGui::GetFrameHeightWithSpacing() + no_voice_height;
+						columnHeights[2] = (5 + 8 + 4 + 4) * ImGui::GetFrameHeightWithSpacing() + no_voice_height;
 
 						const float largestColumn = *std::max_element(columnHeights, columnHeights + IM_ARRAYSIZE(columnHeights));
 						const float contentAvailableY = ImGui::GetContentRegionAvail().y + 2*ImGui::GetStyle().ItemSpacing.y;
@@ -761,6 +762,7 @@ int main(int, char**)
 						}
 
 						ImGui::ColorEdit3("Background Color", (float*)&pdata.background_color);
+						ImGui::ColorEdit4("Window Color", (float*)&style.Colors[ImGuiCol_WindowBg]); //TODO
 
 						if (ImGui::Checkbox("Extra Codecs", &pdata.useExtraCodecs)) {
 							if (!pdata.useExtraCodecs) {
@@ -949,6 +951,7 @@ int main(int, char**)
 						ImGui::DragFloat("Font Size", &pdata.application_font_size, 0.20f, 8.0f, 60.0f, "%.0f");
 
 						ImGui::ColorEdit3("Background Color", (float*)&pdata.background_color);
+						ImGui::ColorEdit4("Window Color", (float*)&style.Colors[ImGuiCol_WindowBg]); //TODO
 
 						if (ImGui::Checkbox("Extra Codecs", &pdata.useExtraCodecs)) {
 							if (!pdata.useExtraCodecs) {

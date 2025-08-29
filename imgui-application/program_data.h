@@ -26,6 +26,7 @@ struct ProgramData {
 	int initial_windowWidth;
 	int initial_windowHeight;
 	ImVec4 background_color;
+	ImVec4 window_color;
 
 	static const char* imageDeleteAgeList[6];
 	static const int imageDeleteAgeList_values[6];
