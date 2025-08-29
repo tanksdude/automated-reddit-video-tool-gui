@@ -264,7 +264,7 @@ int main(int, char**)
 	refreshApplicationFontSize();
 	refreshApplicationFontName();
 
-	global_log.AddLog("[%.2fs] [info] %s\n", ImGui::GetTime(), "Startup");
+	global_log.AddLog("[%06.2fs] [info] %s\n", ImGui::GetTime(), "Startup");
 
     // Main loop
     while (!glfwWindowShouldClose(window))
@@ -295,8 +295,7 @@ int main(int, char**)
 
 		// main window
 		{
-			const auto old_style_WindowBorderSize = style.WindowBorderSize; //push
-			style.WindowBorderSize = 0.0f;
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 			int window_width, window_height;
 			glfwGetWindowSize(window, &window_width, &window_height);
 			ImGui::Begin("Main Window", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings);
@@ -307,13 +306,14 @@ int main(int, char**)
 				ImGuiTabItemFlags tab_flags[6] = { 0, 0, 0, 0, 0, 0 };
 				if (set_default_tab) [[unlikely]] {
 					//instead of clamping, set to zero on a bad value, because that's more obvious (maybe Help or About would be better?):
-					const int idx = (pdata.default_tab_idx > 6 || pdata.default_tab_idx < 0) ? 0 : pdata.default_tab_idx;
+					const int idx = (pdata.default_tab_idx >= IM_ARRAYSIZE(tab_flags) || pdata.default_tab_idx < 0) ? 0 : pdata.default_tab_idx;
 					tab_flags[idx] |= ImGuiTabItemFlags_SetSelected;
 					set_default_tab = false;
 				}
+				ImGuiTableFlags table_flags = ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_PadOuterX;
 
 				if (ImGui::BeginTabItem("Execute", nullptr, tab_flags[0])) {
-					if (ImGui::BeginTable("Execute##table1", 4, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_PadOuterX)) {
+					if (ImGui::BeginTable("Execute##table1", 4, table_flags)) {
 						ImGui::TableSetupColumn("Input Comment");
 						ImGui::TableSetupColumn("Splits");
 						ImGui::TableSetupColumn("Image Parameters");
@@ -352,7 +352,7 @@ int main(int, char**)
 							int result = ARVT::copyFileToCStr(pdata.evaluated_input_file_name, pdata.input_comment_data, IM_ARRAYSIZE(pdata.input_comment_data));
 							if (result) {
 								strcpy(pdata.input_comment_data, "error"); //TODO: red text
-								global_log.AddLog("[%.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Preview", strerror(result));
+								global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Preview", strerror(result));
 							}
 						}
 						if (ImGui::BeginItemTooltip()) {
@@ -392,7 +392,7 @@ int main(int, char**)
 							int result = ARVT::copyFileToCStr(pdata.evaluated_input_split_1, pdata.input_split_1_data, IM_ARRAYSIZE(pdata.input_split_1_data));
 							if (result) {
 								strcpy(pdata.input_split_1_data, "error"); //TODO: red text
-								global_log.AddLog("[%.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Preview", strerror(result));
+								global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Preview", strerror(result));
 							}
 						}
 
@@ -401,8 +401,8 @@ int main(int, char**)
 						if (ImGui::Button("Reveal in File Explorer##Input Split 1")) {
 							int result = ARVT::revealFileExplorer(pdata.evaluated_input_split_1);
 							if (result) {
-								strcpy(pdata.input_split_1_data, "error"); //TODO: red text
-								global_log.AddLog("[%.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
+								//strcpy(pdata.input_split_1_data, "error"); //TODO: red text
+								//global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
 							}
 						}
 						ImGui::SameLine();
@@ -411,9 +411,11 @@ int main(int, char**)
 							if (result) {
 								strcpy(pdata.input_split_2_data, "error copying"); //TODO: red text
 							} else {
+								global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Copy", ("Successfully copied to " + std::string(pdata.evaluated_input_split_2)).c_str());
 								int result = ARVT::copyFileToCStr(pdata.evaluated_input_split_2, pdata.input_split_2_data, IM_ARRAYSIZE(pdata.input_split_2_data));
 								if (result) {
 									strcpy(pdata.input_split_2_data, "error"); //TODO: red text
+									global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Preview", strerror(result));
 								}
 							}
 						}
@@ -433,7 +435,7 @@ int main(int, char**)
 							int result = ARVT::copyFileToCStr(pdata.evaluated_input_split_2, pdata.input_split_2_data, IM_ARRAYSIZE(pdata.input_split_2_data));
 							if (result) {
 								strcpy(pdata.input_split_2_data, "error"); //TODO: red text
-								global_log.AddLog("[%.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Preview", strerror(result));
+								global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Preview", strerror(result));
 							}
 						}
 
@@ -441,8 +443,8 @@ int main(int, char**)
 						if (ImGui::Button("Reveal in File Explorer##Input Split 2")) {
 							int result = ARVT::revealFileExplorer(pdata.evaluated_input_split_2);
 							if (result) {
-								strcpy(pdata.input_split_2_data, "error"); //TODO: red text
-								global_log.AddLog("[%.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
+								//strcpy(pdata.input_split_2_data, "error"); //TODO: red text
+								//global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
 							}
 						}
 
@@ -502,8 +504,9 @@ int main(int, char**)
 							int result = ARVT::call_comment_test_image(pdata.the_file_input_name, idata);
 							if (result) {
 								//TODO: better messages
-								global_log.AddLog("[%.2fs] [error] %s: %s\n", ImGui::GetTime(), "Image", strerror(result));
+								global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Image", strerror(result));
 							} else {
+								global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Image", ("Successfully created test image " + std::string(pdata.evaluated_test_image_path)).c_str());
 								ret = ImGuiHelpers::LoadTextureFromFile(pdata.evaluated_test_image_path, &createdTestImage_texture, &createdTestImage_width, &createdTestImage_height);
 								//TODO: check if success
 							}
@@ -572,9 +575,14 @@ int main(int, char**)
 							int result = ARVT::call_comment_splitter(pdata.the_file_input_name);
 							if (result) {
 								//TODO: better messages
-								global_log.AddLog("[%.2fs] [error] %s: %s\n", ImGui::GetTime(), "Splitter", strerror(result));
+								global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Splitter", strerror(result));
 							} else {
-								ARVT::copyFileToCStr(ARVT::inputFileName_toCommentTestImagePath_Text(pdata.the_file_input_name).c_str(), pdata.input_split_1_data, IM_ARRAYSIZE(pdata.input_split_1_data));
+								global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Splitter", ("Successfully split " + std::string(pdata.evaluated_input_file_name)).c_str());
+								int result = ARVT::copyFileToCStr(ARVT::inputFileName_toCommentTestImagePath_Text(pdata.the_file_input_name).c_str(), pdata.input_split_1_data, IM_ARRAYSIZE(pdata.input_split_1_data));
+								if (result) {
+									strcpy(pdata.input_split_1_data, "error"); //TODO: red text
+									global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Preview", strerror(result));
+								}
 							}
 						}
 						lock_filename_tooltip(filenameIsLocked);
@@ -597,7 +605,9 @@ int main(int, char**)
 							int result = ARVT::call_comment_to_speech(pdata.the_file_input_name, idata, adata, vdata);
 							if (result) {
 								//TODO: better messages
-								global_log.AddLog("[%.2fs] [error] %s: %s\n", ImGui::GetTime(), "Video", strerror(result));
+								global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Video", strerror(result));
+							} else {
+								global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Video", ("Successfully created videos " + std::string(pdata.evaluated_output_speech_path)).c_str());
 							}
 							//TODO: at program start-up, check programs' existence and maybe ffmpeg version
 						}
@@ -609,7 +619,7 @@ int main(int, char**)
 							int result = ARVT::revealFileExplorer(ARVT::inputFileName_toCommentToSpeechPath_getFileExplorerName(pdata.the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current], vdata.audio_only_option_input).c_str());
 							if (result) {
 								//strcpy(, "error"); //TODO: red text
-								global_log.AddLog("[%.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
+								global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
 							}
 						}
 
@@ -617,14 +627,16 @@ int main(int, char**)
 							ImGui::EndDisabled();
 						}
 
+						ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 0.0f);
 						ImGui::EndTable();
+						ImGui::PopStyleVar();
 					}
 
 					ImGui::EndTabItem();
 				}
 
 				if (ImGui::BeginTabItem("Configure", nullptr, tab_flags[1])) {
-					if (ImGui::BeginTable("Configure##table1", 3, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_PadOuterX)) {
+					if (ImGui::BeginTable("Configure##table1", 3, table_flags)) {
 						ImGui::TableSetupColumn("Audio");
 						ImGui::TableSetupColumn("Video");
 						ImGui::TableSetupColumn("Other");
@@ -799,7 +811,9 @@ int main(int, char**)
 						ImGui::Checkbox("Demo Window", &show_demo_window);
 						#endif
 
+						ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 0.0f);
 						ImGui::EndTable();
+						ImGui::PopStyleVar();
 					}
 
 					ImGui::EndTabItem();
@@ -826,7 +840,7 @@ int main(int, char**)
 						//TODO
 					}
 
-					if (ImGui::BeginTable("Defaults##table1", 4, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_PadOuterX)) {
+					if (ImGui::BeginTable("Defaults##table1", 4, table_flags)) {
 						ImGui::TableSetupColumn("Image");
 						ImGui::TableSetupColumn("Audio");
 						ImGui::TableSetupColumn("Video");
@@ -956,7 +970,9 @@ int main(int, char**)
 						//other TODO: display what the commands will be (though maybe this should be in the main section?)
 
 						ImGui::EndDisabled();
+						ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 0.0f);
 						ImGui::EndTable();
+						ImGui::PopStyleVar();
 					}
 
 					ImGui::EndTabItem();
@@ -978,12 +994,23 @@ int main(int, char**)
 				ImGui::EndTabBar();
 			}
 
-			//the "long text display" example is another option, but more utility is better for this situation
-			//maybe use monospace font?
-			global_log.Draw();
+			ImGui::Separator();
+			if (ImGui::BeginTable("Logging##table1", 2, ImGuiTableFlags_SizingStretchProp)) {
+				//the "long text display" example is another option, but more utility is better for this situation
+				//maybe use monospace font?
+
+				ImGui::TableNextRow();
+				ImGui::TableSetColumnIndex(0);
+
+				global_log.Draw();
+				ImGui::TableNextColumn();
+				global_log.Draw_Extras();
+
+				ImGui::EndTable();
+			}
 
 			ImGui::End();
-			style.WindowBorderSize = old_style_WindowBorderSize; //pop
+			ImGui::PopStyleVar(); //ImGuiStyleVar_WindowBorderSize
 		}
 
 		if (show_demo_window)
