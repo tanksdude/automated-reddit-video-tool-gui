@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include <cstring> //strcpy, strcmp
+#include <cstdint>
 #include "av_shared_info.h"
 
 struct VideoData {

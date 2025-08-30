@@ -1,7 +1,6 @@
 #include "audio_data.h"
 #include "arvt_helpers.h"
 #include <cstring> //strcpy
-#include <cstdlib> //system()
 #include <fstream>
 #include <filesystem>
 #include <vector>
@@ -161,12 +160,21 @@ void AudioData::getVoiceListFromExe_Espeak(std::vector<std::string>& file_lines,
 
 void AudioData::update_voiceArray() {
 	// Step 1: poll available voices
-	//ARVT::system_helper((std::string(voiceEngineArray_exeForUpdatingVoiceList[voiceEngineArray_current]) + " > temp.txt").c_str(), true);
-	system((std::string(voiceEngineArray_exeForUpdatingVoiceList[voiceEngineArray_current]) + " > temp.txt").c_str());
+	int result = ARVT::system_helper((std::string(voiceEngineArray_exeForUpdatingVoiceList[voiceEngineArray_current]) + " > temp.txt").c_str(), false);
 
-	if (!std::filesystem::exists("temp.txt")) {
-		//TODO
-		std::cout << "could not write or overwrite temp.txt" << std::endl;
+	//temp.txt will be created even if the executable doesn't exist (on most systems)
+	//most systems return an error code if piping to a file fails
+	if (result) {
+		if (std::filesystem::exists("temp.txt")) [[likely]] {
+			std::filesystem::remove("temp.txt");
+		}
+		//TODO: better solution
+		voiceArray = new char*[1];
+		voiceArray[0] = new char[1];
+		voiceArray[0][0] = '\0';
+		voiceArray_current = -1;
+		voiceArray_length = 1;
+		return;
 	}
 
 	std::vector<std::string> file_lines;
@@ -177,7 +185,7 @@ void AudioData::update_voiceArray() {
 		file_lines.push_back(line);
 	}
 	exe_output.close();
-	std::filesystem::remove("temp.txt"); //TODO: this can throw, also handle if it didn't exist
+	std::filesystem::remove("temp.txt"); //TODO: this can throw, also technically it's possible for it to get deleted earlier but whatever
 
 	// Step 2: read the available voices
 

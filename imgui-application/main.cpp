@@ -411,6 +411,7 @@ int main(int, char**)
 							int result = ARVT::copy_file(pdata.evaluated_input_split_1, pdata.evaluated_input_split_2);
 							if (result) {
 								strcpy(pdata.input_split_2_data, "error copying"); //TODO: red text
+								global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Copy", strerror(result));
 							} else {
 								global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Copy", ("Successfully copied to " + std::string(pdata.evaluated_input_split_2)).c_str());
 								int result = ARVT::copyFileToCStr(pdata.evaluated_input_split_2, pdata.input_split_2_data, IM_ARRAYSIZE(pdata.input_split_2_data));
@@ -751,8 +752,15 @@ int main(int, char**)
 
 						ImGui::SeparatorText("Application");
 
+						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.5f);
 						//TODO: change this to a loader, then use the example font selector?
 						ImGui::InputText("Font Path", pdata.application_font_path, IM_ARRAYSIZE(pdata.application_font_path), ImGuiInputTextFlags_CallbackCharFilter, filepathCleaningFunc);
+						//not sure if this issue applies on Linux:
+						#ifdef _WIN32
+						ImGui::SameLine();
+						ImGuiHelpers::HelpMarker("C:\\Windows\\Fonts does not have folders in it!\n"
+						                         "For example, Noto Sans is not actually \"Noto Sans\\NotoSans-Regular.ttf\" but just \"NotoSans-Regular.ttf\".");
+						#endif
 						ImGui::SameLine();
 						if (ImGui::Button("Refresh##Font Path")) {
 							needToChangeFonts = true;
@@ -760,6 +768,7 @@ int main(int, char**)
 						if (ImGui::DragFloat("Font Size", &pdata.application_font_size, 0.20f, 8.0f, 60.0f, "%.0f")) {
 							refreshApplicationFontSize();
 						}
+						ImGui::PopItemWidth();
 
 						ImGui::ColorEdit3("Background Color", (float*)&pdata.background_color);
 						ImGui::ColorEdit4("Window Color", (float*)&style.Colors[ImGuiCol_WindowBg]); //TODO

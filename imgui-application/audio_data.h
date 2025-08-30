@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <cstdint>
 #include "av_shared_info.h"
 
 struct AudioData {
