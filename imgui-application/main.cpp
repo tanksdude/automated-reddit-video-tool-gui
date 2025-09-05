@@ -478,18 +478,20 @@ int main(int, char**)
 						ImGui::InputText("Background Color",      idata.background_color_input,    IM_ARRAYSIZE(idata.background_color_input), ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc); //TODO: think these need to also scrub backslashes
 						ImGui::SliderScalar("Newline Count", ImGuiDataType_U8, &idata.paragraph_newline_v, &idata.paragraph_newline_min, &idata.paragraph_newline_max);
 						ImGui::Checkbox("Paragraph Tabbed Start", &idata.paragraph_tabbed_start_input);
-						ImGui::InputText("Font Name",             idata.font_name,                 IM_ARRAYSIZE(idata.font_name),              ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc);
-						ImGui::Indent();
-						ImGui::Checkbox("Font is a family",       &idata.font_is_family);
-						ImGui::SameLine();
-						ImGuiHelpers::HelpMarker("Every individual font has its own name, but they're often grouped under a family.\n"
-						                         "Bold/Italic/Bold+Italic/SemiLight/whatever versions of the font are part of the font's family.\n"
-						#ifdef _WIN32
-						                         "See `magick -list font` for the list of available fonts.");
-						#else
-						                         "See `convert -list font` for the list of available fonts.");
-						#endif
-						ImGui::Unindent();
+						const bool opened_additional_options_test_image = ImGui::TreeNodeEx("Additional Options##Test Image", ImGuiTreeNodeFlags_FramePadding);
+						if (opened_additional_options_test_image) {
+							ImGui::Unindent(style.IndentSpacing); //TODO: why isn't ImGui::GetTreeNodeToLabelSpacing() correct?
+							ImGui::InputText("Font Name",             idata.font_name,                 IM_ARRAYSIZE(idata.font_name),              ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc);
+							ImGui::Indent();
+							ImGui::Checkbox("Font is a family",       &idata.font_is_family);
+							ImGui::SameLine();
+							ImGuiHelpers::HelpMarker("Every individual font has its own name, but they're often grouped under a family.\n"
+							                         "Bold/Italic/Bold+Italic/SemiLight/whatever versions of the font are part of the font's family.\n");
+							ImGui::Unindent();
+							ImGui::Indent(style.IndentSpacing);
+							ImGui::TreePop();
+						}
+						const int test_image_font_item_count = 7 + (opened_additional_options_test_image ? 2 : 0);
 						ImGui::PopItemWidth();
 
 						//TODO: export/import settings (use INI file) (buttons: export, quick import (same file name), import specific (file select)) (also a separate gui for batch remake, where it will re-run the script with the settings files)
@@ -553,7 +555,7 @@ int main(int, char**)
 						float columnHeights[3];
 						columnHeights[0] = lock_icon_frame_height + ImGui::GetFrameHeightWithSpacing() + ImGuiHelpers::getMultilineInputHeight(ImGui::GetTextLineHeight() * 16);
 						columnHeights[1] = 7 * ImGui::GetFrameHeightWithSpacing() + 2 * ImGuiHelpers::getMultilineInputHeight(0);
-						columnHeights[2] = (5 + 8 + 4 + 4) * ImGui::GetFrameHeightWithSpacing() + no_voice_height;
+						columnHeights[2] = (5 + test_image_font_item_count + 4 + 4) * ImGui::GetFrameHeightWithSpacing() + no_voice_height;
 
 						const float largestColumn = *std::max_element(columnHeights, columnHeights + IM_ARRAYSIZE(columnHeights));
 						const float contentAvailableY = ImGui::GetContentRegionAvail().y + 2*ImGui::GetStyle().ItemSpacing.y;
