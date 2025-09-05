@@ -483,15 +483,16 @@ int main(int, char**)
 							ImGui::Unindent(style.IndentSpacing); //TODO: why isn't ImGui::GetTreeNodeToLabelSpacing() correct?
 							ImGui::InputText("Font Name",             idata.font_name,                 IM_ARRAYSIZE(idata.font_name),              ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc);
 							ImGui::Indent();
-							ImGui::Checkbox("Font is a family",       &idata.font_is_family);
+							ImGui::Checkbox("Font is a family",       &idata.font_is_family_input);
 							ImGui::SameLine();
 							ImGuiHelpers::HelpMarker("Every individual font has its own name, but they're often grouped under a family.\n"
 							                         "Bold/Italic/Bold+Italic/SemiLight/whatever versions of the font are part of the font's family.\n");
 							ImGui::Unindent();
+							ImGui::Combo("Text Alignment", &idata.textAlignmentArray_current, idata.textAlignmentArray, IM_ARRAYSIZE(idata.textAlignmentArray));
 							ImGui::Indent(style.IndentSpacing);
 							ImGui::TreePop();
 						}
-						const int test_image_font_item_count = 7 + (opened_additional_options_test_image ? 2 : 0);
+						const int test_image_font_item_count = 7 + (opened_additional_options_test_image ? 3 : 0);
 						ImGui::PopItemWidth();
 
 						//TODO: export/import settings (use INI file) (buttons: export, quick import (same file name), import specific (file select)) (also a separate gui for batch remake, where it will re-run the script with the settings files)

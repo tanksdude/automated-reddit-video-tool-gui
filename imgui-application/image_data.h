@@ -17,8 +17,11 @@ struct ImageData {
 	uint8_t paragraph_newline_max = 4;
 	bool paragraph_tabbed_start_input = false;
 
-	bool font_is_family;
+	bool font_is_family_input;
 	char font_name[256]; //there are some fonts with really long names
+
+	static const char* textAlignmentArray[5];
+	int textAlignmentArray_current = 0;
 
 	static const char* imageFormatArray[6];
 	int imageFormatArray_current = 0;
@@ -31,6 +34,7 @@ struct ImageData {
 	inline std::string get_font_size_input() const { return std::string(font_size_input); }
 	inline std::string get_font_color_input() const { return std::string(font_color_input); }
 	inline std::string get_background_color_input() const { return std::string(background_color_input); }
+	inline std::string get_textAlignment() const { return std::string(textAlignmentArray[textAlignmentArray_current]); }
 	inline std::string get_imageFormat() const { return std::string(imageFormatArray[imageFormatArray_current]); }
 
 	ImageData();

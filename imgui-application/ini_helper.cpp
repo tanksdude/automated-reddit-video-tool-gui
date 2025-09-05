@@ -45,6 +45,7 @@ void CreateDefaultIniIfNeeded(const std::string& path) {
 	"\n"
 	"FontName = Verdana\n"
 	"FontIsFamily = false\n"
+	"TextAlignment = default\n"
 	"\n"
 	"ImageFormat = .png\n"
 	"\n"
@@ -187,11 +188,23 @@ void Fill_ImageData(ImageData& idata, const mINI::INIStructure& ini_object) {
 		std::string get = ini_object.get("IMAGE").get("FontIsFamily");
 		if (!get.empty()) {
 			if (get == "true" || get == "True" || get == "TRUE" || get == "1") {
-				idata.font_is_family = true;
+				idata.font_is_family_input = true;
 			} else if (get == "false" || get == "False" || get == "FALSE" || get == "0") {
-				idata.font_is_family = false;
+				idata.font_is_family_input = false;
 			} else {
 				std::cerr << ("Unknown value for [IMAGE].FontIsFamily: \"" + get + "\"") << std::endl;
+			}
+		}
+	}
+
+	if (ini_object.get("IMAGE").has("TextAlignment")) {
+		std::string get = ini_object.get("IMAGE").get("TextAlignment");
+		if (!get.empty()) {
+			size_t index = std::distance(idata.textAlignmentArray, std::find(idata.textAlignmentArray, idata.textAlignmentArray + sizeof(idata.textAlignmentArray) / sizeof(*idata.textAlignmentArray), get));
+			if (index != sizeof(idata.textAlignmentArray) / sizeof(*idata.textAlignmentArray)) {
+				idata.textAlignmentArray_current = index;
+			} else {
+				std::cerr << ("Unknown value for [IMAGE].TextAlignment: \"" + get + "\"") << std::endl;
 			}
 		}
 	}

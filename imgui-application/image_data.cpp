@@ -1,6 +1,7 @@
 #include "image_data.h"
 #include <cstring> //strcpy
 
+const char* ImageData::textAlignmentArray[5] = { "default", "left", "center", "right", "justify" };
 const char* ImageData::imageFormatArray[6] = { ".png", ".jpg", ".avif", ".webp", ".tiff", ".bmp" };
 
 ImageData::ImageData()  {
@@ -13,6 +14,6 @@ ImageData::ImageData()  {
 	strcpy(font_color_input, "white");
 	strcpy(background_color_input, "black");
 
-	font_is_family = false;
+	font_is_family_input = false;
 	strcpy(font_name, "Verdana");
 }
