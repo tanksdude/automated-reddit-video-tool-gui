@@ -16,6 +16,7 @@ struct ImageData {
 	uint8_t paragraph_newline_min = 0;
 	uint8_t paragraph_newline_max = 4;
 	bool paragraph_tabbed_start_input = false;
+	bool skip_lone_lf_input = true;
 
 	bool font_is_family_input;
 	char font_name[256]; //there are some fonts with really long names

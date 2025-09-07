@@ -144,6 +144,7 @@ parser.add_argument("paragraph_tabbed_start")
 parser.add_argument("font_name")
 parser.add_argument("font_is_family")
 parser.add_argument("text_alignment")
+parser.add_argument("skip_lf_line")
 parser.add_argument("imageFormat")
 
 parser.add_argument("-n", "--video_replacement_numbers", metavar="video_replacement_numbers", required=False, help="update/generate a specific video")
@@ -174,6 +175,7 @@ IMAGE_PARAGRAPH_START = "\t" if int(args.paragraph_tabbed_start) else ""
 IMAGE_FONT_NAME = args.font_name
 IMAGE_FONT_IS_FAMILY = int(args.font_is_family)
 IMAGE_TEXT_ALIGN_ARGS = textAlignmentArgsLookup[args.text_alignment]
+IMAGE_SKIP_LF_LINE = int(args.skip_lf_line)
 IMAGE_FORMAT = args.imageFormat
 # evaluated image parameters:
 IMAGE_SIZE = str(IMAGE_WIDTH) + "x" + str(IMAGE_HEIGHT)
@@ -350,6 +352,8 @@ for i in range(len(image_text_file_lines)):
 	image_line = image_text_file_lines[i]
 	speech_line = speech_line[0:-1] # every line should end in a \n
 	image_line = image_line[0:-1]
+	if IMAGE_SKIP_LF_LINE and image_line == "\\n":
+		continue
 	if len(speech_line) == 0:
 		curr_text_file_read += IMAGE_PARAGRAPH_SEP + IMAGE_PARAGRAPH_START
 		continue

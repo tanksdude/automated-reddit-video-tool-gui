@@ -235,7 +235,8 @@ int call_comment_test_image(const char* name, const ImageData& idata) {
 		" "   + std::to_string(idata.paragraph_tabbed_start_input) +
 		" \"" + idata.font_name + "\"" +
 		" "   + std::to_string(idata.font_is_family_input) +
-		" "   + idata.get_textAlignment();
+		" "   + idata.get_textAlignment() +
+		" "   + std::to_string(idata.skip_lone_lf_input);
 
 	#ifdef _WIN32
 	if (command.size() > 4000) {
@@ -264,6 +265,7 @@ int call_comment_to_speech(const char* name, const ImageData& idata, const Audio
 		" \"" + idata.font_name + "\"" +
 		" "   + std::to_string(idata.font_is_family_input) +
 		" "   + idata.get_textAlignment() +
+		" "   + std::to_string(idata.skip_lone_lf_input) +
 		" "   + idata.get_imageFormat() +
 
 		" -n \"" + vdata.get_video_replacement_numbers_input() + "\"" + //needs the -n flag, otherwise Python's argparse will treat something like "-3" as an argument and get confused (pretty sure it's allowed because "-3" is a negative number)

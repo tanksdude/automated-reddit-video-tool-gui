@@ -46,6 +46,7 @@ void CreateDefaultIniIfNeeded(const std::string& path) {
 	"FontName = Verdana\n"
 	"FontIsFamily = false\n"
 	"TextAlignment = default\n"
+	"SkipLoneLF = true\n"
 	"\n"
 	"ImageFormat = .png\n"
 	"\n"
@@ -205,6 +206,19 @@ void Fill_ImageData(ImageData& idata, const mINI::INIStructure& ini_object) {
 				idata.textAlignmentArray_current = index;
 			} else {
 				std::cerr << ("Unknown value for [IMAGE].TextAlignment: \"" + get + "\"") << std::endl;
+			}
+		}
+	}
+
+	if (ini_object.get("IMAGE").has("SkipLoneLF")) {
+		std::string get = ini_object.get("IMAGE").get("SkipLoneLF");
+		if (!get.empty()) {
+			if (get == "true" || get == "True" || get == "TRUE" || get == "1") {
+				idata.skip_lone_lf_input = true;
+			} else if (get == "false" || get == "False" || get == "FALSE" || get == "0") {
+				idata.skip_lone_lf_input = false;
+			} else {
+				std::cerr << ("Unknown value for [IMAGE].SkipLoneLF: \"" + get + "\"") << std::endl;
 			}
 		}
 	}

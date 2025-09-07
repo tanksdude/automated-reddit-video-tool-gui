@@ -489,10 +489,13 @@ int main(int, char**)
 							                         "Bold/Italic/Bold+Italic/SemiLight/whatever versions of the font are part of the font's family.\n");
 							ImGui::Unindent();
 							ImGui::Combo("Text Alignment", &idata.textAlignmentArray_current, idata.textAlignmentArray, IM_ARRAYSIZE(idata.textAlignmentArray));
+							ImGui::Checkbox("Skip line with lone '\\n'", &idata.skip_lone_lf_input);
+							ImGui::SameLine();
+							ImGuiHelpers::HelpMarker("If a line only has \"\\n\" on it, this will skip it, allowing an extra line with nothing on it.");
 							ImGui::Indent(style.IndentSpacing);
 							ImGui::TreePop();
 						}
-						const int test_image_font_item_count = 7 + (opened_additional_options_test_image ? 3 : 0);
+						const int test_image_font_item_count = 7 + (opened_additional_options_test_image ? 4 : 0);
 						ImGui::PopItemWidth();
 
 						//TODO: export/import settings (use INI file) (buttons: export, quick import (same file name), import specific (file select)) (also a separate gui for batch remake, where it will re-run the script with the settings files)

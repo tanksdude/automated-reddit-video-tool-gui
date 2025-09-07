@@ -43,6 +43,7 @@ parser.add_argument("paragraph_tabbed_start")
 parser.add_argument("font_name")
 parser.add_argument("font_is_family")
 parser.add_argument("text_alignment")
+parser.add_argument("skip_lf_line")
 
 # TODO: don't force parameter order
 
@@ -64,6 +65,7 @@ IMAGE_PARAGRAPH_START = "\t" if int(args.paragraph_tabbed_start) else ""
 IMAGE_FONT_NAME = args.font_name
 IMAGE_FONT_IS_FAMILY = int(args.font_is_family)
 IMAGE_TEXT_ALIGN_ARGS = textAlignmentArgsLookup[args.text_alignment]
+IMAGE_SKIP_LF_LINE = int(args.skip_lf_line)
 # evaluated image parameters:
 IMAGE_SIZE = str(IMAGE_WIDTH) + "x" + str(IMAGE_HEIGHT)
 IMAGE_SIZE_EXTENDED = str(IMAGE_WIDTH + 2*IMAGE_W_BORDER) + "x" + str(IMAGE_HEIGHT + 2*IMAGE_H_BORDER)
@@ -101,7 +103,8 @@ curr_file_read = IMAGE_PARAGRAPH_START
 
 for line in image_text_file_lines:
 	line = line[0:-1] # every line should end in a \n
-	#print(line, end="")
+	if IMAGE_SKIP_LF_LINE and line == "\\n":
+		continue
 	if len(line) == 0:
 		curr_file_read += IMAGE_PARAGRAPH_SEP + IMAGE_PARAGRAPH_START
 		continue
