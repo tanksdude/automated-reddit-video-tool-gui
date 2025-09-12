@@ -9,8 +9,8 @@ namespace ARVT {
 const std::string INPUT_COMMENTS = "../input_comments/";
 const std::string INPUT_SPLITS = "../input_splits/";
 const std::string TEST_IMAGES = "../test_images/";
-//const std::string TEST_IMAGE_DATA = "../test_image_data/"; //TODO
 const std::string OUTPUT_SPEECH = "../output_speech/";
+const std::string VIDEO_SETTINGS = "../video_settings/";
 #ifdef _WIN32
 const std::string COMMAND_QUOTE = "\""; //TODO: actually use
 const std::string PYTHON_CMD = "python";
@@ -28,6 +28,7 @@ void copyEvaluatedFileName_toCommentTestImagePath_Text(const char* name, char* d
 void copyEvaluatedFileName_toCommentTestImagePath_Speech(const char* name, char* dest, size_t buf_size);
 void copyEvaluatedFileName_toCommentTestImagePath_TestImage(const char* name, const ImageData& id, char* dest, size_t buf_size);
 void copyEvaluatedFileName_toCommentToSpeechPath(const char* name, const VideoData& vd, char* dest, size_t buf_size);
+void copyEvaluatedFileName_toVideoSettingsPath(const char* name, char* dest, size_t buf_size);
 
 //returns 0 if no errors; does not have to completely fill the buffer
 //1: some error; 2: does not exist or is not a file; 3: reading error
@@ -51,6 +52,7 @@ std::string inputFileName_toCommentTestImagePath_Speech(const char* name);
 std::string inputFileName_toCommentTestImagePath_TestImage(const char* name, const char* format);
 std::string inputFileName_toCommentToSpeechPath(const char* name, const char* container, bool audio_only);
 std::string inputFileName_toCommentToSpeechPath_getFileExplorerName(const char* name, const char* container, bool audio_only);
+std::string inputFileName_toVideoSettingsPath(const char* name);
 
 inline int system_helper(const char* command, bool no_cmd);
 

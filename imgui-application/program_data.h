@@ -14,6 +14,7 @@ struct ProgramData {
 
 	char evaluated_test_image_path[1024];
 	char evaluated_output_speech_path[1024];
+	char evaluated_video_settings_path[1024];
 
 	char application_font_path[1024];
 	float application_font_size;

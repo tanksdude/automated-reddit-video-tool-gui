@@ -33,8 +33,8 @@ void CreateApplicationFoldersIfNeeded() {
 	create_dir(INPUT_COMMENTS);
 	create_dir(INPUT_SPLITS);
 	create_dir(TEST_IMAGES);
-	//create_dir(TEST_IMAGE_DATA);
 	create_dir(OUTPUT_SPEECH);
+	create_dir(VIDEO_SETTINGS);
 }
 
 void copyEvaluatedFileName_toCommentSplitterPath(const char* name, char* dest, size_t buf_size) {
@@ -51,6 +51,9 @@ void copyEvaluatedFileName_toCommentTestImagePath_TestImage(const char* name, co
 }
 void copyEvaluatedFileName_toCommentToSpeechPath(const char* name, const VideoData& vd, char* dest, size_t buf_size) {
 	strncpy(dest, inputFileName_toCommentToSpeechPath(name, vd.get_videoContainer().c_str(), vd.audio_only_option_input).c_str(), buf_size);
+}
+void copyEvaluatedFileName_toVideoSettingsPath(const char* name, char* dest, size_t buf_size) {
+	strncpy(dest, inputFileName_toVideoSettingsPath(name).c_str(), buf_size);
 }
 
 std::string inputFileName_toCommentSplitterPath(const char* name) {
@@ -76,6 +79,9 @@ std::string inputFileName_toCommentToSpeechPath_getFileExplorerName(const char* 
 	std::string path = inputFileName_toCommentToSpeechPath(name, container, audio_only);
 	std::replace(path.begin(), path.end(), '$', '1');
 	return path;
+}
+std::string inputFileName_toVideoSettingsPath(const char* name) {
+	return VIDEO_SETTINGS + std::string(name) + ".ini";
 }
 
 //helper function using WinAPI to not spawn a new command prompt
@@ -272,7 +278,7 @@ int call_comment_to_speech(const char* name, const ImageData& idata, const Audio
 		(vdata.audio_only_option_input ? " -a" : "") +
 
 		" \"" + adata.get_voiceEngine() + "\"" +
-		" \"" + adata.get_voice() + "\"" +
+		" \"" + adata.get_voiceName() + "\"" +
 		" \"" + adata.get_audioEncoder() + "\"" +
 		" "   + adata.get_audioBitrate() +
 		" \"" + adata.get_audioPreset() + "\"" +

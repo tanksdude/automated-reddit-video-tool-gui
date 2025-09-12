@@ -304,7 +304,7 @@ int main(int, char**)
 			ImGui::SetWindowSize("Main Window", ImVec2(window_width, window_height));
 
 			if (ImGui::BeginTabBar("MainTabBar", 0)) {
-				ImGuiTabItemFlags tab_flags[6] = { 0, 0, 0, 0, 0, 0 };
+				ImGuiTabItemFlags tab_flags[5] = { 0, 0, 0, 0, 0 };
 				if (set_default_tab) [[unlikely]] {
 					//instead of clamping, set to zero on a bad value, because that's more obvious (maybe Help or About would be better?):
 					const int idx = (pdata.default_tab_idx >= IM_ARRAYSIZE(tab_flags) || pdata.default_tab_idx < 0) ? 0 : pdata.default_tab_idx;
@@ -498,8 +498,6 @@ int main(int, char**)
 						const int test_image_font_item_count = 7 + (opened_additional_options_test_image ? 4 : 0);
 						ImGui::PopItemWidth();
 
-						//TODO: export/import settings (use INI file) (buttons: export, quick import (same file name), import specific (file select)) (also a separate gui for batch remake, where it will re-run the script with the settings files)
-
 						ImGui::SeparatorText("Export");
 						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
 						ImGui::Combo("Image Format", &idata.imageFormatArray_current, idata.imageFormatArray, IM_ARRAYSIZE(idata.imageFormatArray));
@@ -601,6 +599,67 @@ int main(int, char**)
 
 						ImGui::TableNextColumn();
 						ImGui::TableNextColumn();
+
+						if (!filenameIsLocked) {
+							ImGui::BeginDisabled();
+						}
+
+						if (ImGui::BeginPopup("Settings")) {
+							//TODO: fix size
+							ARVT::copyEvaluatedFileName_toVideoSettingsPath(pdata.the_file_input_name, pdata.evaluated_video_settings_path, IM_ARRAYSIZE(pdata.evaluated_video_settings_path));
+							ImGui::InputText("##Settings File Path", pdata.evaluated_video_settings_path, IM_ARRAYSIZE(pdata.evaluated_video_settings_path), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
+							if (ImGui::Button("Write Current Settings", ImVec2(-FLT_MIN, 0.0f))) {
+								mINI::INIFile video_settings_file(pdata.evaluated_video_settings_path);
+								mINI::INIStructure video_settings_object;
+
+								ARVT::CopySettingsToIni(video_settings_object, idata, adata, vdata);
+								bool result = video_settings_file.generate(video_settings_object, true);
+								//TODO: maybe put a "confirm" box before actually writing the file
+
+								if (!result) {
+									//TODO: better messages
+									global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Settings", strerror(result));
+								} else {
+									global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Settings", ("Successfully wrote " + std::string(pdata.evaluated_video_settings_path)).c_str());
+								}
+							}
+							if (ImGui::Button("Import Settings", ImVec2(-FLT_MIN, 0.0f))) {
+								mINI::INIFile video_settings_file(pdata.evaluated_video_settings_path);
+								mINI::INIStructure video_settings_object;
+								bool result = video_settings_file.read(video_settings_object);
+
+								if (!result) {
+									//TODO: better messages
+									global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Settings", strerror(result));
+								} else {
+									ARVT::Fill_ImageData(idata, video_settings_object);
+									ARVT::Fill_AudioData(adata, video_settings_object, pdata.useExtraCodecs);
+									ARVT::Fill_VideoData(vdata, video_settings_object, pdata.useExtraCodecs);
+									//if the user changed pdata.useExtraCodecs, that's their fault
+									global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Settings", ("Successfully loaded " + std::string(pdata.evaluated_video_settings_path)).c_str());
+								}
+							}
+							if (ImGui::Button("Reveal in File Explorer##Video Settings", ImVec2(-FLT_MIN, 0.0f))) {
+								int result = ARVT::revealFileExplorer(pdata.evaluated_video_settings_path);
+								if (result) {
+									//strcpy(, "error"); //TODO: red text
+									//global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
+								}
+							}
+							ImGui::EndPopup();
+						}
+
+						ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("Settings").x) / 2 - style.FramePadding.x);
+						ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetFrameHeightWithSpacing() / 2);
+						if (ImGui::Button("Settings")) {
+							ImGui::OpenPopup("Settings");
+						}
+						lock_filename_tooltip(filenameIsLocked);
+
+						if (!filenameIsLocked) {
+							ImGui::EndDisabled();
+						}
+
 						ImGui::TableNextColumn();
 
 						if (!filenameIsLocked) {
@@ -621,13 +680,13 @@ int main(int, char**)
 						}
 						lock_filename_tooltip(filenameIsLocked);
 						if (adata.voiceArray_current < 0) { ImGui::EndDisabled(); }
-						if (ImGui::Button("Reveal in File Explorer##final video", ImVec2(-FLT_MIN, 0.0f))) {
+						if (ImGui::Button("Reveal in File Explorer##Final Video", ImVec2(-FLT_MIN, 0.0f))) {
 							//TODO: this should open in the folder if the file doesn't exist
 							//yes it's *kinda* a hack to open on just the first video, but it's better than iterating through every file in the folder and checking what's available
 							int result = ARVT::revealFileExplorer(ARVT::inputFileName_toCommentToSpeechPath_getFileExplorerName(pdata.the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current], vdata.audio_only_option_input).c_str());
 							if (result) {
 								//strcpy(, "error"); //TODO: red text
-								global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
+								//global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
 							}
 						}
 
@@ -765,7 +824,8 @@ int main(int, char**)
 						#ifdef _WIN32
 						ImGui::SameLine();
 						ImGuiHelpers::HelpMarker("C:\\Windows\\Fonts does not have folders in it!\n"
-						                         "For example, Noto Sans is not actually \"Noto Sans\\NotoSans-Regular.ttf\" but just \"NotoSans-Regular.ttf\".");
+						                         "For example, Noto Sans is not actually \"Noto Sans\\NotoSans-Regular.ttf\",\n"
+						                         "but just \"NotoSans-Regular.ttf\". Windows Explorer is lying to you!");
 						#endif
 						ImGui::SameLine();
 						if (ImGui::Button("Refresh##Font Path")) {
@@ -799,8 +859,6 @@ int main(int, char**)
 						//other TODO: display what the commands will be (though maybe this should be in the main section?)
 
 						ImGui::SeparatorText("Misc");
-
-						//TODO: application settings (fonts mainly)
 
 						ImGui::BeginDisabled(); //TODO: un-disable when there's saving and loading of video settings
 						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
@@ -843,165 +901,12 @@ int main(int, char**)
 				}
 				*/
 
-				if (ImGui::BeginTabItem("Defaults", nullptr, tab_flags[3])) {
-					ImGui::Text("TODO");
-					ImGui::BeginDisabled();
-
-					ImGui::Text("Write Changes:"); ImGui::SameLine();
-					if (ImGui::ImageButton("##Write Changes", return_symbol_texture, ImVec2(pdata.application_font_size, pdata.application_font_size))) {
-						//TODO
-						//ini_file.write(ini_object, true);
-					}
-					ImGui::Text("Load Defaults:"); ImGui::SameLine();
-					if (ImGui::ImageButton("##Load Defaults", circle_arrows_texture, ImVec2(pdata.application_font_size, pdata.application_font_size))) {
-						//TODO
-					}
-
-					if (ImGui::BeginTable("Defaults##table1", 4, table_flags)) {
-						ImGui::TableSetupColumn("Image");
-						ImGui::TableSetupColumn("Audio");
-						ImGui::TableSetupColumn("Video");
-						ImGui::TableSetupColumn("Other");
-						ImGui::TableHeadersRow();
-						ImGui::TableNextRow();
-
-						ImGui::TableSetColumnIndex(0);
-
-						//TODO: these should all be text inputs
-
-						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
-						ImGui::SeparatorText("Size");
-						ImGui::InputText("Image Width",     idata.image_width_input,    IM_ARRAYSIZE(idata.image_width_input),    ImGuiInputTextFlags_CharsDecimal);
-						ImGui::InputText("Image Height",    idata.image_height_input,   IM_ARRAYSIZE(idata.image_height_input),   ImGuiInputTextFlags_CharsDecimal);
-						ImGui::InputText("Width Border",    idata.image_w_border_input, IM_ARRAYSIZE(idata.image_w_border_input), ImGuiInputTextFlags_CharsDecimal);
-						ImGui::InputText("Height Border",   idata.image_h_border_input, IM_ARRAYSIZE(idata.image_h_border_input), ImGuiInputTextFlags_CharsDecimal);
-
-						ImGui::SeparatorText("Font"); //TODO: align SeparatorText to center
-						ImGui::InputText("Font Size",             idata.font_size_input,           IM_ARRAYSIZE(idata.font_size_input),        ImGuiInputTextFlags_CharsDecimal);
-						ImGui::InputText("Font Color",            idata.font_color_input,          IM_ARRAYSIZE(idata.font_color_input),       ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc);
-						ImGui::InputText("Background Color",      idata.background_color_input,    IM_ARRAYSIZE(idata.background_color_input), ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc); //TODO: think these need to also scrub backslashes
-						ImGui::SliderScalar("Newline Count", ImGuiDataType_U8, &idata.paragraph_newline_v, &idata.paragraph_newline_min, &idata.paragraph_newline_max);
-						ImGui::Checkbox("Paragraph Tabbed Start", &idata.paragraph_tabbed_start_input);
-						ImGui::PopItemWidth();
-
-						ImGui::SeparatorText("Export");
-						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
-						ImGui::Combo("Image Format", &idata.imageFormatArray_current, idata.imageFormatArray, IM_ARRAYSIZE(idata.imageFormatArray));
-						ImGui::PopItemWidth();
-
-						ImGui::TableNextColumn();
-
-						if (ImGui::Combo("Speech Engine", &adata.voiceEngineArray_current, adata.voiceEngineArray, IM_ARRAYSIZE(adata.voiceEngineArray))) {
-							//there was a change
-							adata.update_voiceArray();
-						}
-
-						ImGui::Combo("Voice", &adata.voiceArray_current, adata.voiceArray, adata.voiceArray_length);
-						//TODO: some kind of visual indicator when one isn't selected
-						ImGui::SameLine();
-						if (ImGui::Button("Refresh")) {
-							adata.update_voiceArray();
-						}
-
-						if (ImGui::Combo("Audio Encoder", &adata.audioEncoderArray_current, AudioData::get_audioEncoderArray(pdata.useExtraCodecs), AudioData::get_audioEncoderArraySize(pdata.useExtraCodecs))) {
-							adata.update_audioBitrateValues();
-							adata.update_audioPresetArray();
-						}
-
-						ImGui::Indent();
-
-						if (adata.audioCodec_hasPreset) {
-							ImGui::Combo(adata.audioCodec_presetTerm.c_str(), &adata.audioPresetArray_current, adata.get_audioPresetArray(), adata.get_audioPresetArray_size(), adata.get_audioPresetArray_size());
-						}
-
-						//ImGui doesn't support steps for sliders, oh well
-						ImGui::SliderScalar("Bitrate (kbps)", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max);
-
-						ImGui::Unindent();
-
-						ImGui::TableNextColumn();
-
-						ImGui::Checkbox("Audio Only", &vdata.audio_only_option_input);
-
-						//TODO: probably merge into one InputText
-						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.4f);
-						ImGui::InputText("##FPS Numerator",      vdata.fps_numerator_input,   IM_ARRAYSIZE(vdata.fps_numerator_input),   ImGuiInputTextFlags_CallbackCharFilter, integerOnlyPositiveFunc);
-						ImGui::SameLine();
-						ImGui::Text(" / ");
-						ImGui::SameLine();
-						ImGui::InputText("FPS##FPS Denominator", vdata.fps_denominator_input, IM_ARRAYSIZE(vdata.fps_denominator_input), ImGuiInputTextFlags_CallbackCharFilter, integerOnlyPositiveFunc);
-						ImGui::PopItemWidth();
-						ImGui::Combo("FPS##Integer", &vdata.fpsArray_current, vdata.fpsArray, IM_ARRAYSIZE(vdata.fpsArray), IM_ARRAYSIZE(vdata.fpsArray));
-
-						if (ImGui::Combo("Video Encoder", &vdata.videoEncoderArray_current, VideoData::get_videoEncoderArray(pdata.useExtraCodecs), VideoData::get_videoEncoderArraySize(pdata.useExtraCodecs))) {
-							vdata.update_videoCrfValues();
-							vdata.update_videoPresetArray();
-						}
-
-						ImGui::Indent();
-
-						if (vdata.videoCodec_hasPreset1) {
-							ImGui::Combo(vdata.videoCodec_preset1Term.c_str(), &vdata.videoPresetArray1_current, vdata.get_videoPresetArray1(), vdata.get_videoPresetArray1_size(), vdata.get_videoPresetArray1_size());
-							//doesn't take flags like ImGuiComboFlags_HeightLargest
-							if (vdata.videoCodec_hasPreset2) {
-								ImGui::Combo(vdata.videoCodec_preset2Term.c_str(), &vdata.videoPresetArray2_current, vdata.get_videoPresetArray2(), vdata.get_videoPresetArray2_size(), vdata.get_videoPresetArray2_size());
-							}
-						}
-
-						ImGui::SliderScalar("CRF", ImGuiDataType_S8, &vdata.crf_v, &vdata.crf_min, &vdata.crf_max);
-
-						ImGui::Unindent();
-
-						ImGui::Combo("Container", &vdata.videoContainerArray_current, vdata.videoContainerArray, IM_ARRAYSIZE(vdata.videoContainerArray));
-
-						ImGui::Indent();
-						ImGui::Checkbox("-movflags=+faststart", &vdata.faststart_flag);
-						ImGui::Unindent();
-
-						ImGui::TableNextColumn();
-
-						ImGui::SeparatorText("Application");
-
-						ImGui::InputText("Font Path", pdata.application_font_path, IM_ARRAYSIZE(pdata.application_font_path), ImGuiInputTextFlags_CallbackCharFilter, filepathCleaningFunc);
-						ImGui::DragFloat("Font Size", &pdata.application_font_size, 0.20f, 8.0f, 60.0f, "%.0f");
-
-						ImGui::ColorEdit3("Background Color", (float*)&pdata.background_color);
-						ImGui::ColorEdit4("Window Color", (float*)&style.Colors[ImGuiCol_WindowBg]); //TODO
-
-						if (ImGui::Checkbox("Extra Codecs", &pdata.useExtraCodecs)) {
-							if (!pdata.useExtraCodecs) {
-								if (adata.audioEncoderArray_current >= AudioData::get_audioEncoderArraySize(false)) {
-									adata.audioEncoderArray_current = 0;
-									adata.update_audioBitrateValues();
-									adata.update_audioPresetArray();
-								}
-								if (vdata.videoEncoderArray_current >= VideoData::get_videoEncoderArraySize(false)) {
-									vdata.videoEncoderArray_current = 0;
-									vdata.update_videoCrfValues();
-									vdata.update_videoPresetArray();
-								}
-							}
-						}
-
-						ImGui::SeparatorText("Paths");
-						ImGui::Text("TODO: three main dirs and a temp dir");
-						//other TODO: display what the commands will be (though maybe this should be in the main section?)
-
-						ImGui::EndDisabled();
-						ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 0.0f);
-						ImGui::EndTable();
-						ImGui::PopStyleVar();
-					}
-
-					ImGui::EndTabItem();
-				}
-
-				if (ImGui::BeginTabItem("Help", nullptr, tab_flags[4])) {
+				if (ImGui::BeginTabItem("Help", nullptr, tab_flags[2])) {
 					ImGui::Text("TODO");
 					ImGui::EndTabItem();
 				}
 
-				if (ImGui::BeginTabItem("About", nullptr, tab_flags[5])) {
+				if (ImGui::BeginTabItem("About", nullptr, tab_flags[3])) {
 					ImGui::Text("License: GNU General Public License v3.0");
 					ImGui::Text("SPDX-License-Identifier: GPL-3.0-only");
 					ImGui::Text("Requirements: TODO");

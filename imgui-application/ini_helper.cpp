@@ -658,4 +658,43 @@ void Fill_ProgramData(ProgramData& pdata, const mINI::INIStructure& ini_object) 
 	}
 }
 
+void CopySettingsToIni(mINI::INIStructure& ini_object, const ImageData& idata, const AudioData& adata, const VideoData& vdata) {
+	ini_object["IMAGE"]["ImageWidth"]   = idata.get_image_width_input();
+	ini_object["IMAGE"]["ImageHeight"]  = idata.get_image_height_input();
+	ini_object["IMAGE"]["ImageBorderW"] = idata.get_image_w_border_input();
+	ini_object["IMAGE"]["ImageBorderH"] = idata.get_image_h_border_input();
+
+	ini_object["IMAGE"]["FontSize"]        = idata.get_font_size_input();
+	ini_object["IMAGE"]["FontColor"]       = idata.get_font_color_input();
+	ini_object["IMAGE"]["BackgroundColor"] = idata.get_background_color_input();
+
+	ini_object["IMAGE"]["ParagraphNewlineCount"] = std::to_string(idata.paragraph_newline_v);
+	ini_object["IMAGE"]["ParagraphTabbedStart"]  = std::to_string(idata.paragraph_tabbed_start_input);
+
+	ini_object["IMAGE"]["FontName"]      = idata.font_name;
+	ini_object["IMAGE"]["FontIsFamily"]  = std::to_string(idata.font_is_family_input);
+	ini_object["IMAGE"]["TextAlignment"] = idata.get_textAlignment();
+	ini_object["IMAGE"]["SkipLoneLF"]    = std::to_string(idata.skip_lone_lf_input);
+
+	ini_object["IMAGE"]["ImageFormat"] = idata.get_imageFormat();
+
+	ini_object["AUDIO"]["VoiceEngine"] = adata.get_voiceEngine();
+	ini_object["AUDIO"]["VoiceName"]   = adata.get_voiceName();
+
+	ini_object["AUDIO"]["AudioEncoder"]     = adata.get_audioEncoder();
+	ini_object["AUDIO"]["AudioBitrateKbps"] = std::to_string(adata.audio_bitrate_v); //no need to check if lossless
+	ini_object["AUDIO"]["AudioPreset"]      = adata.get_audioPreset(); //TODO: don't use the full string
+
+	ini_object["VIDEO"]["VideoEncoder"] = vdata.get_videoEncoder();
+	ini_object["VIDEO"]["VideoPreset1"] = vdata.get_videoPreset1(); //TODO: don't use the full string
+	ini_object["VIDEO"]["VideoPreset2"] = vdata.get_videoPreset2(); //TODO: don't use the full string
+
+	ini_object["VIDEO"]["VideoFPS"] = vdata.get_fps();
+	ini_object["VIDEO"]["VideoCRF"] = vdata.get_videoCrf(); //no need to check if lossless
+
+	ini_object["VIDEO"]["VideoFaststartIfPossible"] = std::to_string(vdata.get_faststart_available() && vdata.faststart_flag);
+	ini_object["VIDEO"]["VideoContainer"]           = vdata.get_videoContainer();
+	ini_object["VIDEO"]["AudioOnly"]                = std::to_string(vdata.audio_only_option_input);
+}
+
 } // namespace ARVT

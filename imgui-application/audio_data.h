@@ -82,7 +82,7 @@ struct AudioData {
 	int16_t audio_bitrate_step = 4; //TODO: unused because ImGui sliders don't support stepping
 
 	inline std::string get_voiceEngine() const { return std::string(voiceEngineArray[voiceEngineArray_current]); }
-	inline std::string get_voice() const {
+	inline std::string get_voiceName() const {
 		if (voiceArray_current < 0) { return ""; }
 		return std::string(voiceArray[voiceArray_current]);
 	}

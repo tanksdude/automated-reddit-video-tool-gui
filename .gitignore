@@ -2,6 +2,7 @@ input_comments
 input_splits
 test_images
 output_speech
+video_settings
 imgui-application/Debug
 imgui-application/imgui.ini
 automated-reddit-video-tool-gui
