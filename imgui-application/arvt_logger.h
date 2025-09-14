@@ -46,22 +46,13 @@ struct ARVT_Logger {
 	}
 
 	void Draw_Extras() {
-		// Options menu
-		if (ImGui::BeginPopup("Options")) {
-			//ImGui::Checkbox("Auto-scroll", &AutoScroll);
-			ImGui::EndPopup();
-		}
-
-		// Main window
 		if (ImGui::Button("Clear 1")) {
 			Clear_OneLine();
 		}
 		ImGui::SameLine();
-		ImGui::BeginDisabled();
-		if (ImGui::Button("Options")) {
-			ImGui::OpenPopup("Options");
+		if (ImGui::Button("Test 1")) {
+			AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Test", "Test log entry");
 		}
-		ImGui::EndDisabled();
 		if (ImGui::Button("Clear 10")) {
 			//be lazy because I don't care
 			for (int i = 0; i < 10; i++) {
