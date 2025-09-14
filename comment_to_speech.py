@@ -204,6 +204,13 @@ if output_vid_file_path.find('$') == -1:
 input_speech_text_file_path = args.input_speech_file
 AUDIO_ONLY = args.audio_only
 
+text_to_image_command_args = [MAGICK_CMD, "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_FONT_COLOR, "-pointsize", IMAGE_FONT_SIZE]
+if IMAGE_FONT_IS_FAMILY:
+	text_to_image_command_args.extend(["-family", IMAGE_FONT_NAME])
+else:
+	text_to_image_command_args.extend(["-font", IMAGE_FONT_NAME])
+text_to_image_command_args.extend(IMAGE_TEXT_ALIGN_ARGS)
+
 speech_and_image_to_vid_command_args = []
 # FFmpeg video args
 speech_and_image_to_vid_command_args.extend(["-c:v", VIDEO_VID_CODEC_lib])
@@ -245,12 +252,8 @@ ttsFunctionLookup = {
 text_to_speech_func = ttsFunctionLookup[args.speechEngine]
 
 def text_to_image_func(img_file_name, text_file_name):
-	command_args = [MAGICK_CMD, "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_FONT_COLOR, "-pointsize", IMAGE_FONT_SIZE]
-	if IMAGE_FONT_IS_FAMILY:
-		command_args.extend(["-family", IMAGE_FONT_NAME])
-	else:
-		command_args.extend(["-font", IMAGE_FONT_NAME])
-	command_args.extend(IMAGE_TEXT_ALIGN_ARGS)
+	command_args = []
+	command_args.extend(text_to_image_command_args)
 	command_args.extend(["pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])
 	return subprocess.run(command_args)
 	# https://imagemagick.org/Usage/text/#caption

@@ -70,13 +70,16 @@ IMAGE_SKIP_LF_LINE = int(args.skip_lf_line)
 IMAGE_SIZE = str(IMAGE_WIDTH) + "x" + str(IMAGE_HEIGHT)
 IMAGE_SIZE_EXTENDED = str(IMAGE_WIDTH + 2*IMAGE_W_BORDER) + "x" + str(IMAGE_HEIGHT + 2*IMAGE_H_BORDER)
 
+text_to_image_command_args = [MAGICK_CMD, "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_FONT_COLOR, "-pointsize", IMAGE_FONT_SIZE]
+if IMAGE_FONT_IS_FAMILY:
+	text_to_image_command_args.extend(["-family", IMAGE_FONT_NAME])
+else:
+	text_to_image_command_args.extend(["-font", IMAGE_FONT_NAME])
+text_to_image_command_args.extend(IMAGE_TEXT_ALIGN_ARGS)
+
 def text_to_image_func(img_file_name, text_file_name):
-	command_args = [MAGICK_CMD, "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_FONT_COLOR, "-pointsize", IMAGE_FONT_SIZE]
-	if IMAGE_FONT_IS_FAMILY:
-		command_args.extend(["-family", IMAGE_FONT_NAME])
-	else:
-		command_args.extend(["-font", IMAGE_FONT_NAME])
-	command_args.extend(IMAGE_TEXT_ALIGN_ARGS)
+	command_args = []
+	command_args.extend(text_to_image_command_args)
 	command_args.extend(["pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])
 	return subprocess.run(command_args)
 	# https://imagemagick.org/Usage/text/#caption
