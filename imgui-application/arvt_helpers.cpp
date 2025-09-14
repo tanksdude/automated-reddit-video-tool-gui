@@ -85,7 +85,7 @@ std::string inputFileName_toVideoSettingsPath(const char* name) {
 }
 
 //helper function using WinAPI to not spawn a new command prompt
-inline int system_helper(const char* command, bool no_cmd) {
+int system_helper(const char* command, bool no_cmd) {
 	#ifdef _WIN32
 	//mostly copied from https://learn.microsoft.com/en-us/windows/win32/procthread/creating-processes
 	if (no_cmd) {

@@ -24,8 +24,9 @@ ProgramData::ProgramData() {
 
 	#ifdef _WIN32
 	strcpy(application_font_path, "C:\\Windows\\Fonts\\segoeui.ttf");
-	application_font_size = 20.0f;
+	application_font_size = 22.0f;
 	#else
+	//just assume Ubuntu
 	strcpy(application_font_path, "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc");
 	application_font_size = 24.0f;
 	#endif

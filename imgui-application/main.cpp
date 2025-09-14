@@ -107,7 +107,7 @@ void clear_input_data(bool lockNewState) {
 	}
 }
 
-void lock_filename_tooltip(bool filenameIsLocked) {
+inline void lock_filename_tooltip(bool filenameIsLocked) {
 	if (!filenameIsLocked) {
 		if (ImGui::BeginItemTooltip()) {
 			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
@@ -176,7 +176,7 @@ int main(int, char**)
     // Create window with graphics context
 	glfwWindowHint(GLFW_SCALE_TO_MONITOR, pdata.application_scale_to_monitor ? GLFW_TRUE : GLFW_FALSE);
     float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()); // Valid on GLFW 3.3+ only
-    GLFWwindow* window = glfwCreateWindow(pdata.initial_windowWidth, pdata.initial_windowHeight, "Automated Reddit Video Tool GUI v0.4.1 DEV", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(pdata.initial_windowWidth, pdata.initial_windowHeight, "Automated Reddit Video Tool GUI v0.5.0", nullptr, nullptr);
     if (window == nullptr)
         return 1;
     glfwMakeContextCurrent(window);
@@ -211,7 +211,7 @@ int main(int, char**)
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
     // - Our Emscripten build process allows embedding fonts to be accessible at runtime from the "fonts/" folder. See Makefile.emscripten for details.
     //style.FontSizeBase = 20.0f;
-    //io.Fonts->AddFontDefault();
+    io.Fonts->AddFontDefault();
     //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf");
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf");
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf");
@@ -407,7 +407,7 @@ int main(int, char**)
 							}
 						}
 						ImGui::SameLine();
-						if (ImGui::Button("↓ Make Copy ↓")) {
+						if (ImGui::Button("\u2193 Make Copy \u2193")) {
 							int result = ARVT::copy_file(pdata.evaluated_input_split_1, pdata.evaluated_input_split_2);
 							if (result) {
 								strcpy(pdata.input_split_2_data, "error copying"); //TODO: red text
@@ -480,7 +480,7 @@ int main(int, char**)
 						ImGui::Checkbox("Paragraph Tabbed Start", &idata.paragraph_tabbed_start_input);
 						const bool opened_additional_options_test_image = ImGui::TreeNodeEx("Additional Options##Test Image", ImGuiTreeNodeFlags_FramePadding);
 						if (opened_additional_options_test_image) {
-							ImGui::Unindent(style.IndentSpacing); //TODO: why isn't ImGui::GetTreeNodeToLabelSpacing() correct?
+							ImGui::Unindent(style.IndentSpacing); //TODO: why isn't ImGui::GetTreeNodeToLabelSpacing() correct? //TODO: it seems to align it with the tree node's parent, which is weird (requires DPI=1)
 							ImGui::InputText("Font Name",             idata.font_name,                 IM_ARRAYSIZE(idata.font_name),              ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc);
 							ImGui::Indent();
 							ImGui::Checkbox("Font is a family",       &idata.font_is_family_input);
@@ -506,7 +506,7 @@ int main(int, char**)
 						ARVT::copyEvaluatedFileName_toCommentTestImagePath_TestImage(pdata.the_file_input_name, idata, pdata.evaluated_test_image_path, IM_ARRAYSIZE(pdata.evaluated_test_image_path));
 						ImGui::InputText("##Test Image Path", pdata.evaluated_test_image_path, IM_ARRAYSIZE(pdata.evaluated_test_image_path), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 
-						if (ImGui::Button("Create →", ImVec2(-FLT_MIN, 0.0f))) {
+						if (ImGui::Button("Create \u2192", ImVec2(-FLT_MIN, 0.0f))) {
 							int result = ARVT::call_comment_test_image(pdata.the_file_input_name, idata);
 							if (result) {
 								//TODO: better messages
@@ -919,6 +919,7 @@ int main(int, char**)
 					ImGui::Text("SPDX-License-Identifier: GPL-3.0-only");
 					ImGui::Text("Requirements: TODO");
 					ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+					ImGui::TextLinkOpenURL("GitHub link", "https://github.com/tanksdude/automated-reddit-video-tool-gui");
 					ImGui::EndTabItem();
 				}
 

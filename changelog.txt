@@ -1,3 +1,11 @@
+0.5.0
+* organization: renamed the main folders to start with "arvt_" and moved the Python scripts to their own folder
+* fixed names of eSpeak voices
+* read/write video settings
+* preliminary error logging
+* image font option & text alignment
+* test image scaled size limited to its actual resolution
+
 0.4.1
 * option to scale the window with the monitor's scale factor
 

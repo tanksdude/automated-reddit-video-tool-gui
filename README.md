@@ -70,11 +70,11 @@ I have spent many hours trying to get ImageMagick to work. If you want something
 * remove conflicting policies (mainly this: `<policy domain="path" rights="none" pattern="@*"/>` (this might be the only thing that *has* to be changed))
 * In ImageMagick 6, this doesn't actually work, despite what documentation I could find saying this should be more than enough. In ImageMagick 7, the background color works just fine, but not the text color.
 
-If you know how to get it working, please do share, because you would probably be the only person on the Internet that knows how to fix this issue. Which I find exceedingly strange no one has documented a fix for this, because if ImageMagick is truly as critical to infrastructure as [this xkcd comic claims (read the alt text)](https://xkcd.com/2347/), then it has to be running on a lot more Linux machines than Windows, so this should be a very-well documented solution.
+If you know how to get it working, please do share, because you would probably be the only person on the Internet that knows how to fix this issue. Which I find exceedingly strange no one has documented a fix for this, because if ImageMagick is truly as critical to infrastructure as [this xkcd comic claims (read the alt text)](https://xkcd.com/2347/), then it has to be running on a lot more Linux machines than Windows, so this should be a very-well documented solution. (Though those systems are probably compiling from source and thus using a security policy that works.)
 
 ## Option list (WIP)
 
-By default, this program uses H.264 and AAC codecs by default for high compatibility, however these are not the "recommended" codecs. You will probably want lossless codecs, especially when the filesize increase is rather small. I recommend changing H.264 to FFV1, or Ut Video if your video editor does not support FFV1, and change AAC to FLAC.
+By default, this program uses H.264 and AAC codecs by default for high compatibility, however these are not the "recommended" codecs. You will probably want lossless codecs, especially when the filesize increase is rather small. For video, I recommend changing H.264 to FFV1, or Ut Video if your video editor does not support FFV1. For audio, I recommend changing AAC to FLAC, or maybe copy if decode speed is vital.
 
 ## TODO list
 
@@ -105,7 +105,7 @@ GNU General Public License v3.0
 
 ### Externals' licenses
 
-* [ImGui](https://github.com/ocornut/imgui): MIT
+* [Dear ImGui](https://github.com/ocornut/imgui): MIT
 * [GLFW](https://www.glfw.org/): zlib
 * [stb_image](https://github.com/nothings/stb): MIT or The Unlicense
 * [mINI](https://github.com/metayeti/mINI): MIT
