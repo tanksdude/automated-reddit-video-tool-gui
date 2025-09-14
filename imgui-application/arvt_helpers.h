@@ -6,11 +6,11 @@
 
 namespace ARVT {
 
-const std::string INPUT_COMMENTS = "../input_comments/";
-const std::string INPUT_SPLITS = "../input_splits/";
-const std::string TEST_IMAGES = "../test_images/";
-const std::string OUTPUT_SPEECH = "../output_speech/";
-const std::string VIDEO_SETTINGS = "../video_settings/";
+const std::string INPUT_COMMENTS = "../arvt_input_comments/";
+const std::string INPUT_SPLITS = "../arvt_input_splits/";
+const std::string TEST_IMAGES = "../arvt_test_images/";
+const std::string OUTPUT_SPEECH = "../arvt_output_speech/";
+const std::string VIDEO_SETTINGS = "../arvt_video_settings/";
 #ifdef _WIN32
 const std::string COMMAND_QUOTE = "\""; //TODO: actually use
 const std::string PYTHON_CMD = "python";

@@ -8,7 +8,7 @@ This program does not automate the entire process of making a "Reddit reading" v
 
 ![readme video](readme-video-alpha.gif)
 
-1. Obtain the comment you want to make a video for as a .txt file. Put that file in the `input_comments` folder.
+1. Obtain the comment you want to make a video for as a .txt file. Put that file in the `arvt_input_comments` folder.
 1. Type in the file name in the "File Name" section. Click "Preview File" to make sure you got the right file.
 1. **Click the lock icon**, then click "Split!" to have it split.
 1. (Optional) If you want to have the speech and image text be different, click "Make Copy" to make a copy of it, then "Reveal in File Explorer" to find it, then edit it as you wish. Check "Use Speech Text" to enable using it.
