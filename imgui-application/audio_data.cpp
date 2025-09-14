@@ -1,6 +1,6 @@
 #include "audio_data.h"
 #include "arvt_helpers.h"
-#include <cstring> //strcpy
+#include <cstring> //memcpy
 #include <fstream>
 #include <filesystem>
 #include <vector>
@@ -168,12 +168,9 @@ void AudioData::update_voiceArray() {
 		if (std::filesystem::exists("temp.txt")) [[likely]] {
 			std::filesystem::remove("temp.txt");
 		}
-		//TODO: better solution
-		voiceArray = new char*[1];
-		voiceArray[0] = new char[1];
-		voiceArray[0][0] = '\0';
+		voiceArray = nullptr;
 		voiceArray_current = -1;
-		voiceArray_length = 1;
+		voiceArray_length = 0;
 		return;
 	}
 
@@ -224,16 +221,14 @@ void AudioData::update_voiceArray() {
 
 	if (voiceList.empty()) {
 		//some error
-		voiceArray = new char*[1];
-		voiceArray[0] = new char[1];
-		voiceArray[0][0] = '\0';
+		voiceArray = nullptr;
 		voiceArray_current = -1;
-		voiceArray_length = 1;
+		voiceArray_length = 0;
 	} else {
 		voiceArray = new char*[voiceList.size()];
 		for (int i = 0; i < voiceList.size(); i++) {
 			voiceArray[i] = new char[voiceList[i].size()+1];
-			strcpy(voiceArray[i], voiceList[i].c_str());
+			memcpy(voiceArray[i], voiceList[i].c_str(), voiceList[i].size()+1);
 		}
 		voiceArray_current = -1;
 		voiceArray_length = voiceList.size();
