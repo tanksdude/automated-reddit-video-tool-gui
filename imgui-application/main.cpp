@@ -565,9 +565,17 @@ int main(int, char**)
 						const float availableWidth = std::max(0.0f, ImGui::GetContentRegionAvail().x);
 
 						if ((availableWidth / createdTestImage_width) * createdTestImage_height > availableHeight) {
-							ImGui::Image((ImTextureID)(intptr_t)createdTestImage_texture, ImVec2((availableHeight / createdTestImage_height) * createdTestImage_width, availableHeight));
+							if (availableHeight > createdTestImage_height) {
+								ImGui::Image((ImTextureID)(intptr_t)createdTestImage_texture, ImVec2(createdTestImage_width, createdTestImage_height));
+							} else {
+								ImGui::Image((ImTextureID)(intptr_t)createdTestImage_texture, ImVec2((availableHeight / createdTestImage_height) * createdTestImage_width, availableHeight));
+							}
 						} else {
-							ImGui::Image((ImTextureID)(intptr_t)createdTestImage_texture, ImVec2(availableWidth, (availableWidth / createdTestImage_width) * createdTestImage_height));
+							if (availableWidth > createdTestImage_width) {
+								ImGui::Image((ImTextureID)(intptr_t)createdTestImage_texture, ImVec2(createdTestImage_width, createdTestImage_height));
+							} else {
+								ImGui::Image((ImTextureID)(intptr_t)createdTestImage_texture, ImVec2(availableWidth, (availableWidth / createdTestImage_width) * createdTestImage_height));
+							}
 						}
 
 						ImGui::TableNextRow();
