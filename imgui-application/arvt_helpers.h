@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 #include "image_data.h"
 #include "audio_data.h"
 #include "video_data.h"
@@ -36,7 +37,9 @@ int copyFileToCStr(const char* path, char* dest, int buf_size); //TODO: maybe ma
 
 int copy_file(const char* path, const char* newPath);
 int revealFileExplorer(const char* path); //note: this also checks for existence using <filesystem> //TODO: should make a separate version for each path (going further, should that mean everything this program can do is a function exposed here?)
-int deleteAllOldFiles(const char* dir, int hourCount);
+
+int getListOfOldFiles(const char* dir, int hourCount, std::vector<std::string>& deleteFileList);
+int deleteAllOldFiles(const std::vector<std::string>& fileList); //no undo!
 
 int call_comment_splitter(const char* name);
 int call_comment_test_image(const char* name, const ImageData& idata);

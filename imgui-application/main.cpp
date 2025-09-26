@@ -25,7 +25,9 @@ AudioData adata;
 VideoData vdata;
 ProgramData pdata;
 
-ARVT_Logger global_log;
+ARVT_Logger global_log(true);
+ARVT_Logger deleteFileLogger(false);
+std::vector<std::string> deleteFileList;
 
 bool needToChangeFonts = false;
 
@@ -311,7 +313,7 @@ int main(int, char**)
 					tab_flags[idx] |= ImGuiTabItemFlags_SetSelected;
 					set_default_tab = false;
 				}
-				ImGuiTableFlags table_flags = ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_PadOuterX;
+				const ImGuiTableFlags table_flags = ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_PadOuterX;
 
 				if (ImGui::BeginTabItem("Execute", nullptr, tab_flags[0])) {
 					if (ImGui::BeginTable("Execute##table1", 4, table_flags)) {
@@ -321,7 +323,6 @@ int main(int, char**)
 						ImGui::TableSetupColumn("Test Image");
 						ImGui::TableHeadersRow();
 						ImGui::TableNextRow();
-
 						ImGui::TableSetColumnIndex(0);
 
 						if (filenameIsLocked) {
@@ -702,7 +703,7 @@ int main(int, char**)
 							ImGui::EndDisabled();
 						}
 
-						ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 0.0f);
+						ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 1.0f);
 						ImGui::EndTable();
 						ImGui::PopStyleVar();
 					}
@@ -717,7 +718,6 @@ int main(int, char**)
 						ImGui::TableSetupColumn("Other");
 						ImGui::TableHeadersRow();
 						ImGui::TableNextRow();
-
 						ImGui::TableSetColumnIndex(0);
 
 						//to align text to the left: use a table
@@ -828,7 +828,6 @@ int main(int, char**)
 						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.5f);
 						//TODO: change this to a loader, then use the example font selector?
 						ImGui::InputText("Font Path", pdata.application_font_path, IM_ARRAYSIZE(pdata.application_font_path), ImGuiInputTextFlags_CallbackCharFilter, filepathCleaningFunc);
-						//not sure if this issue applies on Linux:
 						#ifdef _WIN32
 						ImGui::SameLine();
 						ImGuiHelpers::HelpMarker("C:\\Windows\\Fonts does not have folders in it!\n"
@@ -868,35 +867,103 @@ int main(int, char**)
 
 						ImGui::SeparatorText("Misc");
 
-						ImGui::BeginDisabled(); //TODO: un-disable when there's saving and loading of video settings
-						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
-						ImGui::Combo("File Delete Age", &pdata.imageDeleteAgeList_current, pdata.imageDeleteAgeList, IM_ARRAYSIZE(pdata.imageDeleteAgeList));
-						ImGui::PopItemWidth();
-						ImGui::SameLine();
-						if (ImGui::Button("Delete videos")) {
-							int result = ARVT::deleteAllOldFiles(ARVT::OUTPUT_SPEECH.c_str(), pdata.imageDeleteAgeList_values[pdata.imageDeleteAgeList_current]);
-							if (result) {
-								//TODO
-							}
-						}
-						ImGui::SameLine();
-						if (ImGui::Button("Delete images")) {
-							int result = ARVT::deleteAllOldFiles(ARVT::TEST_IMAGES.c_str(), pdata.imageDeleteAgeList_values[pdata.imageDeleteAgeList_current]);
-							if (result) {
-								//TODO
-							}
-						}
-						ImGui::EndDisabled();
-
-						ImGui::Text("TODO: reset all to default button");
-
 						#if 1
 						ImGui::Checkbox("Demo Window", &show_demo_window);
 						#endif
 
-						ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 0.0f);
+						ImGui::Text("TODO: reset all to default button");
+
+						ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 1.0f);
 						ImGui::EndTable();
 						ImGui::PopStyleVar();
+					}
+
+					if (ImGui::BeginTable("Configure##table2", 2, table_flags | ImGuiTableFlags_ScrollY, {0.0f, 10.0f * ImGui::GetFrameHeightWithSpacing()})) {
+						ImGui::TableSetupColumn("Delete Old Files");
+						ImGui::TableSetupColumn("##Logger");
+						ImGui::TableHeadersRow();
+						ImGui::TableNextRow();
+						ImGui::TableSetColumnIndex(0);
+
+						ImGui::SeparatorText("Query");
+
+						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
+						if (ImGui::Combo("File Delete Age", &pdata.imageDeleteAgeList_current, pdata.imageDeleteAgeList, IM_ARRAYSIZE(pdata.imageDeleteAgeList))) {
+							//TODO: not sure
+							//deleteFileList.clear();
+							//deleteFileLogger.Clear();
+						}
+						ImGui::PopItemWidth();
+
+						if (ImGui::Button("Query images")) {
+							deleteFileList.clear();
+							deleteFileLogger.Clear();
+							int result = ARVT::getListOfOldFiles(ARVT::TEST_IMAGES.c_str(), pdata.imageDeleteAgeList_values[pdata.imageDeleteAgeList_current], deleteFileList);
+							if (result) {
+								global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Query Files", strerror(result));
+							} else {
+								global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Query Files", ("Successfully queried " + ARVT::TEST_IMAGES).c_str());
+								deleteFileLogger.AddLog("Found %d files that are more than %s old:\n", deleteFileList.size(), pdata.imageDeleteAgeList[pdata.imageDeleteAgeList_current]);
+								for (const auto& f : deleteFileList) {
+									deleteFileLogger.AddLog("%s\n", f.c_str());
+								}
+							}
+						}
+						//ImGui::SameLine();
+						if (ImGui::Button("Query videos")) {
+							deleteFileList.clear();
+							deleteFileLogger.Clear();
+							int result = ARVT::getListOfOldFiles(ARVT::OUTPUT_SPEECH.c_str(), pdata.imageDeleteAgeList_values[pdata.imageDeleteAgeList_current], deleteFileList);
+							if (result) {
+								global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Query Files", strerror(result));
+							} else {
+								global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Query Files", ("Successfully queried " + ARVT::OUTPUT_SPEECH).c_str());
+								deleteFileLogger.AddLog("Found %d files that are more than %s old:\n", deleteFileList.size(), pdata.imageDeleteAgeList[pdata.imageDeleteAgeList_current]);
+								for (const auto& f : deleteFileList) {
+									deleteFileLogger.AddLog("%s\n", f.c_str());
+								}
+							}
+						}
+
+						ImGui::SeparatorText("Delete");
+
+						//only allowed to delete what's in the list: if something new suddenly meets the cutoff, it's spared; if something old gets its modified time changed, it's gone
+						if (ImGui::BeginPopup("Delete queried files")) {
+							//centering the text or buttons:
+							//const float text_size = ImGui::CalcTextSize("Are you sure? This cannot be undone.").x;
+							//const float buttons_size = 4*style.FramePadding.x + style.ItemSpacing.x + ImGui::CalcTextSize("No, take me back!").x + ImGui::CalcTextSize("Yes, I understand").x;
+
+							ImGui::TextColored(ImVec4(1, 0, 0, 1), "Are you sure? This cannot be undone.");
+
+							if (ImGui::Button("No, take me back!")) {
+								ImGui::CloseCurrentPopup();
+							}
+							ImGui::SameLine();
+							if (ImGui::Button("Yes, I understand")) {
+								int result = ARVT::deleteAllOldFiles(deleteFileList);
+								if (result) {
+									global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Delete Files", strerror(result));
+								} else {
+									deleteFileLogger.Clear();
+									global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Delete Files", ("Successfully deleted " + std::to_string(deleteFileList.size()) + " files").c_str());
+								}
+								deleteFileList.clear();
+								ImGui::CloseCurrentPopup();
+							}
+							ImGui::EndPopup();
+						}
+
+						if (ImGui::Button("Delete queried files")) {
+							ImGui::OpenPopup("Delete queried files");
+						}
+
+						ImGui::TableNextColumn();
+
+						deleteFileLogger.Draw();
+
+						//ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 1.0f);
+						ImGui::EndTable();
+						//ImGui::PopStyleVar();
 					}
 
 					ImGui::EndTabItem();

@@ -5,9 +5,11 @@
 //see IMGUI_DEMO_MARKER("Examples/Log") for the base code
 struct ARVT_Logger {
 	ImGuiTextBuffer Buf;
+	bool AutoScroll;
 
-	ARVT_Logger() {
+	ARVT_Logger(bool scrollToBottom) {
 		Clear();
+		AutoScroll = scrollToBottom;
 	}
 
 	void Clear() {
@@ -38,7 +40,7 @@ struct ARVT_Logger {
 
 			// Keep up at the bottom of the scroll region if we were already at the bottom at the beginning of the frame.
 			// Using a scrollbar or mouse-wheel will take away from the bottom edge.
-			if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
+			if (AutoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
 				ImGui::SetScrollHereY(1.0f);
 			}
 		}

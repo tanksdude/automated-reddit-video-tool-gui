@@ -195,26 +195,30 @@ int revealFileExplorer(const char* path) {
 	#endif
 }
 
-int deleteAllOldFiles(const char* dir, int hourCount) {
-	//TODO: this needs to have some kind of guarantee that the path is somewhere inside this project's root folder
-	//it does work though, but I'm not pushing it until there's safety
-	return 0;
-
-	/*
-	if (hourCount <= 0) [[unlikely]] {
-		return 0;
-	}
-	//TODO: this should print a list for confirmation
+int getListOfOldFiles(const char* dir, int hourCount, std::vector<std::string>& deleteFileList) {
 	auto nowTime = std::chrono::file_clock::now();
 	for (const auto& file : std::filesystem::directory_iterator(dir)) {
+		//TODO: not sure what to do about directories
 		std::filesystem::file_time_type ftime = std::filesystem::last_write_time(file);
 		auto duration = nowTime - ftime;
 		if (duration > std::chrono::hours(hourCount)) {
-			std::filesystem::remove(file);
+			deleteFileList.push_back(file.path().string());
 		}
 	}
 	return 0;
-	*/
+}
+
+int deleteAllOldFiles(const std::vector<std::string>& fileList) {
+	for (const auto& file : fileList) {
+		if (std::filesystem::exists(file)) [[likely]] {
+			if (!std::filesystem::remove(file)) [[unlikely]] {
+				return 1;
+			}
+		} else {
+			//probably error
+		}
+	}
+	return 0;
 }
 
 
