@@ -4,7 +4,8 @@
 
 #include <stdio.h> //fprintf for glfwSetErrorCallback
 #include <algorithm> //std::max_element
-#include <cstring> //strerror
+#include <cstring> //strerror, strcmp
+#include <filesystem> //only for refreshApplicationFontName(), though plenty of other files also use <filesystem>
 
 #include <GLFW/glfw3.h>
 #define MINI_CASE_SENSITIVE
@@ -30,18 +31,44 @@ ARVT_Logger deleteFileLogger(false);
 std::vector<std::string> deleteFileList;
 
 bool needToChangeFonts = false;
+ImFont* newFontToSwitchTo = nullptr;
 
-void refreshApplicationFontName() {
+void refreshApplicationFontName(bool loadingStartupFont = false) {
+	//if the input is empty, load ImGui's default font
+	if (pdata.application_font_path[0] == '\0') {
+		//see ImGui::ShowFontSelector()
+		ImGuiIO& io = ImGui::GetIO();
+		ImFont* font_current = ImGui::GetFont();
+		for (ImFont* font : io.Fonts->Fonts) {
+			if (strcmp(font->GetDebugName(), "ProggyClean.ttf") == 0) {
+				io.FontDefault = font;
+				break;
+			}
+		}
+		global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Font", "Successfully loaded ProggyClean.ttf");
+		return;
+	}
+
+	//TODO: should probably use ImFontFlags_NoLoadError instead, but this is good enough
+	if (!std::filesystem::exists(pdata.application_font_path)) {
+		global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Font", "Font does not exist");
+		return;
+	}
+
 	ImGuiIO& io = ImGui::GetIO();
 	ImFont* newFont = io.Fonts->AddFontFromFileTTF(pdata.application_font_path);
 	if (newFont == nullptr) {
-		//TODO: error handle
+		//TODO: ImFontFlags_NoLoadError
 		return;
 	}
 	io.FontDefault = newFont;
 
 	//ideally this would be used but it doesn't change the font for some reason:
 	//ImGui::PushFont(newFont, newSize);
+
+	if (!loadingStartupFont) {
+		global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Font", ("Successfully added font " + std::string(pdata.application_font_path)).c_str());
+	}
 
 	//TODO: should re-scale for the monitor's scale factor again
 }
@@ -75,9 +102,8 @@ auto filenameCleaningFunc = [] (ImGuiInputTextCallbackData* data) {
 	return 0;
 };
 auto filepathCleaningFunc = [] (ImGuiInputTextCallbackData* data) {
-	//identical to filenameCleaningFunc but allows slashes
-	if (data->EventChar == ':'  ||
-	    data->EventChar == '*'  ||
+	//identical to filenameCleaningFunc but allows slashes (and colons)
+	if (data->EventChar == '*'  ||
 	    data->EventChar == '\"' ||
 	    data->EventChar == '?'  ||
 	    data->EventChar == '<'  ||
@@ -264,7 +290,7 @@ int main(int, char**)
 	ret = ImGuiHelpers::LoadTextureFromFile("../res/counterclockwise-arrows-button_1f504.png", &circle_arrows_texture, NULL, NULL);
 
 	refreshApplicationFontSize();
-	refreshApplicationFontName();
+	refreshApplicationFontName(true);
 	style.Colors[ImGuiCol_WindowBg] = pdata.window_color; //TODO: have the color selector be for pdata.window_color, so the style is updated every frame
 
 	global_log.AddLog("[%06.2fs] [info] %s\n", ImGui::GetTime(), "Startup");
@@ -274,7 +300,13 @@ int main(int, char**)
     {
 		// Font handling
 		if (needToChangeFonts) [[unlikely]] {
-			refreshApplicationFontName();
+			if (newFontToSwitchTo == nullptr) {
+				refreshApplicationFontName();
+			} else {
+				io.FontDefault = newFontToSwitchTo;
+				global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Font", ("Successfully switched to font " + std::string(newFontToSwitchTo->GetDebugName())).c_str());
+				newFontToSwitchTo = nullptr;
+			}
 			needToChangeFonts = false;
 		}
 
@@ -826,8 +858,29 @@ int main(int, char**)
 						ImGui::SeparatorText("Application");
 
 						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.5f);
-						//TODO: change this to a loader, then use the example font selector?
-						ImGui::InputText("Font Path", pdata.application_font_path, IM_ARRAYSIZE(pdata.application_font_path), ImGuiInputTextFlags_CallbackCharFilter, filepathCleaningFunc);
+						//see ImGui::ShowFontSelector()
+						{
+							ImFont* font_current = ImGui::GetFont();
+							if (ImGui::BeginCombo("Font Selector", font_current->GetDebugName()))
+							{
+								for (ImFont* font : io.Fonts->Fonts) {
+									ImGui::PushID((void*)font);
+									if (ImGui::Selectable(font->GetDebugName(), font == font_current)) {
+										newFontToSwitchTo = font;
+										needToChangeFonts = true;
+									}
+									if (font == font_current) {
+										ImGui::SetItemDefaultFocus();
+									}
+									ImGui::PopID();
+								}
+								ImGui::EndCombo();
+							}
+						}
+						if (ImGui::DragFloat("Font Size", &pdata.application_font_size, 0.20f, 8.0f, 60.0f, "%.0f")) {
+							refreshApplicationFontSize();
+						}
+						ImGui::InputText("New Font Path", pdata.application_font_path, IM_ARRAYSIZE(pdata.application_font_path), ImGuiInputTextFlags_CallbackCharFilter, filepathCleaningFunc);
 						#ifdef _WIN32
 						ImGui::SameLine();
 						ImGuiHelpers::HelpMarker("C:\\Windows\\Fonts does not have folders in it!\n"
@@ -835,11 +888,8 @@ int main(int, char**)
 						                         "but just \"NotoSans-Regular.ttf\". Windows Explorer is lying to you!");
 						#endif
 						ImGui::SameLine();
-						if (ImGui::Button("Refresh##Font Path")) {
+						if (ImGui::Button("Load##Font Path")) {
 							needToChangeFonts = true;
-						}
-						if (ImGui::DragFloat("Font Size", &pdata.application_font_size, 0.20f, 8.0f, 60.0f, "%.0f")) {
-							refreshApplicationFontSize();
 						}
 						ImGui::PopItemWidth();
 
