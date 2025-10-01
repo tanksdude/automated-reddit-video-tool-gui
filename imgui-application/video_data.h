@@ -89,28 +89,26 @@ struct VideoData {
 	char fps_numerator_input[32];
 	char fps_denominator_input[32];
 
-	int8_t crf_v;
-	int8_t crf_min;
-	int8_t crf_max;
+	int8_t video_crf_v;
+	int8_t video_crf_min;
+	int8_t video_crf_max;
 
 	inline std::string get_video_replacement_numbers_input() const { return std::string(video_replacement_numbers_input); }
 	inline std::string get_videoEncoder() const { return std::string(videoEncoderArrayExtended[videoEncoderArray_current]); } //TODO: hacky to not check whether to use the extra codecs
 	inline std::string get_videoContainer() const { return std::string(videoContainerArray[videoContainerArray_current]); }
 	inline std::string get_fps() const { return fractionalFps ? std::string(fps_numerator_input) + "/" + std::string(fps_denominator_input) : std::string(fpsArray[fpsArray_current]); }
-	inline std::string get_videoCrf() const { return std::to_string(crf_v); }
+	inline std::string get_videoCrf() const { return std::to_string(video_crf_v); }
 	std::string get_videoPreset1() const;
 	std::string get_videoPreset2() const;
 
-	void update_videoCrfValues();
-	void update_videoPresetArray();
+	void update_videoEncoderValues(); // Call this when changing the video encoder!
+	void set_videoCrf(int8_t val); // Used by the INI file, not really needed otherwise
 
 	VideoData() {
 		videoEncoderArray_current = 0;
-
+		update_videoEncoderValues();
 		strcpy(video_replacement_numbers_input, "");
 		strcpy(fps_numerator_input, "2997");
 		strcpy(fps_denominator_input, "100");
-		update_videoCrfValues();
-		update_videoPresetArray();
 	}
 };

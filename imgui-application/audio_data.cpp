@@ -3,8 +3,7 @@
 #include <cstring> //memcpy
 #include <fstream>
 #include <filesystem>
-#include <vector>
-#include <iostream>
+#include <algorithm> //std::clamp
 
 #ifdef _WIN32
 const char* AudioData::voiceEngineArray[4] = { "Balabolka", "Espeak", "Espeak NG", "Windows Narrator (TODO)" };
@@ -168,9 +167,8 @@ void AudioData::update_voiceArray() {
 		if (std::filesystem::exists("temp.txt")) [[likely]] {
 			std::filesystem::remove("temp.txt");
 		}
-		voiceArray = nullptr;
-		voiceArray_current = -1;
-		voiceArray_length = 0;
+		voiceArray_free();
+		voiceArray_setToBlank();
 		return;
 	}
 
@@ -212,18 +210,11 @@ void AudioData::update_voiceArray() {
 
 	// Step 3: update internals
 
-	if (voiceArray != nullptr) {
-		for (int i = 0; i < voiceArray_length; i++) {
-			delete voiceArray[i];
-		}
-		delete[] voiceArray;
-	}
+	voiceArray_free();
 
 	if (voiceList.empty()) {
 		//some error
-		voiceArray = nullptr;
-		voiceArray_current = -1;
-		voiceArray_length = 0;
+		voiceArray_setToBlank();
 	} else {
 		voiceArray = new char*[voiceList.size()];
 		for (int i = 0; i < voiceList.size(); i++) {
@@ -235,18 +226,23 @@ void AudioData::update_voiceArray() {
 	}
 }
 
-void AudioData::update_audioBitrateValues() {
-	const AudioData::BitrateData& data = codecToBitrate.at(get_audioEncoder());
+void AudioData::update_audioEncoderValues() {
+	const std::string codec = get_audioEncoder();
+
+	// Bitrate:
+	const AudioData::BitrateData& data = codecToBitrate.at(codec);
 	audio_bitrate_v = data.starting_value;
 	audio_bitrate_min = data.min_value;
 	audio_bitrate_max = data.max_value;
 	//audio_bitrate_step = 4; //TODO: unused because ImGui sliders don't support stepping
-}
 
-void AudioData::update_audioPresetArray() {
+	// Preset:
 	audioPresetArray_current = 0;
-
-	const std::string codec = get_audioEncoder();
 	audioCodec_hasPreset = !codecToPresetArray.at(codec).presetArray.empty();
 	audioCodec_presetTerm = codecToPresetArray.at(codec).term;
+}
+
+void AudioData::set_audioBitrate(int16_t val) {
+	const AudioData::BitrateData& data = codecToBitrate.at(get_audioEncoder());
+	audio_bitrate_v = std::clamp(val, data.codec_min_value, data.codec_max_value);
 }

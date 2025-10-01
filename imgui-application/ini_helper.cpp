@@ -247,20 +247,19 @@ void Fill_AudioData(AudioData& adata, const mINI::INIStructure& ini_object, bool
 		return;
 	}
 
-	//TODO
 	if (ini_object.get("AUDIO").has("VoiceEngine")) {
 		std::string get = ini_object.get("AUDIO").get("VoiceEngine");
 		if (!get.empty()) {
 			size_t index = std::distance(adata.voiceEngineArray, std::find(adata.voiceEngineArray, adata.voiceEngineArray + sizeof(adata.voiceEngineArray) / sizeof(*adata.voiceEngineArray), get));
 			if (index != sizeof(adata.voiceEngineArray) / sizeof(*adata.voiceEngineArray)) {
 				adata.voiceEngineArray_current = index;
+				adata.update_voiceArray();
 			} else {
 				std::cerr << ("Unknown value for [AUDIO].VoiceEngine: \"" + get + "\"") << std::endl;
 			}
 		}
 	}
 
-	//TODO
 	if (ini_object.get("AUDIO").has("VoiceName")) {
 		std::string get = ini_object.get("AUDIO").get("VoiceName");
 		if (!get.empty()) {
@@ -281,6 +280,7 @@ void Fill_AudioData(AudioData& adata, const mINI::INIStructure& ini_object, bool
 				size_t index = std::distance(adata.audioEncoderArrayExtended, std::find(adata.audioEncoderArrayExtended, adata.audioEncoderArrayExtended + sizeof(adata.audioEncoderArrayExtended) / sizeof(*adata.audioEncoderArrayExtended), get));
 				if (index != sizeof(adata.audioEncoderArrayExtended) / sizeof(*adata.audioEncoderArrayExtended)) {
 					adata.audioEncoderArray_current = index;
+					adata.update_audioEncoderValues();
 				} else {
 					std::cerr << ("Unknown value for [AUDIO].AudioEncoder: \"" + get + "\"") << std::endl;
 				}
@@ -288,6 +288,7 @@ void Fill_AudioData(AudioData& adata, const mINI::INIStructure& ini_object, bool
 				size_t index = std::distance(adata.audioEncoderArray, std::find(adata.audioEncoderArray, adata.audioEncoderArray + sizeof(adata.audioEncoderArray) / sizeof(*adata.audioEncoderArray), get));
 				if (index != sizeof(adata.audioEncoderArray) / sizeof(*adata.audioEncoderArray)) {
 					adata.audioEncoderArray_current = index;
+					adata.update_audioEncoderValues();
 				} else {
 					std::cerr << ("Unknown value for [AUDIO].AudioEncoder: \"" + get + "\"") << std::endl;
 				}
@@ -295,13 +296,12 @@ void Fill_AudioData(AudioData& adata, const mINI::INIStructure& ini_object, bool
 		}
 	}
 
-	//TODO
 	if (ini_object.get("AUDIO").has("AudioBitrateKbps") && !adata.get_audioEncoderIsLossless()) {
 		std::string get = ini_object.get("AUDIO").get("AudioBitrateKbps");
 		if (!get.empty()) {
 			try {
 				int16_t val = std::stoi(get);
-				adata.audio_bitrate_v = val;
+				adata.set_audioBitrate(val);
 			}
 			catch (const std::exception&) {
 				std::cerr << ("Unable to parse [AUDIO].AudioBitrateKbps: \"" + get + "\"") << std::endl;
@@ -336,6 +336,7 @@ void Fill_VideoData(VideoData& vdata, const mINI::INIStructure& ini_object, bool
 				size_t index = std::distance(vdata.videoEncoderArrayExtended, std::find(vdata.videoEncoderArrayExtended, vdata.videoEncoderArrayExtended + sizeof(vdata.videoEncoderArrayExtended) / sizeof(*vdata.videoEncoderArrayExtended), get));
 				if (index != sizeof(vdata.videoEncoderArrayExtended) / sizeof(*vdata.videoEncoderArrayExtended)) {
 					vdata.videoEncoderArray_current = index;
+					vdata.update_videoEncoderValues();
 				} else {
 					std::cerr << ("Unknown value for [VIDEO].VideoEncoder: \"" + get + "\"") << std::endl;
 				}
@@ -343,6 +344,7 @@ void Fill_VideoData(VideoData& vdata, const mINI::INIStructure& ini_object, bool
 				size_t index = std::distance(vdata.videoEncoderArray, std::find(vdata.videoEncoderArray, vdata.videoEncoderArray + sizeof(vdata.videoEncoderArray) / sizeof(*vdata.videoEncoderArray), get));
 				if (index != sizeof(vdata.videoEncoderArray) / sizeof(*vdata.videoEncoderArray)) {
 					vdata.videoEncoderArray_current = index;
+					vdata.update_videoEncoderValues();
 				} else {
 					std::cerr << ("Unknown value for [VIDEO].VideoEncoder: \"" + get + "\"") << std::endl;
 				}
@@ -416,13 +418,12 @@ void Fill_VideoData(VideoData& vdata, const mINI::INIStructure& ini_object, bool
 		}
 	}
 
-	//TODO
 	if (ini_object.get("VIDEO").has("VideoCRF") && !vdata.get_videoEncoderIsLossless()) {
 		std::string get = ini_object.get("VIDEO").get("VideoCRF");
 		if (!get.empty()) {
 			try {
 				int8_t val = std::stoi(get);
-				vdata.crf_v = val;
+				vdata.set_videoCrf(val);
 			}
 			catch (const std::exception&) {
 				std::cerr << ("Unable to parse [VIDEO].VideoCRF: \"" + get + "\"") << std::endl;

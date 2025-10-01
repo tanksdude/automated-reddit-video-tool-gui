@@ -166,6 +166,12 @@ int main(int, char**)
 	ARVT::Fill_AudioData(adata, ini_object, pdata.useExtraCodecs);
 	ARVT::Fill_VideoData(vdata, ini_object, pdata.useExtraCodecs);
 
+	// If the user didn't set a speech engine in the INI, then fill its
+	// available voices. (If the user did, then the values are already filled.)
+	if (ini_object.get("AUDIO").get("VoiceEngine").empty()) {
+		adata.update_voiceArray();
+	}
+
 	ARVT::CreateApplicationFoldersIfNeeded();
 
     glfwSetErrorCallback(glfw_error_callback);
@@ -766,8 +772,7 @@ int main(int, char**)
 						}
 
 						if (ImGui::Combo("Audio Encoder", &adata.audioEncoderArray_current, AudioData::get_audioEncoderArray(pdata.useExtraCodecs), AudioData::get_audioEncoderArraySize(pdata.useExtraCodecs))) {
-							adata.update_audioBitrateValues();
-							adata.update_audioPresetArray();
+							adata.update_audioEncoderValues();
 						}
 
 						ImGui::Indent();
@@ -809,8 +814,7 @@ int main(int, char**)
 						ImGui::Unindent();
 
 						if (ImGui::Combo("Video Encoder", &vdata.videoEncoderArray_current, VideoData::get_videoEncoderArray(pdata.useExtraCodecs), VideoData::get_videoEncoderArraySize(pdata.useExtraCodecs))) {
-							vdata.update_videoCrfValues();
-							vdata.update_videoPresetArray();
+							vdata.update_videoEncoderValues();
 						}
 
 						ImGui::Indent();
@@ -834,7 +838,7 @@ int main(int, char**)
 						}
 
 						if (!vdata.get_videoEncoderIsLossless()) {
-							ImGui::SliderScalar("CRF", ImGuiDataType_S8, &vdata.crf_v, &vdata.crf_min, &vdata.crf_max);
+							ImGui::SliderScalar("CRF", ImGuiDataType_S8, &vdata.video_crf_v, &vdata.video_crf_min, &vdata.video_crf_max);
 							//ImGui::SameLine();
 							//HelpMarker("CTRL+Click to input a value.");
 						}
@@ -900,13 +904,11 @@ int main(int, char**)
 							if (!pdata.useExtraCodecs) {
 								if (adata.audioEncoderArray_current >= AudioData::get_audioEncoderArraySize(false)) {
 									adata.audioEncoderArray_current = 0;
-									adata.update_audioBitrateValues();
-									adata.update_audioPresetArray();
+									adata.update_audioEncoderValues();
 								}
 								if (vdata.videoEncoderArray_current >= VideoData::get_videoEncoderArraySize(false)) {
 									vdata.videoEncoderArray_current = 0;
-									vdata.update_videoCrfValues();
-									vdata.update_videoPresetArray();
+									vdata.update_videoEncoderValues();
 								}
 							}
 						}

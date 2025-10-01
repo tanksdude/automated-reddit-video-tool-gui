@@ -1,4 +1,5 @@
 #include "video_data.h"
+#include <algorithm> //std::clamp
 
 const char* VideoData::videoEncoderArray[7]          = { "H.264", "H.265 / HEVC", "VP8", "VP9", "AV1", "FFV1", "Ut Video" };
 const char* VideoData::videoEncoderArrayExtended[13] = { "H.264", "H.265 / HEVC", "VP8", "VP9", "AV1", "FFV1", "Ut Video", "Apple ProRes", "QuickTime Animation", "CineForm", "Lossless_H.264", "VVC / H.266", "EVC / MPEG-5 Part 1" };
@@ -134,20 +135,25 @@ std::string VideoData::get_videoPreset2() const {
 	return codecArr.empty() ? "default" : codecArr[videoPresetArray2_current];
 }
 
-void VideoData::update_videoCrfValues() {
-	const VideoData::CrfData& data = codecToCrf.at(get_videoEncoder());
-	crf_v = data.starting_value;
-	crf_min = data.min_value;
-	crf_max = data.max_value;
-}
+void VideoData::update_videoEncoderValues() {
+	const std::string codec = get_videoEncoder();
 
-void VideoData::update_videoPresetArray() {
+	// CRF:
+	const VideoData::CrfData& data = codecToCrf.at(codec);
+	video_crf_v = data.starting_value;
+	video_crf_min = data.min_value;
+	video_crf_max = data.max_value;
+
+	// Presets:
 	videoPresetArray1_current = 0;
 	videoPresetArray2_current = 0;
-
-	const std::string codec = get_videoEncoder();
 	videoCodec_hasPreset1 = !codecToPresetArray1.at(codec).presetArray.empty();
 	videoCodec_hasPreset2 = !codecToPresetArray2.at(codec).presetArray.empty();
 	videoCodec_preset1Term = codecToPresetArray1.at(codec).term;
 	videoCodec_preset2Term = codecToPresetArray2.at(codec).term;
+}
+
+void VideoData::set_videoCrf(int8_t val) {
+	const VideoData::CrfData& data = codecToCrf.at(get_videoEncoder());
+	video_crf_v = std::clamp(val, data.codec_min_value, data.codec_max_value);
 }

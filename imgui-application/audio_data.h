@@ -31,8 +31,8 @@ struct AudioData {
 #endif
 
 	char** voiceArray = nullptr;
-	int voiceArray_current;
-	int voiceArray_length;
+	int voiceArray_current = -1;
+	int voiceArray_length = 0;
 
 	static void getVoiceListFromExe_Balabolka(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList);
 	static void getVoiceListFromExe_Espeak(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList);
@@ -90,23 +90,31 @@ struct AudioData {
 	inline std::string get_audioBitrate() const { return std::to_string(audio_bitrate_v) + "k"; }
 	std::string get_audioPreset() const;
 
-	void update_voiceArray(); // updates voiceArray and its related data
-	void update_audioBitrateValues();
-	void update_audioPresetArray();
-	
-	AudioData() {
-		audioEncoderArray_current = 1;
+	void update_voiceArray(); // Call this when changing the speech engine!
+	void update_audioEncoderValues(); // Call this when changing the audio encoder!
+	void set_audioBitrate(int16_t val); // Used by the INI file, not really needed otherwise
 
-		update_voiceArray();
-		update_audioPresetArray();
-	}
-
-	~AudioData() {
+	// Called during update_voiceArray() (don't call these yourself):
+	inline void voiceArray_free() {
 		if (voiceArray != nullptr) [[likely]] {
 			for (int i = 0; i < voiceArray_length; i++) {
 				delete voiceArray[i];
 			}
 			delete[] voiceArray;
 		}
+	}
+	inline void voiceArray_setToBlank() {
+		voiceArray = nullptr;
+		voiceArray_current = -1;
+		voiceArray_length = 0;
+	}
+
+	// Make sure to call update_voiceArray() to finish initialization! (Assuming you want a voice list populated.)
+	AudioData() {
+		audioEncoderArray_current = 1;
+		update_audioEncoderValues();
+	}
+	~AudioData() {
+		voiceArray_free();
 	}
 };
