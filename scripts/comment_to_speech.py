@@ -239,9 +239,9 @@ def text_to_speech_func_balabolka(wav_file_name, text_file_name):
 	# make sure to do -w arg before the -f arg, because sometimes it just won't write to a wav file otherwise
 	return subprocess.run([AUDIO_PROGRAM_CMD, "-n", AUDIO_VOICE, "-enc", "utf8", "-w", wav_file_name, "-f", text_file_name])
 def text_to_speech_func_espeak(wav_file_name, text_file_name):
-	# Voice names have spaces replaced with underscores, so undo that to make the voice work
-	# Theoretically there could be a voice that has underscores *and* spaces, but that let's say that's user error because that's above my pay grade to handle
-	return subprocess.run([AUDIO_PROGRAM_CMD, "-v", AUDIO_VOICE.replace("_", " "), "-w", wav_file_name, "-f", text_file_name])
+	# Voice names have spaces replaced with underscores when printed to the
+	# console, but that's fixed before being sent to this script.
+	return subprocess.run([AUDIO_PROGRAM_CMD, "-v", AUDIO_VOICE, "-w", wav_file_name, "-f", text_file_name])
 
 ttsFunctionLookup = {
 	"Balabolka": text_to_speech_func_balabolka,

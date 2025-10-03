@@ -3,7 +3,7 @@
 #include <cstring> //memcpy
 #include <fstream>
 #include <filesystem>
-#include <algorithm> //std::clamp
+#include <algorithm> //std::clamp, std::replace
 
 #ifdef _WIN32
 const char* AudioData::voiceEngineArray[4] = { "Balabolka", "Espeak", "Espeak NG", "Windows Narrator (TODO)" };
@@ -133,6 +133,8 @@ void AudioData::getVoiceListFromExe_Espeak(std::vector<std::string>& file_lines,
 	// The first line is formatting information, everything else is the languages
 	// Columns are separated by spaces, simply go through until the 4th column
 	// VoiceName does not have spaces, as they are replaced with underscores when printed: see function DisplayVoices() at https://github.com/espeak-ng/espeak-ng/blob/master/src/espeak-ng.c
+	// When specifying a VoiceName to eSpeak, the underscores have to be replaced back by spaces, so do it here because this part is visible to the user
+	// Theoretically there could be a voice that has underscores *and* spaces, but that let's say that's user error because that's above my pay grade to handle
 
 	file_lines.erase(file_lines.begin()); //remove formatting information
 	for (std::string& l : file_lines) {
@@ -152,8 +154,11 @@ void AudioData::getVoiceListFromExe_Espeak(std::vector<std::string>& file_lines,
 		pos = l.find_first_of(" ", pos);
 		pos = l.find_first_not_of(" ", pos); //VoiceName column
 		size_t endPos = l.find_first_of(" ", pos);
+		std::string voice = l.substr(pos, endPos - pos);
 
-		voiceList.push_back(l.substr(pos, endPos - pos));
+		//replace and push to list
+		std::replace(voice.begin(), voice.end(), '_', ' ');
+		voiceList.push_back(voice);
 	}
 }
 
