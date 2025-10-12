@@ -3,76 +3,48 @@
 #include <vector>
 #include <unordered_map>
 #include <cstring> //strcpy, strcmp
-#include <cstdint>
-#include "av_shared_info.h"
+#include <array>
+#include "av_codecs.h"
 
 struct VideoData {
-	struct CrfData {
-		int8_t starting_value;
-		int8_t min_value; //"sane" min
-		int8_t max_value; //"sane" max
-		int8_t codec_default_value; //unused
-		int8_t codec_min_value;     //unused
-		int8_t codec_max_value;     //unused
-	};
-
-	/* Passing codec information to the Python script:
-	 * The Python script will ignore everything after the first space. This
-	 * means "H.265 / HEVC" will be interpreted the same as "H.265".
-	 */
-	static const char* videoEncoderArray[7];
-	static const char* videoEncoderArrayExtended[13];
-	static inline const char** get_videoEncoderArray(bool extended) {
-		return extended ? videoEncoderArrayExtended : videoEncoderArray;
-	}
+	static std::array<const VideoCodecData*, 7>  videoEncoderArray;
+	static std::array<const VideoCodecData*, 13> videoEncoderArrayExtended;
 	static inline size_t get_videoEncoderArraySize(bool extended) {
-		return extended ? sizeof(videoEncoderArrayExtended) / sizeof(*videoEncoderArrayExtended)
-		                : sizeof(videoEncoderArray)         / sizeof(*videoEncoderArray);
+		return extended ? videoEncoderArrayExtended.size() : videoEncoderArray.size();
 	}
-	/* Passing preset information to the Python script:
-	 * The Python script will ignore everything after the first space. This
-	 * means "medium (default)" will be interpreted the same as "medium".
-	 */
-	static std::vector<const char*> videoPresetArray_H264_preset;
-	static std::vector<const char*> videoPresetArray_VP9_deadline;
-	static std::vector<const char*> videoPresetArray_AV1_usage;
-	static std::vector<const char*> videoPresetArray_VP9_cpu_used;
-	static std::vector<const char*> videoPresetArray_UtVideo_prediction;
-	static std::vector<const char*> videoPresetArray_empty; //placeholder for the hashmap lookups
-	static std::vector<const char*> videoPresetArray_CineForm_quality;
-	static std::vector<const char*> videoPresetArray_VVC_preset;
-	static std::vector<const char*> videoPresetArray_EVC_preset;
 
-	static const std::unordered_map<std::string, CodecPresetInformation> codecToPresetArray1;
-	static const std::unordered_map<std::string, CodecPresetInformation> codecToPresetArray2;
-	static const std::unordered_map<std::string, CrfData> codecToCrf;
-	static const std::unordered_map<std::string, VideoCodecMiscInformation> codecMiscInformation;
+	int videoEncoderArray_current;
+	int videoEncoder_preset1_current;
+	int videoEncoder_preset2_current;
+	void set_encoder_idx(int idx) {
+		videoEncoderArray_current = idx;
+		videoEncoder_preset1_current = 0;
+		videoEncoder_preset2_current = 0;
+		update_videoEncoderValues();
+	}
+	void set_encoder_preset1_idx(int idx) {
+		videoEncoder_preset1_current = idx;
+		//TODO: in the future this would be used when the codec's second preset changes its range depending on its first preset (like VP9)
+	}
+	void set_encoder_preset2_idx(int idx) {
+		videoEncoder_preset2_current = idx;
+	}
 
-	static const char* videoContainerArray[6];
+	inline const VideoCodecData* get_videoEncoder() const { return videoEncoderArrayExtended[videoEncoderArray_current]; }
+	inline std::string get_videoPreset1_currentValue() const {
+		const GenericCodecPreset& vc_p1 = get_videoEncoder()->preset1;
+		return vc_p1.displayValues.empty() ? "default" : vc_p1.internalValues[videoEncoder_preset1_current];
+	}
+	inline std::string get_videoPreset2_currentValue() const {
+		const GenericCodecPreset& vc_p2 = get_videoEncoder()->preset2;
+		return vc_p2.displayValues.empty() ? "default" : vc_p2.internalValues[videoEncoder_preset2_current];
+	}
 
 	bool use_speech_text = false;
 	char video_replacement_numbers_input[64];
 	bool audio_only_option_input = false;
 
-	int videoEncoderArray_current;
-	CodecRecommendedLevel get_videoEncoderRecommendation() const;
-	bool get_videoEncoderIsLossless() const;
-	bool get_videoEncoderSupportsAlpha() const;
-	std::string get_videoEncoderInformationText() const;
-
-	//preset counts: FFV1 zero, H.264 one, VP9 two
-	bool videoCodec_hasPreset1;
-	bool videoCodec_hasPreset2;
-	int videoPresetArray1_current;
-	int videoPresetArray2_current;
-	std::string videoCodec_preset1Term;
-	std::string videoCodec_preset2Term;
-	const char** get_videoPresetArray1() const;
-	const char** get_videoPresetArray2() const;
-	int get_videoPresetArray1_size() const;
-	int get_videoPresetArray2_size() const;
-	//extending this to an arbitrary amount is a lot of effort
-
+	static const char* videoContainerArray[6];
 	int videoContainerArray_current = 0;
 	bool faststart_flag = false;
 	inline bool get_faststart_available() const {
@@ -94,19 +66,19 @@ struct VideoData {
 	int8_t video_crf_max;
 
 	inline std::string get_video_replacement_numbers_input() const { return std::string(video_replacement_numbers_input); }
-	inline std::string get_videoEncoder() const { return std::string(videoEncoderArrayExtended[videoEncoderArray_current]); } //TODO: hacky to not check whether to use the extra codecs
 	inline std::string get_videoContainer() const { return std::string(videoContainerArray[videoContainerArray_current]); }
 	inline std::string get_fps() const { return fractionalFps ? std::string(fps_numerator_input) + "/" + std::string(fps_denominator_input) : std::string(fpsArray[fpsArray_current]); }
 	inline std::string get_videoCrf() const { return std::to_string(video_crf_v); }
-	std::string get_videoPreset1() const;
-	std::string get_videoPreset2() const;
 
-	void update_videoEncoderValues(); // Call this when changing the video encoder!
+	void update_videoEncoderValues(); // [Internal] Called when changing the video encoder
 	void set_videoCrf(int8_t val); // Used by the INI file, not really needed otherwise
 
 	VideoData() {
 		videoEncoderArray_current = 0;
+		videoEncoder_preset1_current = 0;
+		videoEncoder_preset2_current = 0;
 		update_videoEncoderValues();
+
 		strcpy(video_replacement_numbers_input, "");
 		strcpy(fps_numerator_input, "2997");
 		strcpy(fps_denominator_input, "100");

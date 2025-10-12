@@ -283,12 +283,12 @@ int call_comment_to_speech(const char* name, const ImageData& idata, const Audio
 
 		" \"" + adata.get_voiceEngine() + "\"" +
 		" \"" + adata.get_voiceName() + "\"" +
-		" \"" + adata.get_audioEncoder() + "\"" +
+		" \"" + adata.get_audioEncoder()->internalName + "\"" +
 		" "   + adata.get_audioBitrate() +
-		" \"" + adata.get_audioPreset() + "\"" +
-		" \"" + vdata.get_videoEncoder() + "\"" +
-		" \"" + vdata.get_videoPreset1() + "\"" +
-		" \"" + vdata.get_videoPreset2() + "\"" +
+		" \"" + adata.get_audioPreset1_currentValue() + "\"" +
+		" \"" + vdata.get_videoEncoder()->internalName + "\"" +
+		" \"" + vdata.get_videoPreset1_currentValue() + "\"" +
+		" \"" + vdata.get_videoPreset2_currentValue() + "\"" +
 		" "   + std::to_string(vdata.faststart_flag && vdata.get_faststart_available()) +
 
 		" "   + vdata.get_fps() +

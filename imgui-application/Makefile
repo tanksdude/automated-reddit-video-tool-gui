@@ -2,7 +2,7 @@ CXX = g++
 
 EXE = automated-reddit-video-tool-gui
 IMGUI_DIR = imgui
-SOURCES = arvt_helpers.cpp ini_helper.cpp image_data.cpp audio_data.cpp video_data.cpp program_data.cpp main.cpp
+SOURCES = av_codecs.cpp arvt_helpers.cpp ini_helper.cpp image_data.cpp audio_data.cpp video_data.cpp program_data.cpp main.cpp
 SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
 SOURCES += $(IMGUI_DIR)/imgui_impl_glfw.cpp $(IMGUI_DIR)/imgui_impl_opengl3.cpp
 OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))

@@ -771,25 +771,39 @@ int main(int, char**)
 							adata.update_voiceArray();
 						}
 
-						if (ImGui::Combo("Audio Encoder", &adata.audioEncoderArray_current, AudioData::get_audioEncoderArray(pdata.useExtraCodecs), AudioData::get_audioEncoderArraySize(pdata.useExtraCodecs))) {
-							adata.update_audioEncoderValues();
+						if (ImGui::BeginCombo("Audio Encoder", adata.get_audioEncoder()->displayName)) {
+							for (int n = 0; n < AudioData::get_audioEncoderArraySize(pdata.useExtraCodecs); n++) {
+								if (ImGui::Selectable(AudioData::audioEncoderArrayExtended[n]->displayName, adata.audioEncoderArray_current == n)) {
+									adata.set_encoder_idx(n);
+								}
+							}
+							ImGui::EndCombo();
 						}
+						const AudioCodecData* ac = adata.get_audioEncoder();
 
 						ImGui::Indent();
 
 						ImGui::Text("Recommendation:");
 						ImGui::SameLine();
-						ImGui::Image(recommendationStr_toTexId[adata.get_audioEncoderRecommendation()], ImVec2(pdata.application_font_size, pdata.application_font_size));
+						ImGui::Image(recommendationStr_toTexId[ac->recommendation], ImVec2(pdata.application_font_size, pdata.application_font_size));
 
 						ImGui::Text("Information:");
 						ImGui::SameLine();
-						ImGuiHelpers::HelpMarker(adata.get_audioEncoderInformationText().c_str());
+						ImGuiHelpers::HelpMarker(ac->information_text);
 
-						if (adata.audioCodec_hasPreset) {
-							ImGui::Combo(adata.audioCodec_presetTerm.c_str(), &adata.audioPresetArray_current, adata.get_audioPresetArray(), adata.get_audioPresetArray_size(), adata.get_audioPresetArray_size());
+						if (!ac->preset1.displayValues.empty()) {
+							const GenericCodecPreset& ac_p1 = ac->preset1;
+							if (ImGui::BeginCombo(ac_p1.displayTerm, ac_p1.displayValues[adata.audioEncoder_preset1_current])) {
+								for (int n = 0; n < ac_p1.displayValues.size(); n++) {
+									if (ImGui::Selectable(ac_p1.displayValues[n], adata.audioEncoder_preset1_current == n)) {
+										adata.set_encoder_preset1_idx(n);
+									}
+								}
+								ImGui::EndCombo();
+							}
 						}
 
-						if (!adata.get_audioEncoderIsLossless()) {
+						if (!ac->isLossless) {
 							//ImGui doesn't support steps for sliders, oh well
 							ImGui::SliderScalar("Bitrate (kbps)", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max);
 						}
@@ -813,34 +827,55 @@ int main(int, char**)
 						}
 						ImGui::Unindent();
 
-						if (ImGui::Combo("Video Encoder", &vdata.videoEncoderArray_current, VideoData::get_videoEncoderArray(pdata.useExtraCodecs), VideoData::get_videoEncoderArraySize(pdata.useExtraCodecs))) {
-							vdata.update_videoEncoderValues();
+						if (ImGui::BeginCombo("Video Encoder", vdata.get_videoEncoder()->displayName)) {
+							for (int n = 0; n < VideoData::get_videoEncoderArraySize(pdata.useExtraCodecs); n++) {
+								if (ImGui::Selectable(VideoData::videoEncoderArrayExtended[n]->displayName, vdata.videoEncoderArray_current == n)) {
+									vdata.set_encoder_idx(n);
+								}
+							}
+							ImGui::EndCombo();
 						}
+						const VideoCodecData* vc = vdata.get_videoEncoder();
 
 						ImGui::Indent();
 
 						ImGui::Text("Recommendation:");
 						ImGui::SameLine();
-						ImGui::Image(recommendationStr_toTexId[vdata.get_videoEncoderRecommendation()], ImVec2(pdata.application_font_size, pdata.application_font_size));
+						ImGui::Image(recommendationStr_toTexId[vc->recommendation], ImVec2(pdata.application_font_size, pdata.application_font_size));
 
 						ImGui::Text("Information:");
 						ImGui::SameLine();
-						ImGuiHelpers::HelpMarker(vdata.get_videoEncoderInformationText().c_str());
+						ImGuiHelpers::HelpMarker(vc->information_text);
 						ImGui::SameLine();
-						ImGui::Text(vdata.get_videoEncoderSupportsAlpha() ? "  Alpha channel: Yes" : "  Alpha channel: No");
+						ImGui::Text(vc->supportsAlpha ? "  Alpha channel: Yes" : "  Alpha channel: No");
 
-						if (vdata.videoCodec_hasPreset1) {
-							ImGui::Combo(vdata.videoCodec_preset1Term.c_str(), &vdata.videoPresetArray1_current, vdata.get_videoPresetArray1(), vdata.get_videoPresetArray1_size(), vdata.get_videoPresetArray1_size());
-							//doesn't take flags like ImGuiComboFlags_HeightLargest
-							if (vdata.videoCodec_hasPreset2) {
-								ImGui::Combo(vdata.videoCodec_preset2Term.c_str(), &vdata.videoPresetArray2_current, vdata.get_videoPresetArray2(), vdata.get_videoPresetArray2_size(), vdata.get_videoPresetArray2_size());
+						if (!vc->preset1.displayValues.empty()) {
+							const GenericCodecPreset& vc_p1 = vc->preset1;
+							if (ImGui::BeginCombo(vc_p1.displayTerm, vc_p1.displayValues[vdata.videoEncoder_preset1_current])) {
+								for (int n = 0; n < vc_p1.displayValues.size(); n++) {
+									if (ImGui::Selectable(vc_p1.displayValues[n], vdata.videoEncoder_preset1_current == n)) {
+										vdata.set_encoder_preset1_idx(n);
+									}
+								}
+								ImGui::EndCombo();
+							}
+							if (!vc->preset2.displayValues.empty()) {
+								const GenericCodecPreset& vc_p2 = vc->preset2;
+								if (ImGui::BeginCombo(vc_p2.displayTerm, vc_p2.displayValues[vdata.videoEncoder_preset2_current])) {
+									for (int n = 0; n < vc_p2.displayValues.size(); n++) {
+										if (ImGui::Selectable(vc_p2.displayValues[n], vdata.videoEncoder_preset2_current == n)) {
+											vdata.set_encoder_preset2_idx(n);
+										}
+									}
+									ImGui::EndCombo();
+								}
 							}
 						}
 
-						if (!vdata.get_videoEncoderIsLossless()) {
+						if (!vc->isLossless) {
 							ImGui::SliderScalar("CRF", ImGuiDataType_S8, &vdata.video_crf_v, &vdata.video_crf_min, &vdata.video_crf_max);
 							//ImGui::SameLine();
-							//HelpMarker("CTRL+Click to input a value.");
+							//ImGuiHelpers::HelpMarker("CTRL+Click to input a value.");
 						}
 
 						ImGui::Unindent();
@@ -903,12 +938,10 @@ int main(int, char**)
 						if (ImGui::Checkbox("Extra Codecs", &pdata.useExtraCodecs)) {
 							if (!pdata.useExtraCodecs) {
 								if (adata.audioEncoderArray_current >= AudioData::get_audioEncoderArraySize(false)) {
-									adata.audioEncoderArray_current = 0;
-									adata.update_audioEncoderValues();
+									adata.set_encoder_idx(0);
 								}
 								if (vdata.videoEncoderArray_current >= VideoData::get_videoEncoderArraySize(false)) {
-									vdata.videoEncoderArray_current = 0;
-									vdata.update_videoEncoderValues();
+									vdata.set_encoder_idx(0);
 								}
 							}
 						}

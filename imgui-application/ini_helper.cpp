@@ -272,31 +272,26 @@ void Fill_AudioData(AudioData& adata, const mINI::INIStructure& ini_object, bool
 		}
 	}
 
-	//TODO
 	if (ini_object.get("AUDIO").has("AudioEncoder")) {
 		std::string get = ini_object.get("AUDIO").get("AudioEncoder");
 		if (!get.empty()) {
-			if (useExtraCodecs) {
-				size_t index = std::distance(adata.audioEncoderArrayExtended, std::find(adata.audioEncoderArrayExtended, adata.audioEncoderArrayExtended + sizeof(adata.audioEncoderArrayExtended) / sizeof(*adata.audioEncoderArrayExtended), get));
-				if (index != sizeof(adata.audioEncoderArrayExtended) / sizeof(*adata.audioEncoderArrayExtended)) {
-					adata.audioEncoderArray_current = index;
-					adata.update_audioEncoderValues();
-				} else {
-					std::cerr << ("Unknown value for [AUDIO].AudioEncoder: \"" + get + "\"") << std::endl;
+			bool found = false;
+			for (int i = 0; i < AudioData::get_audioEncoderArraySize(useExtraCodecs); i++) {
+				const AudioCodecData* ac = AudioData::audioEncoderArrayExtended[i];
+				auto it = std::find(ac->searchNames.begin(), ac->searchNames.end(), get);
+				if (it != ac->searchNames.end()) {
+					adata.set_encoder_idx(i);
+					found = true;
+					break;
 				}
-			} else {
-				size_t index = std::distance(adata.audioEncoderArray, std::find(adata.audioEncoderArray, adata.audioEncoderArray + sizeof(adata.audioEncoderArray) / sizeof(*adata.audioEncoderArray), get));
-				if (index != sizeof(adata.audioEncoderArray) / sizeof(*adata.audioEncoderArray)) {
-					adata.audioEncoderArray_current = index;
-					adata.update_audioEncoderValues();
-				} else {
-					std::cerr << ("Unknown value for [AUDIO].AudioEncoder: \"" + get + "\"") << std::endl;
-				}
+			}
+			if (!found) {
+				std::cerr << ("Unknown value for [AUDIO].AudioEncoder: \"" + get + "\"") << std::endl;
 			}
 		}
 	}
 
-	if (ini_object.get("AUDIO").has("AudioBitrateKbps") && !adata.get_audioEncoderIsLossless()) {
+	if (ini_object.get("AUDIO").has("AudioBitrateKbps") && !adata.get_audioEncoder()->isLossless) {
 		std::string get = ini_object.get("AUDIO").get("AudioBitrateKbps");
 		if (!get.empty()) {
 			try {
@@ -309,13 +304,13 @@ void Fill_AudioData(AudioData& adata, const mINI::INIStructure& ini_object, bool
 		}
 	}
 
-	//TODO
-	if (ini_object.get("AUDIO").has("AudioPreset") && adata.audioCodec_hasPreset) {
+	if (ini_object.get("AUDIO").has("AudioPreset") && !adata.get_audioEncoder()->preset1.internalValues.empty()) {
 		std::string get = ini_object.get("AUDIO").get("AudioPreset");
 		if (!get.empty() && get != "default") {
-			size_t index = std::distance(adata.get_audioPresetArray(), std::find(adata.get_audioPresetArray(), adata.get_audioPresetArray() + adata.get_audioPresetArray_size(), get));
-			if (index != adata.get_audioPresetArray_size()) {
-				adata.audioPresetArray_current = index;
+			const GenericCodecPreset& ac_p1 = adata.get_audioEncoder()->preset1;
+			size_t index = std::distance(ac_p1.internalValues.begin(), std::find(ac_p1.internalValues.begin(), ac_p1.internalValues.end(), get));
+			if (index != ac_p1.internalValues.size()) {
+				adata.set_encoder_preset1_idx(index);
 			} else {
 				std::cerr << ("Unknown value for [AUDIO].AudioPreset: \"" + get + "\"") << std::endl;
 			}
@@ -328,50 +323,45 @@ void Fill_VideoData(VideoData& vdata, const mINI::INIStructure& ini_object, bool
 		return;
 	}
 
-	//TODO
 	if (ini_object.get("VIDEO").has("VideoEncoder")) {
 		std::string get = ini_object.get("VIDEO").get("VideoEncoder");
 		if (!get.empty()) {
-			if (useExtraCodecs) {
-				size_t index = std::distance(vdata.videoEncoderArrayExtended, std::find(vdata.videoEncoderArrayExtended, vdata.videoEncoderArrayExtended + sizeof(vdata.videoEncoderArrayExtended) / sizeof(*vdata.videoEncoderArrayExtended), get));
-				if (index != sizeof(vdata.videoEncoderArrayExtended) / sizeof(*vdata.videoEncoderArrayExtended)) {
-					vdata.videoEncoderArray_current = index;
-					vdata.update_videoEncoderValues();
-				} else {
-					std::cerr << ("Unknown value for [VIDEO].VideoEncoder: \"" + get + "\"") << std::endl;
+			bool found = false;
+			for (int i = 0; i < VideoData::get_videoEncoderArraySize(useExtraCodecs); i++) {
+				const VideoCodecData* vc = VideoData::videoEncoderArrayExtended[i];
+				auto it = std::find(vc->searchNames.begin(), vc->searchNames.end(), get);
+				if (it != vc->searchNames.end()) {
+					vdata.set_encoder_idx(i);
+					found = true;
+					break;
 				}
-			} else {
-				size_t index = std::distance(vdata.videoEncoderArray, std::find(vdata.videoEncoderArray, vdata.videoEncoderArray + sizeof(vdata.videoEncoderArray) / sizeof(*vdata.videoEncoderArray), get));
-				if (index != sizeof(vdata.videoEncoderArray) / sizeof(*vdata.videoEncoderArray)) {
-					vdata.videoEncoderArray_current = index;
-					vdata.update_videoEncoderValues();
-				} else {
-					std::cerr << ("Unknown value for [VIDEO].VideoEncoder: \"" + get + "\"") << std::endl;
-				}
+			}
+			if (!found) {
+				std::cerr << ("Unknown value for [VIDEO].VideoEncoder: \"" + get + "\"") << std::endl;
 			}
 		}
 	}
 
-	//TODO
-	if (ini_object.get("VIDEO").has("VideoPreset1") && vdata.videoCodec_hasPreset1) {
+	if (ini_object.get("VIDEO").has("VideoPreset1") && !vdata.get_videoEncoder()->preset1.internalValues.empty()) {
 		std::string get = ini_object.get("VIDEO").get("VideoPreset1");
 		if (!get.empty() && get != "default") {
-			size_t index = std::distance(vdata.get_videoPresetArray1(), std::find(vdata.get_videoPresetArray1(), vdata.get_videoPresetArray1() + vdata.get_videoPresetArray1_size(), get));
-			if (index != vdata.get_videoPresetArray1_size()) {
-				vdata.videoPresetArray1_current = index;
+			const GenericCodecPreset& vc_p1 = vdata.get_videoEncoder()->preset1;
+			size_t index = std::distance(vc_p1.internalValues.begin(), std::find(vc_p1.internalValues.begin(), vc_p1.internalValues.end(), get));
+			if (index != vc_p1.internalValues.size()) {
+				vdata.set_encoder_preset1_idx(index);
 			} else {
 				std::cerr << ("Unknown value for [VIDEO].VideoPreset1: \"" + get + "\"") << std::endl;
 			}
 		}
 	}
 
-	//TODO
-	if (ini_object.get("VIDEO").has("VideoPreset2") && vdata.videoCodec_hasPreset2) {
+	if (ini_object.get("VIDEO").has("VideoPreset2") && !vdata.get_videoEncoder()->preset2.internalValues.empty()) {
 		std::string get = ini_object.get("VIDEO").get("VideoPreset2");
 		if (!get.empty() && get != "default") {
-			size_t index = std::distance(vdata.get_videoPresetArray2(), std::find(vdata.get_videoPresetArray2(), vdata.get_videoPresetArray2() + vdata.get_videoPresetArray2_size(), get));
-			if (index != vdata.get_videoPresetArray2_size()) {
-				vdata.videoPresetArray2_current = index;
+			const GenericCodecPreset& vc_p2 = vdata.get_videoEncoder()->preset2;
+			size_t index = std::distance(vc_p2.internalValues.begin(), std::find(vc_p2.internalValues.begin(), vc_p2.internalValues.end(), get));
+			if (index != vc_p2.internalValues.size()) {
+				vdata.set_encoder_preset2_idx(index);
 			} else {
 				std::cerr << ("Unknown value for [VIDEO].VideoPreset2: \"" + get + "\"") << std::endl;
 			}
@@ -418,7 +408,7 @@ void Fill_VideoData(VideoData& vdata, const mINI::INIStructure& ini_object, bool
 		}
 	}
 
-	if (ini_object.get("VIDEO").has("VideoCRF") && !vdata.get_videoEncoderIsLossless()) {
+	if (ini_object.get("VIDEO").has("VideoCRF") && !vdata.get_videoEncoder()->isLossless) {
 		std::string get = ini_object.get("VIDEO").get("VideoCRF");
 		if (!get.empty()) {
 			try {
@@ -688,13 +678,13 @@ void CopySettingsToIni(mINI::INIStructure& ini_object, const ImageData& idata, c
 	ini_object["AUDIO"]["VoiceEngine"] = adata.get_voiceEngine();
 	ini_object["AUDIO"]["VoiceName"]   = adata.get_voiceName();
 
-	ini_object["AUDIO"]["AudioEncoder"]     = adata.get_audioEncoder();
+	ini_object["AUDIO"]["AudioEncoder"]     = adata.get_audioEncoder()->internalName;
 	ini_object["AUDIO"]["AudioBitrateKbps"] = std::to_string(adata.audio_bitrate_v); //no need to check if lossless
-	ini_object["AUDIO"]["AudioPreset"]      = adata.get_audioPreset(); //TODO: don't use the full string
+	ini_object["AUDIO"]["AudioPreset"]      = adata.get_audioPreset1_currentValue();
 
-	ini_object["VIDEO"]["VideoEncoder"] = vdata.get_videoEncoder();
-	ini_object["VIDEO"]["VideoPreset1"] = vdata.get_videoPreset1(); //TODO: don't use the full string
-	ini_object["VIDEO"]["VideoPreset2"] = vdata.get_videoPreset2(); //TODO: don't use the full string
+	ini_object["VIDEO"]["VideoEncoder"] = vdata.get_videoEncoder()->internalName;
+	ini_object["VIDEO"]["VideoPreset1"] = vdata.get_videoPreset1_currentValue();
+	ini_object["VIDEO"]["VideoPreset2"] = vdata.get_videoPreset2_currentValue();
 
 	ini_object["VIDEO"]["VideoFPS"] = vdata.get_fps();
 	ini_object["VIDEO"]["VideoCRF"] = vdata.get_videoCrf(); //no need to check if lossless

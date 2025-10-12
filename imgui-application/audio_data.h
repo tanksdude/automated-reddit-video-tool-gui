@@ -2,24 +2,10 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <cstdint>
-#include "av_shared_info.h"
+#include <array>
+#include "av_codecs.h"
 
 struct AudioData {
-	struct BitrateData {
-		// Bitrate in kbps
-		int16_t starting_value;
-		int16_t min_value; //"sane" min
-		int16_t max_value; //"sane" max
-		int16_t codec_default_value; //unused
-		int16_t codec_min_value;     //unused
-		int16_t codec_max_value;     //unused
-	};
-
-	/* Passing voice engine information to the Python script:
-	 * The Python script will read the string character for character. It will
-	 * translate each voice engine name to the correct program.
-	 */
 #ifdef _WIN32
 	static const char* voiceEngineArray[4];
 	static const char* voiceEngineArray_exeForUpdatingVoiceList[4]; //note: internal use only
@@ -37,44 +23,28 @@ struct AudioData {
 	static void getVoiceListFromExe_Balabolka(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList);
 	static void getVoiceListFromExe_Espeak(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList);
 
-	/* Passing codec information to the Python script:
-	 * The Python script will ignore everything after the first space. This
-	 * means "copy (pcm)" will be interpreted the same as "copy".
-	 */
-	static const char* audioEncoderArray[7];
-	static const char* audioEncoderArrayExtended[13];
-	static inline const char** get_audioEncoderArray(bool extended) {
-		return extended ? audioEncoderArrayExtended : audioEncoderArray;
-	}
+	static std::array<const AudioCodecData*, 7>  audioEncoderArray;
+	static std::array<const AudioCodecData*, 13> audioEncoderArrayExtended;
 	static inline size_t get_audioEncoderArraySize(bool extended) {
-		return extended ? sizeof(audioEncoderArrayExtended) / sizeof(*audioEncoderArrayExtended)
-		                : sizeof(audioEncoderArray)         / sizeof(*audioEncoderArray);
+		return extended ? audioEncoderArrayExtended.size() : audioEncoderArray.size();
 	}
-	/* Passing "preset" information to the Python script:
-	 * The Python script will ignore everything after the first space. This
-	 * means "5 (default)" will be interpreted the same as "5".
-	 */
-	static std::vector<const char*> audioPresetArray_AAC;
-	static std::vector<const char*> audioPresetArray_Opus;
-	static std::vector<const char*> audioPresetArray_FLAC;
-	static std::vector<const char*> audioPresetArray_MP3;
-	static std::vector<const char*> audioPresetArray_empty; //placeholder for the hashmap lookups
-	//other possibilities: flac lpc_coeff_precision, libopus application, aac profile ("low complexity" default, "main", "scalable sampling rate")
-
-	static const std::unordered_map<std::string, CodecPresetInformation> codecToPresetArray;
-	static const std::unordered_map<std::string, BitrateData> codecToBitrate;
-	static const std::unordered_map<std::string, AudioCodecMiscInformation> codecMiscInformation;
 
 	int audioEncoderArray_current;
-	CodecRecommendedLevel get_audioEncoderRecommendation() const;
-	bool get_audioEncoderIsLossless() const;
-	std::string get_audioEncoderInformationText() const;
+	int audioEncoder_preset1_current;
+	void set_encoder_idx(int idx) {
+		audioEncoderArray_current = idx;
+		audioEncoder_preset1_current = 0;
+		update_audioEncoderValues();
+	}
+	void set_encoder_preset1_idx(int idx) {
+		audioEncoder_preset1_current = idx;
+	}
 
-	bool audioCodec_hasPreset;
-	int audioPresetArray_current;
-	std::string audioCodec_presetTerm;
-	const char** get_audioPresetArray() const;
-	int get_audioPresetArray_size() const;
+	inline const AudioCodecData* get_audioEncoder() const { return audioEncoderArrayExtended[audioEncoderArray_current]; }
+	inline std::string get_audioPreset1_currentValue() const {
+		const GenericCodecPreset& ac_p1 = get_audioEncoder()->preset1;
+		return ac_p1.displayValues.empty() ? "default" : ac_p1.internalValues[audioEncoder_preset1_current];
+	}
 
 	int16_t audio_bitrate_v;
 	int16_t audio_bitrate_min;
@@ -86,15 +56,13 @@ struct AudioData {
 		if (voiceArray_current < 0) { return ""; }
 		return std::string(voiceArray[voiceArray_current]);
 	}
-	inline std::string get_audioEncoder() const { return std::string(audioEncoderArrayExtended[audioEncoderArray_current]); } //TODO: hacky to not check whether to use the extra codecs
 	inline std::string get_audioBitrate() const { return std::to_string(audio_bitrate_v) + "k"; }
-	std::string get_audioPreset() const;
 
 	void update_voiceArray(); // Call this when changing the speech engine!
-	void update_audioEncoderValues(); // Call this when changing the audio encoder!
+	void update_audioEncoderValues(); // [Internal] Called when changing the audio encoder
 	void set_audioBitrate(int16_t val); // Used by the INI file, not really needed otherwise
 
-	// Called during update_voiceArray() (don't call these yourself):
+	// [Internal] Called during update_voiceArray():
 	inline void voiceArray_free() {
 		if (voiceArray != nullptr) [[likely]] {
 			for (int i = 0; i < voiceArray_length; i++) {
@@ -112,6 +80,7 @@ struct AudioData {
 	// Make sure to call update_voiceArray() to finish initialization! (Assuming you want a voice list populated.)
 	AudioData() {
 		audioEncoderArray_current = 1;
+		audioEncoder_preset1_current = 0;
 		update_audioEncoderValues();
 	}
 	~AudioData() {

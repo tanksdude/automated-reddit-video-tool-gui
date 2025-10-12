@@ -50,8 +50,8 @@ audioCodecLookup = {
 	"E-AC-3":   "eac3",
 	"Speex":    "libspeex",
 	"TTA":      "tta",
-	"Windows":  "wmav2",
-	"MPEG-2":   "libtwolame", # mp2 also exists, though it only does 160k bitrate; ffprobe reports this as mp3 either way
+	"WMA2":     "wmav2",
+	"MP2":      "libtwolame", # mp2 also exists, though it only does 160k bitrate; ffprobe reports this as mp3 either way
 }
 audioCodecIsLosslessList = ["copy", "FLAC", "ALAC", "TTA"]
 
@@ -68,58 +68,58 @@ audioPresetKeywordLookup = {
 	"E-AC-3":   [],
 	"Speex":    [],
 	"TTA":      [],
-	"Windows":  [],
-	"MPEG-2":   [],
+	"WMA2":     [],
+	"MP2":      [],
 }
 
 videoCodecLookup = {
-	"H.264":   "libx264",
-	"H.265":   "libx265",
-	"VP8":     "libvpx",
-	"VP9":     "libvpx-vp9",
-	"AV1":     "libaom-av1",
-	"FFV1":    "ffv1",
-	"Ut":      "utvideo",
+	"H.264":      "libx264",
+	"H.265":      "libx265",
+	"VP8":        "libvpx",
+	"VP9":        "libvpx-vp9",
+	"AV1":        "libaom-av1",
+	"FFV1":       "ffv1",
+	"Ut_Video":   "utvideo",
 
-	"Apple":            "prores",
+	"ProRes":           "prores",
 	"QuickTime":        "qtrle",
 	"CineForm":         "cfhd",
-	"Lossless_H.264":   "libx264", #TODO: libx264rgb?
+	"H.264_Lossless":   "libx264", #TODO: libx264rgb?
 	"VVC":              "libvvenc",
 	"EVC":              "libxeve",
 }
-videoCodecIsLosslessList = ["FFV1", "Ut", "QuickTime", "Lossless_H.264"] + ["Apple", "CineForm", "VVC"] # The second list isn't lossless, but they don't support CRF mode
+videoCodecIsLosslessList = ["FFV1", "Ut_Video", "QuickTime", "H.264_Lossless"] + ["ProRes", "CineForm", "VVC"] # The second list isn't lossless, but they don't support CRF mode
 
 videoPresetKeywordLookup = {
-	"H.264":   ["-preset"],
-	"H.265":   ["-preset"],
-	"VP8":     ["-deadline", "-cpu-used"],
-	"VP9":     ["-deadline", "-cpu-used"],
-	"AV1":     ["-usage",    "-cpu-used"],
-	"FFV1":    [],
-	"Ut":      ["-pred"],
+	"H.264":      ["-preset"],
+	"H.265":      ["-preset"],
+	"VP8":        ["-deadline", "-cpu-used"],
+	"VP9":        ["-deadline", "-cpu-used"],
+	"AV1":        ["-usage",    "-cpu-used"],
+	"FFV1":       [],
+	"Ut_Video":   ["-pred"],
 
-	"Apple":            [],
+	"ProRes":           [],
 	"QuickTime":        [],
 	"CineForm":         ["-quality"],
-	"Lossless_H.264":   ["-preset"],
+	"H.264_Lossless":   ["-preset"],
 	"VVC":              ["-preset"],
 	"EVC":              ["-preset"],
 }
 
 videoExtraArgsLookup = {
-	"H.264":   [],
-	"H.265":   ["-x265-params", "log-level=error"],    # silence unnecessary output, as FFmpeg does not tell libx265 the log level
-	"VP8":     ["-b:v", "1G", "-auto-alt-ref", "0"],   # bitrate flag possibly required: https://goughlui.com/2023/12/27/video-codec-round-up-2023-part-4-libvpx-vp8/
-	"VP9":     ["-b:v", "0"],                          # definitely required (for CRF mode)
-	"AV1":     [],                                     # requires FFmpeg 4.3+ to not require "-b:v 0", 4.4+ to avoid a lossless bug
-	"FFV1":    [],                                     # no need for -level 3 as that's the default (found empirically, required ffprobe -debug 1)
-	"Ut":      [],
+	"H.264":      [],
+	"H.265":      ["-x265-params", "log-level=error"],    # silence unnecessary output, as FFmpeg does not tell libx265 the log level
+	"VP8":        ["-b:v", "1G", "-auto-alt-ref", "0"],   # bitrate flag possibly required: https://goughlui.com/2023/12/27/video-codec-round-up-2023-part-4-libvpx-vp8/
+	"VP9":        ["-b:v", "0"],                          # definitely required (for CRF mode)
+	"AV1":        [],                                     # requires FFmpeg 4.3+ to not require "-b:v 0", 4.4+ to avoid a lossless bug
+	"FFV1":       [],                                     # no need for -level 3 as that's the default (found empirically, required ffprobe -debug 1)
+	"Ut_Video":   [],
 
-	"Apple":            [],
+	"ProRes":           [],
 	"QuickTime":        [],
 	"CineForm":         [],
-	"Lossless_H.264":   ["-crf", "0"], # not needed if the codec is removed from videoCodecIsLosslessList, however ["-qp", "0"] might be preferred
+	"H.264_Lossless":   ["-crf", "0"], # not needed if the codec is removed from videoCodecIsLosslessList, however ["-qp", "0"] might be preferred
 	"VVC":              [],
 	"EVC":              [],
 }
@@ -182,18 +182,18 @@ IMAGE_SIZE = str(IMAGE_WIDTH) + "x" + str(IMAGE_HEIGHT)
 IMAGE_SIZE_EXTENDED = str(IMAGE_WIDTH + 2*IMAGE_W_BORDER) + "x" + str(IMAGE_HEIGHT + 2*IMAGE_H_BORDER)
 
 # Video parameters:
-VIDEO_AUD_CODEC_name = args.audioEncoder.split(' ')[0]
-VIDEO_VID_CODEC_name = args.videoEncoder.split(' ')[0]
+VIDEO_AUD_CODEC_name = args.audioEncoder
+VIDEO_VID_CODEC_name = args.videoEncoder
 AUDIO_PROGRAM_CMD = audioProgramLookup[args.speechEngine]
 AUDIO_VOICE = args.voice
 VIDEO_FPS = args.fps # Fun fact: FFmpeg's default framerate is 25. Only answer I could find for why is PAL compatibility, but I think that's just a coincidence.
 VIDEO_VID_CRF = args.crf
 VIDEO_AUD_CODEC_lib = audioCodecLookup[VIDEO_AUD_CODEC_name]
 VIDEO_AUD_BITRATE = args.audioBitrate
-VIDEO_AUD_PRESET = args.audioPreset.split(' ')[0]
+VIDEO_AUD_PRESET = args.audioPreset
 VIDEO_VID_CODEC_lib = videoCodecLookup[VIDEO_VID_CODEC_name]
-VIDEO_VID_PRESET_1 = args.videoPreset1.split(' ')[0]
-VIDEO_VID_PRESET_2 = args.videoPreset2.split(' ')[0]
+VIDEO_VID_PRESET_1 = args.videoPreset1
+VIDEO_VID_PRESET_2 = args.videoPreset2
 VIDEO_VID_EXTRA_ARGS = videoExtraArgsLookup[VIDEO_VID_CODEC_name]
 VIDEO_VID_FASTSTART = int(args.faststart_flag)
 

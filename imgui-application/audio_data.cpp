@@ -14,89 +14,8 @@ const char* AudioData::voiceEngineArray[5] = { "Espeak", "Espeak NG", "say (TODO
 const char* AudioData::voiceEngineArray_exeForUpdatingVoiceList[5] = { "espeak --voices", "espeak-ng --voices", "", "", "" }; //note: internal use only
 #endif
 
-const char* AudioData::audioEncoderArray[7]          = { "copy (pcm)", "AAC", "Opus", "FLAC", "Vorbis", "MP3", "ALAC" };
-const char* AudioData::audioEncoderArrayExtended[13] = { "copy (pcm)", "AAC", "Opus", "FLAC", "Vorbis", "MP3", "ALAC", "AC-3", "E-AC-3", "Speex", "TTA True Audio", "Windows Media Audio (2)", "MPEG-2" };
-std::vector<const char*> AudioData::audioPresetArray_AAC  = { "default", "anmr (not recommended) (NOT SUPPORTED)", "twoloop (default)", "fast" };
-std::vector<const char*> AudioData::audioPresetArray_Opus = { "default", "0 (fast)", "1", "2", "3", "4", "5",           "6", "7", "8", "9", "10 (default)" };
-std::vector<const char*> AudioData::audioPresetArray_FLAC = { "default", "0 (fast)", "1", "2", "3", "4", "5 (default)", "6", "7", "8", "9", "10", "11", "12" };
-std::vector<const char*> AudioData::audioPresetArray_MP3  = { "default", "0 (slow)", "1", "2", "3", "4", "5 (default)", "6", "7", "8", "9" }; //default is 5 according to its API
-std::vector<const char*> AudioData::audioPresetArray_empty = {};
-
-const std::unordered_map<std::string, CodecPresetInformation> AudioData::codecToPresetArray = {
-	{ "copy (pcm)", { "", audioPresetArray_empty } },
-	{ "AAC",        { "Encoding Method", audioPresetArray_AAC } },
-	{ "Opus",       { "Compression Level", audioPresetArray_Opus } },
-	{ "FLAC",       { "Compression Level", audioPresetArray_FLAC } },
-	{ "Vorbis",     { "", audioPresetArray_empty } },
-	{ "MP3",        { "Compression Level", audioPresetArray_MP3 } },
-	{ "ALAC",       { "", audioPresetArray_empty } },
-
-	{ "AC-3",                    { "", audioPresetArray_empty } },
-	{ "E-AC-3",                  { "", audioPresetArray_empty } },
-	{ "Speex",                   { "", audioPresetArray_empty } },
-	{ "TTA True Audio",          { "", audioPresetArray_empty } },
-	{ "Windows Media Audio (2)", { "", audioPresetArray_empty } },
-	{ "MPEG-2",                  { "", audioPresetArray_empty } },
-};
-
-//the recommended range is mostly a guess; maybe quality values should be used instead
-const std::unordered_map<std::string, AudioData::BitrateData> AudioData::codecToBitrate {
-	{ "copy (pcm)", {   0,   0,   0,   0,   0,   0 } },
-	{ "AAC",        { 128,  30, 192, 128,   0, INT16_MAX } }, //codec clamps bitrate when too high/low
-	{ "Opus",       {  96,  30, 128,  64,   1, 256 } }, //actual minimum is .5k
-	{ "FLAC",       {   0,   0,   0,   0,   0,   0 } },
-	{ "Vorbis",     {  90,  45,  90,  40,  16,  90 } }, //default bitrate found empirically (sidenote: ffprobe couldn't read the bitrate from a .mkv, that's annoying); also Vorbis itself seems to support basically any birtate, but libvorbis errors outside that range
-	{ "MP3",        { 128,  64, 256, 128,   0, INT16_MAX } }, //codec clamps bitrate when too high/low; seems like the range is 8k-160k per channel
-	{ "ALAC",       {   0,   0,   0,   0,   0,   0 } },
-
-	{ "AC-3",                    { 192,  96, 448,  96,  32, 640 } }, //min bitrate found empirically
-	{ "E-AC-3",                  { 128,  32, 384,  96,  12, 4096 } }, //32k-6144k is the range according to Wikipedia; bitrate depends on sample rate and channels, probably like AC-3
-	{ "Speex",                   {  27,   3,  42,  27,   2,  44 } }, //default bitrate found empirically
-	{ "TTA True Audio",          {   0,   0,   0,   0,   0,   0 } },
-	{ "Windows Media Audio (2)", { 128,  64, 256, 128,  24, INT16_MAX } }, //max bitrate empirically found to be 361267.088k, which is *very* weird, however nothing above ~5644.628k gets any more bits
-	{ "MPEG-2",                  { 128,  64, 160,  79,  32, 160 } }, //bitrate range found empirically
-};
-
-const std::unordered_map<std::string, AudioCodecMiscInformation> AudioData::codecMiscInformation = {
-	{ "copy (pcm)", { .recommendation=CodecRecommendedLevel::Okay,  .lossless=true,  .information_text="Uncompressed raw audio. Not very useful." } },
-	{ "AAC",        { .recommendation=CodecRecommendedLevel::Good,  .lossless=false, .information_text="Very widespread. Opus is faster and higher quality though." } },
-	{ "Opus",       { .recommendation=CodecRecommendedLevel::Best,  .lossless=false, .information_text="Currently the best lossy audio codec. Very unlikely to encounter compatibility issues." } },
-	{ "FLAC",       { .recommendation=CodecRecommendedLevel::Best,  .lossless=true,  .information_text="It's lossless. Smaller filesizes than raw audio." } },
-	{ "Vorbis",     { .recommendation=CodecRecommendedLevel::Okay,  .lossless=false, .information_text="Succeeded by Opus. Not much reason to use it." } }, //I was originally very against Vorbis because it had poor container support, but it's actually supported in every container exposed by this program; it's VP8 that's the problem
-	{ "MP3",        { .recommendation=CodecRecommendedLevel::Awful, .lossless=false, .information_text="There are better options; at least use its successor AAC." } },
-	{ "ALAC",       { .recommendation=CodecRecommendedLevel::Good,  .lossless=true,  .information_text="It's lossless. FLAC probably has better support." } },
-
-	{ "AC-3",                    { .recommendation=CodecRecommendedLevel::Awful, .lossless=false, .information_text="One of the oldest audio codecs. Still used in modern movies, for some reason." } },
-	{ "E-AC-3",                  { .recommendation=CodecRecommendedLevel::No_Opinion, .lossless=false, .information_text="AC-3's successor, and decently modern. Not a good choice for this program's usage, but definitely used elsewhere." } },
-	{ "Speex",                   { .recommendation=CodecRecommendedLevel::Okay,  .lossless=false, .information_text="Succeeded by Opus. Designed for speech, while Vorbis is more general-purpose." } }, //intended to use a 0-10 quality parameter rather than bitrate
-	{ "TTA True Audio",          { .recommendation=CodecRecommendedLevel::Awful, .lossless=true,  .information_text="It's lossless, but doesn't seem to be used anywhere..." } },
-	{ "Windows Media Audio (2)", { .recommendation=CodecRecommendedLevel::Awful, .lossless=false, .information_text="Competed with MP3. Doesn't reach transparency at any bitrate." } }, // The versions are 1, 2, 9/Pro, and Lossless, but 2 is the one exposed by Kdenlive so that's the one I'll offer (and 9/Pro and Lossless don't have encoders)
-	{ "MPEG-2",                  { .recommendation=CodecRecommendedLevel::Awful, .lossless=false, .information_text="MP3's predecessor, and succeeded by AAC. Still used in DVDs." } },
-};
-
-CodecRecommendedLevel AudioData::get_audioEncoderRecommendation() const {
-	return codecMiscInformation.at(get_audioEncoder()).recommendation;
-}
-bool AudioData::get_audioEncoderIsLossless() const {
-	return codecMiscInformation.at(get_audioEncoder()).lossless;
-}
-std::string AudioData::get_audioEncoderInformationText() const {
-	return codecMiscInformation.at(get_audioEncoder()).information_text;
-}
-
-const char** AudioData::get_audioPresetArray() const {
-	return codecToPresetArray.at(get_audioEncoder()).presetArray.data();
-}
-
-int AudioData::get_audioPresetArray_size() const {
-	const std::vector<const char*>& codecArr = codecToPresetArray.at(get_audioEncoder()).presetArray;
-	return codecArr.size();
-}
-
-std::string AudioData::get_audioPreset() const {
-	const std::vector<const char*>& codecArr = codecToPresetArray.at(get_audioEncoder()).presetArray;
-	return codecArr.empty() ? "default" : codecArr[audioPresetArray_current];
-}
+std::array<const AudioCodecData*, 7>  AudioData::audioEncoderArray         = { &CODEC_AUDIO_copypcm, &CODEC_AUDIO_AAC, &CODEC_AUDIO_Opus, &CODEC_AUDIO_FLAC, &CODEC_AUDIO_Vorbis, &CODEC_AUDIO_MP3, &CODEC_AUDIO_ALAC };
+std::array<const AudioCodecData*, 13> AudioData::audioEncoderArrayExtended = { &CODEC_AUDIO_copypcm, &CODEC_AUDIO_AAC, &CODEC_AUDIO_Opus, &CODEC_AUDIO_FLAC, &CODEC_AUDIO_Vorbis, &CODEC_AUDIO_MP3, &CODEC_AUDIO_ALAC, &CODEC_AUDIO_AC3, &CODEC_AUDIO_EAC3, &CODEC_AUDIO_Speex, &CODEC_AUDIO_TTA, &CODEC_AUDIO_WMA2, &CODEC_AUDIO_MP2 };
 
 void AudioData::getVoiceListFromExe_Balabolka(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList) {
 	// Balabolka lists the voices under "SAPI" with a space, so it's a voice if it's indented
@@ -232,22 +151,15 @@ void AudioData::update_voiceArray() {
 }
 
 void AudioData::update_audioEncoderValues() {
-	const std::string codec = get_audioEncoder();
-
 	// Bitrate:
-	const AudioData::BitrateData& data = codecToBitrate.at(codec);
+	const AudioCodecData::BitrateData& data = get_audioEncoder()->bitrateInfo;
 	audio_bitrate_v = data.starting_value;
 	audio_bitrate_min = data.min_value;
 	audio_bitrate_max = data.max_value;
 	//audio_bitrate_step = 4; //TODO: unused because ImGui sliders don't support stepping
-
-	// Preset:
-	audioPresetArray_current = 0;
-	audioCodec_hasPreset = !codecToPresetArray.at(codec).presetArray.empty();
-	audioCodec_presetTerm = codecToPresetArray.at(codec).term;
 }
 
 void AudioData::set_audioBitrate(int16_t val) {
-	const AudioData::BitrateData& data = codecToBitrate.at(get_audioEncoder());
+	const AudioCodecData::BitrateData& data = get_audioEncoder()->bitrateInfo;
 	audio_bitrate_v = std::clamp(val, data.codec_min_value, data.codec_max_value);
 }
