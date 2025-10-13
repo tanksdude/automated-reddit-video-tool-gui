@@ -38,7 +38,6 @@ void refreshApplicationFontName(bool loadingStartupFont = false) {
 	if (pdata.application_font_path[0] == '\0') {
 		//see ImGui::ShowFontSelector()
 		ImGuiIO& io = ImGui::GetIO();
-		ImFont* font_current = ImGui::GetFont();
 		for (ImFont* font : io.Fonts->Fonts) {
 			if (strcmp(font->GetDebugName(), "ProggyClean.ttf") == 0) {
 				io.FontDefault = font;
@@ -342,6 +341,7 @@ int main(int, char**)
 			ImGui::Begin("Main Window", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings);
 			ImGui::SetWindowPos(ImVec2(0, 0));
 			ImGui::SetWindowSize("Main Window", ImVec2(window_width, window_height));
+			const ImVec2 ImageButtonSize = { ImGui::GetTextLineHeight(), ImGui::GetTextLineHeight() };
 
 			if (ImGui::BeginTabBar("MainTabBar", 0)) {
 				ImGuiTabItemFlags tab_flags[5] = { 0, 0, 0, 0, 0 };
@@ -376,7 +376,7 @@ int main(int, char**)
 							ImGui::EndDisabled();
 						}
 
-						if (ImGui::ImageButton("##Lock Icon", filenameIsLocked ? lock_icon_texture : unlock_icon_texture, ImVec2(pdata.application_font_size, pdata.application_font_size))) {
+						if (ImGui::ImageButton("##Lock Icon", filenameIsLocked ? lock_icon_texture : unlock_icon_texture, ImageButtonSize)) {
 							clear_input_data(filenameIsLocked);
 							filenameIsLocked = !filenameIsLocked;
 						}
@@ -785,7 +785,7 @@ int main(int, char**)
 
 						ImGui::Text("Recommendation:");
 						ImGui::SameLine();
-						ImGui::Image(recommendationStr_toTexId[ac->recommendation], ImVec2(pdata.application_font_size, pdata.application_font_size));
+						ImGui::Image(recommendationStr_toTexId[ac->recommendation], ImageButtonSize);
 
 						ImGui::Text("Information:");
 						ImGui::SameLine();
@@ -841,7 +841,7 @@ int main(int, char**)
 
 						ImGui::Text("Recommendation:");
 						ImGui::SameLine();
-						ImGui::Image(recommendationStr_toTexId[vc->recommendation], ImVec2(pdata.application_font_size, pdata.application_font_size));
+						ImGui::Image(recommendationStr_toTexId[vc->recommendation], ImageButtonSize);
 
 						ImGui::Text("Information:");
 						ImGui::SameLine();
