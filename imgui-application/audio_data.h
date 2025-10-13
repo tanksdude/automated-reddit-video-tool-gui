@@ -7,12 +7,12 @@
 
 struct AudioData {
 #ifdef _WIN32
-	static const char* voiceEngineArray[4];
-	static const char* voiceEngineArray_exeForUpdatingVoiceList[4]; //note: internal use only
+	static const std::array<const char*, 3> voiceEngineArray;
+	static const std::array<const char*, 3> voiceEngineArray_exeForUpdatingVoiceList; //note: internal use only
 	int voiceEngineArray_current = 0;
 #else
-	static const char* voiceEngineArray[5];
-	static const char* voiceEngineArray_exeForUpdatingVoiceList[5]; //note: internal use only
+	static const std::array<const char*, 5> voiceEngineArray;
+	static const std::array<const char*, 5> voiceEngineArray_exeForUpdatingVoiceList; //note: internal use only
 	int voiceEngineArray_current = 1;
 #endif
 
@@ -23,8 +23,8 @@ struct AudioData {
 	static void getVoiceListFromExe_Balabolka(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList);
 	static void getVoiceListFromExe_Espeak(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList);
 
-	static std::array<const AudioCodecData*, 7>  audioEncoderArray;
-	static std::array<const AudioCodecData*, 13> audioEncoderArrayExtended;
+	static const std::array<const AudioCodecData*, 7>  audioEncoderArray;
+	static const std::array<const AudioCodecData*, 13> audioEncoderArrayExtended;
 	static inline size_t get_audioEncoderArraySize(bool extended) {
 		return extended ? audioEncoderArrayExtended.size() : audioEncoderArray.size();
 	}

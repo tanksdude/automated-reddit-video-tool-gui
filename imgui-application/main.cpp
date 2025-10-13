@@ -517,9 +517,11 @@ int main(int, char**)
 						ImGui::InputText("Background Color",      idata.background_color_input,    IM_ARRAYSIZE(idata.background_color_input), ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc); //TODO: think these need to also scrub backslashes
 						ImGui::SliderScalar("Newline Count", ImGuiDataType_U8, &idata.paragraph_newline_v, &idata.paragraph_newline_min, &idata.paragraph_newline_max);
 						ImGui::Checkbox("Paragraph Tabbed Start", &idata.paragraph_tabbed_start_input);
+
 						const bool opened_additional_options_test_image = ImGui::TreeNodeEx("Additional Options##Test Image", ImGuiTreeNodeFlags_FramePadding);
 						if (opened_additional_options_test_image) {
 							ImGui::Unindent(style.IndentSpacing); //TODO: why isn't ImGui::GetTreeNodeToLabelSpacing() correct? //TODO: it seems to align it with the tree node's parent, which is weird (requires DPI=1)
+
 							ImGui::InputText("Font Name",             idata.font_name,                 IM_ARRAYSIZE(idata.font_name),              ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc);
 							ImGui::Indent();
 							ImGui::Checkbox("Font is a family",       &idata.font_is_family_input);
@@ -527,10 +529,12 @@ int main(int, char**)
 							ImGuiHelpers::HelpMarker("Every individual font has its own name, but they're often grouped under a family.\n"
 							                         "Bold/Italic/Bold+Italic/SemiLight/whatever versions of the font are part of the font's family.\n");
 							ImGui::Unindent();
-							ImGui::Combo("Text Alignment", &idata.textAlignmentArray_current, idata.textAlignmentArray, IM_ARRAYSIZE(idata.textAlignmentArray));
+
+							ImGui::Combo("Text Alignment", &idata.textAlignmentArray_current, idata.textAlignmentArray.data(), idata.textAlignmentArray.size());
 							ImGui::Checkbox("Skip line with lone '\\n'", &idata.skip_lone_lf_input);
 							ImGui::SameLine();
 							ImGuiHelpers::HelpMarker("If a line only has \"\\n\" on it, this will skip it, allowing an extra line with nothing on it.");
+
 							ImGui::Indent(style.IndentSpacing);
 							ImGui::TreePop();
 						}
@@ -539,7 +543,7 @@ int main(int, char**)
 
 						ImGui::SeparatorText("Export");
 						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
-						ImGui::Combo("Image Format", &idata.imageFormatArray_current, idata.imageFormatArray, IM_ARRAYSIZE(idata.imageFormatArray));
+						ImGui::Combo("Image Format", &idata.imageFormatArray_current, idata.imageFormatArray.data(), idata.imageFormatArray.size());
 						ImGui::PopItemWidth();
 
 						ARVT::copyEvaluatedFileName_toCommentTestImagePath_TestImage(pdata.the_file_input_name, idata, pdata.evaluated_test_image_path, IM_ARRAYSIZE(pdata.evaluated_test_image_path));
@@ -759,7 +763,7 @@ int main(int, char**)
 						ImGui::TableSetColumnIndex(0);
 
 						//to align text to the left: use a table
-						if (ImGui::Combo("Speech Engine", &adata.voiceEngineArray_current, adata.voiceEngineArray, IM_ARRAYSIZE(adata.voiceEngineArray))) {
+						if (ImGui::Combo("Speech Engine", &adata.voiceEngineArray_current, adata.voiceEngineArray.data(), adata.voiceEngineArray.size())) {
 							//there was a change
 							adata.update_voiceArray();
 						}
@@ -823,7 +827,7 @@ int main(int, char**)
 							ImGui::InputText("FPS##FPS Denominator", vdata.fps_denominator_input, IM_ARRAYSIZE(vdata.fps_denominator_input), ImGuiInputTextFlags_CallbackCharFilter, integerOnlyPositiveFunc);
 							ImGui::PopItemWidth();
 						} else {
-							ImGui::Combo("FPS##Integer", &vdata.fpsArray_current, vdata.fpsArray, IM_ARRAYSIZE(vdata.fpsArray), IM_ARRAYSIZE(vdata.fpsArray));
+							ImGui::Combo("FPS##Integer", &vdata.fpsArray_current, vdata.fpsArray.data(), vdata.fpsArray.size(), vdata.fpsArray.size());
 						}
 						ImGui::Unindent();
 
@@ -881,7 +885,7 @@ int main(int, char**)
 						ImGui::Unindent();
 
 						//TODO: probably move to main settings, think about non-wav containers for audio-only mode
-						ImGui::Combo("Container", &vdata.videoContainerArray_current, vdata.videoContainerArray, IM_ARRAYSIZE(vdata.videoContainerArray));
+						ImGui::Combo("Container", &vdata.videoContainerArray_current, vdata.videoContainerArray.data(), vdata.videoContainerArray.size());
 
 						ImGui::Indent();
 						if (!vdata.get_faststart_available()) { ImGui::BeginDisabled(); }
@@ -973,7 +977,7 @@ int main(int, char**)
 						ImGui::SeparatorText("Query");
 
 						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
-						if (ImGui::Combo("File Delete Age", &pdata.imageDeleteAgeList_current, pdata.imageDeleteAgeList, IM_ARRAYSIZE(pdata.imageDeleteAgeList))) {
+						if (ImGui::Combo("File Delete Age", &pdata.fileDeleteAgeList_current, pdata.fileDeleteAgeList.data(), pdata.fileDeleteAgeList.size())) {
 							//TODO: not sure
 							//deleteFileList.clear();
 							//deleteFileLogger.Clear();
@@ -983,12 +987,12 @@ int main(int, char**)
 						if (ImGui::Button("Query images")) {
 							deleteFileList.clear();
 							deleteFileLogger.Clear();
-							int result = ARVT::getListOfOldFiles(ARVT::TEST_IMAGES.c_str(), pdata.imageDeleteAgeList_values[pdata.imageDeleteAgeList_current], deleteFileList);
+							int result = ARVT::getListOfOldFiles(ARVT::TEST_IMAGES.c_str(), pdata.fileDeleteAgeList_values[pdata.fileDeleteAgeList_current], deleteFileList);
 							if (result) {
 								global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Query Files", strerror(result));
 							} else {
 								global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Query Files", ("Successfully queried " + ARVT::TEST_IMAGES).c_str());
-								deleteFileLogger.AddLog("Found %d files that are more than %s old:\n", deleteFileList.size(), pdata.imageDeleteAgeList[pdata.imageDeleteAgeList_current]);
+								deleteFileLogger.AddLog("Found %d files that are more than %s old:\n", deleteFileList.size(), pdata.fileDeleteAgeList[pdata.fileDeleteAgeList_current]);
 								for (const auto& f : deleteFileList) {
 									deleteFileLogger.AddLog("%s\n", f.c_str());
 								}
@@ -998,12 +1002,12 @@ int main(int, char**)
 						if (ImGui::Button("Query videos")) {
 							deleteFileList.clear();
 							deleteFileLogger.Clear();
-							int result = ARVT::getListOfOldFiles(ARVT::OUTPUT_SPEECH.c_str(), pdata.imageDeleteAgeList_values[pdata.imageDeleteAgeList_current], deleteFileList);
+							int result = ARVT::getListOfOldFiles(ARVT::OUTPUT_SPEECH.c_str(), pdata.fileDeleteAgeList_values[pdata.fileDeleteAgeList_current], deleteFileList);
 							if (result) {
 								global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Query Files", strerror(result));
 							} else {
 								global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Query Files", ("Successfully queried " + ARVT::OUTPUT_SPEECH).c_str());
-								deleteFileLogger.AddLog("Found %d files that are more than %s old:\n", deleteFileList.size(), pdata.imageDeleteAgeList[pdata.imageDeleteAgeList_current]);
+								deleteFileLogger.AddLog("Found %d files that are more than %s old:\n", deleteFileList.size(), pdata.fileDeleteAgeList[pdata.fileDeleteAgeList_current]);
 								for (const auto& f : deleteFileList) {
 									deleteFileLogger.AddLog("%s\n", f.c_str());
 								}

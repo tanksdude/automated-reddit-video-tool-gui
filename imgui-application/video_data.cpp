@@ -1,10 +1,10 @@
 #include "video_data.h"
 #include <algorithm> //std::clamp
 
-std::array<const VideoCodecData*, 7>  VideoData::videoEncoderArray         = { &CODEC_VIDEO_H264, &CODEC_VIDEO_H265, &CODEC_VIDEO_VP8, &CODEC_VIDEO_VP9, &CODEC_VIDEO_AV1, &CODEC_VIDEO_FFV1, &CODEC_VIDEO_UtVideo };
-std::array<const VideoCodecData*, 13> VideoData::videoEncoderArrayExtended = { &CODEC_VIDEO_H264, &CODEC_VIDEO_H265, &CODEC_VIDEO_VP8, &CODEC_VIDEO_VP9, &CODEC_VIDEO_AV1, &CODEC_VIDEO_FFV1, &CODEC_VIDEO_UtVideo, &CODEC_VIDEO_ProRes, &CODEC_VIDEO_QuickTime, &CODEC_VIDEO_CineForm, &CODEC_VIDEO_LosslessH264, &CODEC_VIDEO_VVC, &CODEC_VIDEO_EVC };
-const char* VideoData::videoContainerArray[6] = { ".mp4", ".mkv", ".mov", ".webm", ".ogg", ".avi" }; //TODO: .ogg has really poor support for codecs, so find a way to communicate that or disable/warn on certain codecs; could remove codecs based on the container or vice versa
-const char* VideoData::fpsArray[9] = { "10", "20", "25", "30", "50", "60", "75", "90", "120" };
+const std::array<const VideoCodecData*, 7>  VideoData::videoEncoderArray         = { &CODEC_VIDEO_H264, &CODEC_VIDEO_H265, &CODEC_VIDEO_VP8, &CODEC_VIDEO_VP9, &CODEC_VIDEO_AV1, &CODEC_VIDEO_FFV1, &CODEC_VIDEO_UtVideo };
+const std::array<const VideoCodecData*, 13> VideoData::videoEncoderArrayExtended = { &CODEC_VIDEO_H264, &CODEC_VIDEO_H265, &CODEC_VIDEO_VP8, &CODEC_VIDEO_VP9, &CODEC_VIDEO_AV1, &CODEC_VIDEO_FFV1, &CODEC_VIDEO_UtVideo, &CODEC_VIDEO_ProRes, &CODEC_VIDEO_QuickTime, &CODEC_VIDEO_CineForm, &CODEC_VIDEO_LosslessH264, &CODEC_VIDEO_VVC, &CODEC_VIDEO_EVC };
+const std::array<const char*, 6>  VideoData::videoContainerArray = { ".mp4", ".mkv", ".mov", ".webm", ".ogg", ".avi" }; //TODO: .ogg has really poor support for codecs, so find a way to communicate that or disable/warn on certain codecs; could remove codecs based on the container or vice versa
+const std::array<const char*, 10> VideoData::fpsArray = { "10", "20", "25", "30", "50", "60", "75", "90", "100", "120" };
 
 void VideoData::update_videoEncoderValues() {
 	// CRF:

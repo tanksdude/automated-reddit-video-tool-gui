@@ -7,8 +7,8 @@
 #include "av_codecs.h"
 
 struct VideoData {
-	static std::array<const VideoCodecData*, 7>  videoEncoderArray;
-	static std::array<const VideoCodecData*, 13> videoEncoderArrayExtended;
+	static const std::array<const VideoCodecData*, 7>  videoEncoderArray;
+	static const std::array<const VideoCodecData*, 13> videoEncoderArrayExtended;
 	static inline size_t get_videoEncoderArraySize(bool extended) {
 		return extended ? videoEncoderArrayExtended.size() : videoEncoderArray.size();
 	}
@@ -44,7 +44,7 @@ struct VideoData {
 	char video_replacement_numbers_input[64];
 	bool audio_only_option_input = false;
 
-	static const char* videoContainerArray[6];
+	static const std::array<const char*, 6> videoContainerArray;
 	int videoContainerArray_current = 0;
 	bool faststart_flag = false;
 	inline bool get_faststart_available() const {
@@ -55,7 +55,7 @@ struct VideoData {
 
 	bool fractionalFps = false;
 	//integers
-	static const char* fpsArray[9];
+	static const std::array<const char*, 10> fpsArray;
 	int fpsArray_current = 5;
 	//fraction
 	char fps_numerator_input[32];

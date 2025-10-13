@@ -11,16 +11,16 @@ MAGICK_CMD = None
 if platform.system() == "Windows":
 	audioProgramLookup = {
 		"Balabolka": "balcon",
-		"Espeak":    "espeak",
-		"Espeak NG": "espeak-ng",
+		"eSpeak":    "espeak",
+		"eSpeak NG": "espeak-ng",
 	}
 	MAGICK_CMD = "magick"
 elif platform.system() == "Darwin":
 	sys.exit("Mac OS not supported")
 elif platform.system() == "Linux" or platform.system() in ["FreeBSD", "OpenBSD", "NetBSD"]:
 	audioProgramLookup = {
-		"Espeak":    "espeak",
-		"Espeak NG": "espeak-ng",
+		"eSpeak":    "espeak",
+		"eSpeak NG": "espeak-ng",
 	}
 	MAGICK_CMD = "convert"
 else:
@@ -245,8 +245,8 @@ def text_to_speech_func_espeak(wav_file_name, text_file_name):
 
 ttsFunctionLookup = {
 	"Balabolka": text_to_speech_func_balabolka,
-	"Espeak":    text_to_speech_func_espeak,
-	"Espeak NG": text_to_speech_func_espeak,
+	"eSpeak":    text_to_speech_func_espeak,
+	"eSpeak NG": text_to_speech_func_espeak,
 }
 
 text_to_speech_func = ttsFunctionLookup[args.speechEngine]

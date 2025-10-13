@@ -207,8 +207,8 @@ void Fill_ImageData(ImageData& idata, const mINI::INIStructure& ini_object) {
 	if (ini_object.get("IMAGE").has("TextAlignment")) {
 		std::string get = ini_object.get("IMAGE").get("TextAlignment");
 		if (!get.empty()) {
-			size_t index = std::distance(idata.textAlignmentArray, std::find(idata.textAlignmentArray, idata.textAlignmentArray + sizeof(idata.textAlignmentArray) / sizeof(*idata.textAlignmentArray), get));
-			if (index != sizeof(idata.textAlignmentArray) / sizeof(*idata.textAlignmentArray)) {
+			size_t index = std::distance(idata.textAlignmentArray.begin(), std::find(idata.textAlignmentArray.begin(), idata.textAlignmentArray.end(), get));
+			if (index != idata.textAlignmentArray.size()) {
 				idata.textAlignmentArray_current = index;
 			} else {
 				std::cerr << ("Unknown value for [IMAGE].TextAlignment: \"" + get + "\"") << std::endl;
@@ -232,8 +232,8 @@ void Fill_ImageData(ImageData& idata, const mINI::INIStructure& ini_object) {
 	if (ini_object.get("IMAGE").has("ImageFormat")) {
 		std::string get = ini_object.get("IMAGE").get("ImageFormat");
 		if (!get.empty()) {
-			size_t index = std::distance(idata.imageFormatArray, std::find(idata.imageFormatArray, idata.imageFormatArray + sizeof(idata.imageFormatArray) / sizeof(*idata.imageFormatArray), get));
-			if (index != sizeof(idata.imageFormatArray) / sizeof(*idata.imageFormatArray)) {
+			size_t index = std::distance(idata.imageFormatArray.begin(), std::find(idata.imageFormatArray.begin(), idata.imageFormatArray.end(), get));
+			if (index != idata.imageFormatArray.size()) {
 				idata.imageFormatArray_current = index;
 			} else {
 				std::cerr << ("Unknown value for [IMAGE].ImageFormat: \"" + get + "\"") << std::endl;
@@ -250,8 +250,8 @@ void Fill_AudioData(AudioData& adata, const mINI::INIStructure& ini_object, bool
 	if (ini_object.get("AUDIO").has("VoiceEngine")) {
 		std::string get = ini_object.get("AUDIO").get("VoiceEngine");
 		if (!get.empty()) {
-			size_t index = std::distance(adata.voiceEngineArray, std::find(adata.voiceEngineArray, adata.voiceEngineArray + sizeof(adata.voiceEngineArray) / sizeof(*adata.voiceEngineArray), get));
-			if (index != sizeof(adata.voiceEngineArray) / sizeof(*adata.voiceEngineArray)) {
+			size_t index = std::distance(adata.voiceEngineArray.begin(), std::find(adata.voiceEngineArray.begin(), adata.voiceEngineArray.end(), get));
+			if (index != adata.voiceEngineArray.size()) {
 				adata.voiceEngineArray_current = index;
 				adata.update_voiceArray();
 			} else {
@@ -390,8 +390,8 @@ void Fill_VideoData(VideoData& vdata, const mINI::INIStructure& ini_object, bool
 				std::cerr << ("Unable to parse [VIDEO].VideoFPS: \"" + get + "\"") << std::endl;
 			}
 		} else if (!get.empty()) {
-			size_t index = std::distance(vdata.fpsArray, std::find(vdata.fpsArray, vdata.fpsArray + sizeof(vdata.fpsArray) / sizeof(*vdata.fpsArray), get));
-			if (index != sizeof(vdata.fpsArray) / sizeof(*vdata.fpsArray)) {
+			size_t index = std::distance(vdata.fpsArray.begin(), std::find(vdata.fpsArray.begin(), vdata.fpsArray.end(), get));
+			if (index != vdata.fpsArray.size()) {
 				vdata.fpsArray_current = index;
 			} else {
 				try {
@@ -437,8 +437,8 @@ void Fill_VideoData(VideoData& vdata, const mINI::INIStructure& ini_object, bool
 	if (ini_object.get("VIDEO").has("VideoContainer")) {
 		std::string get = ini_object.get("VIDEO").get("VideoContainer");
 		if (!get.empty()) {
-			size_t index = std::distance(vdata.videoContainerArray, std::find(vdata.videoContainerArray, vdata.videoContainerArray + sizeof(vdata.videoContainerArray) / sizeof(*vdata.videoContainerArray), get));
-			if (index != sizeof(vdata.videoContainerArray) / sizeof(*vdata.videoContainerArray)) {
+			size_t index = std::distance(vdata.videoContainerArray.begin(), std::find(vdata.videoContainerArray.begin(), vdata.videoContainerArray.end(), get));
+			if (index != vdata.videoContainerArray.size()) {
 				vdata.videoContainerArray_current = index;
 			} else {
 				std::cerr << ("Unknown value for [VIDEO].VideoContainer: \"" + get + "\"") << std::endl;

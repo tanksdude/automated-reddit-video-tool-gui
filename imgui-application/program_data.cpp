@@ -1,9 +1,8 @@
 #include "program_data.h"
 #include <cstring> //strcpy
-#include "imgui/imgui.h"
 
-const char* ProgramData::imageDeleteAgeList[6] = { "0 seconds", "1 hour", "24 hours", "2 weeks", "1 month", "6 months" };
-const int ProgramData::imageDeleteAgeList_values[6] = { 0, 1, 24, 14*24, 30*24, 180*24 };
+const std::array<const char*, 6> ProgramData::fileDeleteAgeList = { "0 seconds", "1 hour", "24 hours", "2 weeks", "1 month", "6 months" };
+const std::array<int, 6> ProgramData::fileDeleteAgeList_values = { 0, 1, 24, 14*24, 30*24, 180*24 };
 
 ProgramData::ProgramData() {
 	application_scale_to_monitor = true;

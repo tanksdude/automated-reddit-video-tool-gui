@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <cstdint>
+#include <array>
 
 struct ImageData {
 	char image_width_input[32];
@@ -21,10 +22,10 @@ struct ImageData {
 	bool font_is_family_input;
 	char font_name[256]; //there are some fonts with really long names
 
-	static const char* textAlignmentArray[5];
+	static const std::array<const char*, 5> textAlignmentArray;
 	int textAlignmentArray_current = 0;
 
-	static const char* imageFormatArray[6];
+	static const std::array<const char*, 6> imageFormatArray;
 	int imageFormatArray_current = 0;
 
 	inline std::string get_image_width_input() const { return std::string(image_width_input); }

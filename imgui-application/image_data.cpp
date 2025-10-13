@@ -1,8 +1,8 @@
 #include "image_data.h"
 #include <cstring> //strcpy
 
-const char* ImageData::textAlignmentArray[5] = { "default", "left", "center", "right", "justify" };
-const char* ImageData::imageFormatArray[6] = { ".png", ".jpg", ".avif", ".webp", ".tiff", ".bmp" };
+const std::array<const char*, 5> ImageData::textAlignmentArray = { "default", "left", "center", "right", "justify" };
+const std::array<const char*, 6> ImageData::imageFormatArray = { ".png", ".jpg", ".avif", ".webp", ".tiff", ".bmp" };
 
 ImageData::ImageData()  {
 	strcpy(image_width_input, "960");

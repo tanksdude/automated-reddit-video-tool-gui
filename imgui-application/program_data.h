@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <array>
 #include "imgui/imgui.h"
 
 struct ProgramData {
@@ -29,9 +30,9 @@ struct ProgramData {
 	ImVec4 background_color;
 	ImVec4 window_color;
 
-	static const char* imageDeleteAgeList[6];
-	static const int imageDeleteAgeList_values[6];
-	int imageDeleteAgeList_current = 0;
+	static const std::array<const char*, 6> fileDeleteAgeList;
+	static const std::array<int, 6> fileDeleteAgeList_values;
+	int fileDeleteAgeList_current = 0;
 
 	ProgramData();
 };

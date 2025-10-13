@@ -6,16 +6,15 @@
 #include <algorithm> //std::clamp, std::replace
 
 #ifdef _WIN32
-const char* AudioData::voiceEngineArray[4] = { "Balabolka", "Espeak", "Espeak NG", "Windows Narrator (TODO)" };
-const char* AudioData::voiceEngineArray_exeForUpdatingVoiceList[4] = { "\"balcon\" -l", "\"espeak\" --voices=en", "\"espeak-ng\" --voices=en", "" }; //note: internal use only
-//TODO: look into whether nvaccess/nvda has compatible command line support
+const std::array<const char*, 3> AudioData::voiceEngineArray = { "Balabolka", "eSpeak", "eSpeak NG" };
+const std::array<const char*, 3> AudioData::voiceEngineArray_exeForUpdatingVoiceList = { "\"balcon\" -l", "\"espeak\" --voices=en", "\"espeak-ng\" --voices=en" }; //note: internal use only
 #else
-const char* AudioData::voiceEngineArray[5] = { "Espeak", "Espeak NG", "say (TODO)", "spd-say (TODO)", "Festival (TODO)" }; //TODO: https://askubuntu.com/questions/501910/how-to-text-to-speech-output-using-command-line/501917#501917
-const char* AudioData::voiceEngineArray_exeForUpdatingVoiceList[5] = { "espeak --voices", "espeak-ng --voices", "", "", "" }; //note: internal use only
+const std::array<const char*, 5> AudioData::voiceEngineArray = { "eSpeak", "eSpeak NG", "say (TODO)", "spd-say (TODO)", "Festival (TODO)" }; //TODO: https://askubuntu.com/questions/501910/how-to-text-to-speech-output-using-command-line/501917#501917
+const std::array<const char*, 5> AudioData::voiceEngineArray_exeForUpdatingVoiceList = { "espeak --voices", "espeak-ng --voices", "", "", "" }; //note: internal use only
 #endif
 
-std::array<const AudioCodecData*, 7>  AudioData::audioEncoderArray         = { &CODEC_AUDIO_copypcm, &CODEC_AUDIO_AAC, &CODEC_AUDIO_Opus, &CODEC_AUDIO_FLAC, &CODEC_AUDIO_Vorbis, &CODEC_AUDIO_MP3, &CODEC_AUDIO_ALAC };
-std::array<const AudioCodecData*, 13> AudioData::audioEncoderArrayExtended = { &CODEC_AUDIO_copypcm, &CODEC_AUDIO_AAC, &CODEC_AUDIO_Opus, &CODEC_AUDIO_FLAC, &CODEC_AUDIO_Vorbis, &CODEC_AUDIO_MP3, &CODEC_AUDIO_ALAC, &CODEC_AUDIO_AC3, &CODEC_AUDIO_EAC3, &CODEC_AUDIO_Speex, &CODEC_AUDIO_TTA, &CODEC_AUDIO_WMA2, &CODEC_AUDIO_MP2 };
+const std::array<const AudioCodecData*, 7>  AudioData::audioEncoderArray         = { &CODEC_AUDIO_copypcm, &CODEC_AUDIO_AAC, &CODEC_AUDIO_Opus, &CODEC_AUDIO_FLAC, &CODEC_AUDIO_Vorbis, &CODEC_AUDIO_MP3, &CODEC_AUDIO_ALAC };
+const std::array<const AudioCodecData*, 13> AudioData::audioEncoderArrayExtended = { &CODEC_AUDIO_copypcm, &CODEC_AUDIO_AAC, &CODEC_AUDIO_Opus, &CODEC_AUDIO_FLAC, &CODEC_AUDIO_Vorbis, &CODEC_AUDIO_MP3, &CODEC_AUDIO_ALAC, &CODEC_AUDIO_AC3, &CODEC_AUDIO_EAC3, &CODEC_AUDIO_Speex, &CODEC_AUDIO_TTA, &CODEC_AUDIO_WMA2, &CODEC_AUDIO_MP2 };
 
 void AudioData::getVoiceListFromExe_Balabolka(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList) {
 	// Balabolka lists the voices under "SAPI" with a space, so it's a voice if it's indented
