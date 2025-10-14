@@ -7,18 +7,25 @@
 
 struct AudioData {
 #ifdef _WIN32
-	static const std::array<const char*, 3> voiceEngineArray;
-	static const std::array<const char*, 3> voiceEngineArray_exeForUpdatingVoiceList; //note: internal use only
-	int voiceEngineArray_current = 0;
+	static const std::array<const char*, 3> speechEngineArray;
+	static const std::array<const char*, 3> speechEngineArray_exeForUpdatingVoiceList; //note: internal use only
+	int speechEngineArray_current = 0;
 #else
-	static const std::array<const char*, 5> voiceEngineArray;
-	static const std::array<const char*, 5> voiceEngineArray_exeForUpdatingVoiceList; //note: internal use only
-	int voiceEngineArray_current = 1;
+	static const std::array<const char*, 5> speechEngineArray;
+	static const std::array<const char*, 5> speechEngineArray_exeForUpdatingVoiceList; //note: internal use only
+	int speechEngineArray_current = 1;
 #endif
 
 	char** voiceArray = nullptr;
 	int voiceArray_current = -1;
 	int voiceArray_length = 0;
+	void update_voiceArray(); // Call this when changing the speech engine!
+
+	inline std::string get_speechEngine() const { return std::string(speechEngineArray[speechEngineArray_current]); }
+	inline std::string get_voiceName() const {
+		if (voiceArray_current < 0) { return ""; }
+		return std::string(voiceArray[voiceArray_current]);
+	}
 
 	static void getVoiceListFromExe_Balabolka(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList);
 	static void getVoiceListFromExe_Espeak(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList);
@@ -51,16 +58,9 @@ struct AudioData {
 	int16_t audio_bitrate_max;
 	int16_t audio_bitrate_step = 4; //TODO: unused because ImGui sliders don't support stepping
 
-	inline std::string get_voiceEngine() const { return std::string(voiceEngineArray[voiceEngineArray_current]); }
-	inline std::string get_voiceName() const {
-		if (voiceArray_current < 0) { return ""; }
-		return std::string(voiceArray[voiceArray_current]);
-	}
 	inline std::string get_audioBitrate() const { return std::to_string(audio_bitrate_v) + "k"; }
-
-	void update_voiceArray(); // Call this when changing the speech engine!
-	void update_audioEncoderValues(); // [Internal] Called when changing the audio encoder
 	void set_audioBitrate(int16_t val); // Used by the INI file, not really needed otherwise
+	void update_audioEncoderValues(); // [Internal] Called when changing the audio encoder
 
 	// [Internal] Called during update_voiceArray():
 	inline void voiceArray_free() {

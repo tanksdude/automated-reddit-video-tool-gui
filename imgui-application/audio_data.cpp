@@ -6,11 +6,11 @@
 #include <algorithm> //std::clamp, std::replace
 
 #ifdef _WIN32
-const std::array<const char*, 3> AudioData::voiceEngineArray = { "Balabolka", "eSpeak", "eSpeak NG" };
-const std::array<const char*, 3> AudioData::voiceEngineArray_exeForUpdatingVoiceList = { "\"balcon\" -l", "\"espeak\" --voices=en", "\"espeak-ng\" --voices=en" }; //note: internal use only
+const std::array<const char*, 3> AudioData::speechEngineArray = { "Balabolka", "eSpeak", "eSpeak NG" };
+const std::array<const char*, 3> AudioData::speechEngineArray_exeForUpdatingVoiceList = { "\"balcon\" -l", "\"espeak\" --voices=en", "\"espeak-ng\" --voices=en" }; //note: internal use only
 #else
-const std::array<const char*, 5> AudioData::voiceEngineArray = { "eSpeak", "eSpeak NG", "say (TODO)", "spd-say (TODO)", "Festival (TODO)" }; //TODO: https://askubuntu.com/questions/501910/how-to-text-to-speech-output-using-command-line/501917#501917
-const std::array<const char*, 5> AudioData::voiceEngineArray_exeForUpdatingVoiceList = { "espeak --voices", "espeak-ng --voices", "", "", "" }; //note: internal use only
+const std::array<const char*, 5> AudioData::speechEngineArray = { "eSpeak", "eSpeak NG", "say (TODO)", "spd-say (TODO)", "Festival (TODO)" }; //TODO: https://askubuntu.com/questions/501910/how-to-text-to-speech-output-using-command-line/501917#501917
+const std::array<const char*, 5> AudioData::speechEngineArray_exeForUpdatingVoiceList = { "espeak --voices", "espeak-ng --voices", "", "", "" }; //note: internal use only
 #endif
 
 const std::array<const AudioCodecData*, 7>  AudioData::audioEncoderArray         = { &CODEC_AUDIO_copypcm, &CODEC_AUDIO_AAC, &CODEC_AUDIO_Opus, &CODEC_AUDIO_FLAC, &CODEC_AUDIO_Vorbis, &CODEC_AUDIO_MP3, &CODEC_AUDIO_ALAC };
@@ -82,7 +82,7 @@ void AudioData::getVoiceListFromExe_Espeak(std::vector<std::string>& file_lines,
 
 void AudioData::update_voiceArray() {
 	// Step 1: poll available voices
-	int result = ARVT::system_helper((std::string(voiceEngineArray_exeForUpdatingVoiceList[voiceEngineArray_current]) + " > temp.txt").c_str(), false);
+	int result = ARVT::system_helper((std::string(speechEngineArray_exeForUpdatingVoiceList[speechEngineArray_current]) + " > temp.txt").c_str(), false);
 
 	//temp.txt will be created even if the executable doesn't exist (on most systems)
 	//most systems return an error code if piping to a file fails
@@ -109,7 +109,7 @@ void AudioData::update_voiceArray() {
 
 	std::vector<std::string> voiceList;
 
-	switch (voiceEngineArray_current) {
+	switch (speechEngineArray_current) {
 	#ifdef _WIN32
 		case 0: //Balabolka
 			getVoiceListFromExe_Balabolka(file_lines, voiceList);

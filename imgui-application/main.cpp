@@ -167,7 +167,7 @@ int main(int, char**)
 
 	// If the user didn't set a speech engine in the INI, then fill its
 	// available voices. (If the user did, then the values are already filled.)
-	if (ini_object.get("AUDIO").get("VoiceEngine").empty()) {
+	if (ini_object.get("AUDIO").get("SpeechEngine").empty()) {
 		adata.update_voiceArray();
 	}
 
@@ -253,7 +253,7 @@ int main(int, char**)
 
     // Our state
     bool show_demo_window = false;
-	bool set_default_tab = true;
+	bool set_startup_tab = true;
 
 	int createdTestImage_width = 0;
 	int createdTestImage_height = 0;
@@ -345,11 +345,11 @@ int main(int, char**)
 
 			if (ImGui::BeginTabBar("MainTabBar", 0)) {
 				ImGuiTabItemFlags tab_flags[5] = { 0, 0, 0, 0, 0 };
-				if (set_default_tab) [[unlikely]] {
+				if (set_startup_tab) [[unlikely]] {
 					//instead of clamping, set to zero on a bad value, because that's more obvious (maybe Help or About would be better?):
-					const int idx = (pdata.default_tab_idx >= IM_ARRAYSIZE(tab_flags) || pdata.default_tab_idx < 0) ? 0 : pdata.default_tab_idx;
+					const int idx = (pdata.startup_tab_idx >= IM_ARRAYSIZE(tab_flags) || pdata.startup_tab_idx < 0) ? 0 : pdata.startup_tab_idx;
 					tab_flags[idx] |= ImGuiTabItemFlags_SetSelected;
-					set_default_tab = false;
+					set_startup_tab = false;
 				}
 				const ImGuiTableFlags table_flags = ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_PadOuterX;
 
@@ -763,7 +763,7 @@ int main(int, char**)
 						ImGui::TableSetColumnIndex(0);
 
 						//to align text to the left: use a table
-						if (ImGui::Combo("Speech Engine", &adata.voiceEngineArray_current, adata.voiceEngineArray.data(), adata.voiceEngineArray.size())) {
+						if (ImGui::Combo("Speech Engine", &adata.speechEngineArray_current, adata.speechEngineArray.data(), adata.speechEngineArray.size())) {
 							//there was a change
 							adata.update_voiceArray();
 						}

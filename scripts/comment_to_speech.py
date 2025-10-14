@@ -149,16 +149,16 @@ parser.add_argument("imageFormat")
 
 parser.add_argument("-n", "--video_replacement_numbers", metavar="video_replacement_numbers", required=False, help="update/generate a specific video")
 parser.add_argument("speechEngine")
-parser.add_argument("voice")
+parser.add_argument("voiceName")
 parser.add_argument("audioEncoder")
-parser.add_argument("audioBitrate")
 parser.add_argument("audioPreset")
+parser.add_argument("audioBitrate")
 parser.add_argument("videoEncoder")
 parser.add_argument("videoPreset1")
 parser.add_argument("videoPreset2")
-parser.add_argument("faststart_flag")
-parser.add_argument("fps")
 parser.add_argument("crf")
+parser.add_argument("fps")
+parser.add_argument("faststart_flag")
 #TODO: option to erase all old videos (of the same project name)? needed to "replace" one container with another
 args = parser.parse_args()
 
@@ -185,7 +185,7 @@ IMAGE_SIZE_EXTENDED = str(IMAGE_WIDTH + 2*IMAGE_W_BORDER) + "x" + str(IMAGE_HEIG
 VIDEO_AUD_CODEC_name = args.audioEncoder
 VIDEO_VID_CODEC_name = args.videoEncoder
 AUDIO_PROGRAM_CMD = audioProgramLookup[args.speechEngine]
-AUDIO_VOICE = args.voice
+AUDIO_VOICE = args.voiceName
 VIDEO_FPS = args.fps # Fun fact: FFmpeg's default framerate is 25. Only answer I could find for why is PAL compatibility, but I think that's just a coincidence.
 VIDEO_VID_CRF = args.crf
 VIDEO_AUD_CODEC_lib = audioCodecLookup[VIDEO_AUD_CODEC_name]
@@ -195,7 +195,7 @@ VIDEO_VID_CODEC_lib = videoCodecLookup[VIDEO_VID_CODEC_name]
 VIDEO_VID_PRESET_1 = args.videoPreset1
 VIDEO_VID_PRESET_2 = args.videoPreset2
 VIDEO_VID_EXTRA_ARGS = videoExtraArgsLookup[VIDEO_VID_CODEC_name]
-VIDEO_VID_FASTSTART = int(args.faststart_flag)
+VIDEO_VID_FASTSTART = bool(args.faststart_flag)
 
 input_image_text_file_path = args.input_text_file
 output_vid_file_path = args.output_mp4_files

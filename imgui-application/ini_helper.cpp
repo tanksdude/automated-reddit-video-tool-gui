@@ -16,12 +16,45 @@ void CreateDefaultIniIfNeeded(const std::string& path) {
 	"[APPLICATION]\n"
 	"\n"
 	"; Windows:\n"
+	";ApplicationFont = C:\\Windows\\Fonts\\NotoSans-Regular.ttf\n"
 	";ApplicationFont = C:\\Windows\\Fonts\\segoeui.ttf\n"
+	";ApplicationFontSize = 24\n"
+	"\n"
+	"; Ubuntu/Mint:\n"
+	";ApplicationFont = /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc\n"
+	";ApplicationFont = /usr/share/fonts/truetype/noto/NotoSans-Regular.ttf\n"
+	";ApplicationFontSize = 24\n"
+	"\n"
+	"; Fedora KDE Plasma:\n"
+	";ApplicationFont = /usr/share/fonts/google-noto/NotoSans-Regular.ttf\n"
+	";ApplicationFontSize = 24\n"
+	"; Fedora GNOME/Xfce:\n"
+	";ApplicationFont = /usr/share/fonts/google-noto/NotoSansMath-Regular.ttf\n"
+	";ApplicationFontSize = 24\n"
+	"\n"
+	"; Arch KDE Plasma:\n"
+	";ApplicationFont = /usr/share/fonts/noto/NotoSans-Regular.ttf\n"
+	";ApplicationFontSize = 24\n"
+	"; Arch GNOME:\n"
+	";ApplicationFont = /usr/share/Adwaita/AdwaitaSans-Regular.ttf\n"
+	";ApplicationFontSize = 22\n"
+	"; Arch Xfce:\n"
+	";ApplicationFont = /usr/share/fonts/gnu-free/FreeSans.otf\n"
+	";ApplicationFont = /usr/share/Adwaita/AdwaitaSans-Regular.ttf\n"
 	";ApplicationFontSize = 22\n"
 	"\n"
-	"; Ubuntu:\n"
-	";ApplicationFont = /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc\n"
+	"; Manjaro KDE Plasma:\n"
+	";ApplicationFont = /usr/share/fonts/noto/NotoSans-Regular.ttf\n"
 	";ApplicationFontSize = 24\n"
+	"; Manjaro GNOME/Xfce:\n"
+	";ApplicationFont = /usr/share/fonts/noto/NotoSans-Regular.ttf\n"
+	";ApplicationFontSize = 24\n"
+	"; Manjaro Cinnamon:\n"
+	";ApplicationFont = /usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc\n"
+	";ApplicationFontSize = 24\n"
+	";ApplicationFont = /usr/share/fonts/gnu-free/FreeSans.otf\n"
+	";ApplicationFont = /usr/share/Adwaita/AdwaitaSans-Regular.ttf\n"
+	";ApplicationFontSize = 22\n"
 	"\n"
 	"ApplicationWindowWidth = 1600\n"
 	"ApplicationWindowHeight = 900\n"
@@ -59,12 +92,13 @@ void CreateDefaultIniIfNeeded(const std::string& path) {
 
 	"[AUDIO]\n"
 	"\n"
-	"VoiceEngine =\n"
+	"SpeechEngine =\n"
 	"VoiceName =\n"
 	"\n"
 	"AudioEncoder = AAC\n"
-	"AudioBitrateKbps = 128\n"
 	"AudioPreset = default\n"
+	"\n"
+	";AudioBitrateKbps = 128\n"
 	"\n"
 
 	"[VIDEO]\n"
@@ -73,8 +107,8 @@ void CreateDefaultIniIfNeeded(const std::string& path) {
 	"VideoPreset1 = default\n"
 	"VideoPreset2 = default\n"
 	"\n"
+	";VideoCRF = 23\n"
 	"VideoFPS = 60\n"
-	"VideoCRF = 23\n"
 	"\n"
 	"VideoFaststartIfPossible = false\n"
 	"VideoContainer = .mp4\n"
@@ -247,15 +281,15 @@ void Fill_AudioData(AudioData& adata, const mINI::INIStructure& ini_object, bool
 		return;
 	}
 
-	if (ini_object.get("AUDIO").has("VoiceEngine")) {
-		std::string get = ini_object.get("AUDIO").get("VoiceEngine");
+	if (ini_object.get("AUDIO").has("SpeechEngine")) {
+		std::string get = ini_object.get("AUDIO").get("SpeechEngine");
 		if (!get.empty()) {
-			size_t index = std::distance(adata.voiceEngineArray.begin(), std::find(adata.voiceEngineArray.begin(), adata.voiceEngineArray.end(), get));
-			if (index != adata.voiceEngineArray.size()) {
-				adata.voiceEngineArray_current = index;
+			size_t index = std::distance(adata.speechEngineArray.begin(), std::find(adata.speechEngineArray.begin(), adata.speechEngineArray.end(), get));
+			if (index != adata.speechEngineArray.size()) {
+				adata.speechEngineArray_current = index;
 				adata.update_voiceArray();
 			} else {
-				std::cerr << ("Unknown value for [AUDIO].VoiceEngine: \"" + get + "\"") << std::endl;
+				std::cerr << ("Unknown value for [AUDIO].SpeechEngine: \"" + get + "\"") << std::endl;
 			}
 		}
 	}
@@ -289,8 +323,22 @@ void Fill_AudioData(AudioData& adata, const mINI::INIStructure& ini_object, bool
 				std::cerr << ("Unknown value for [AUDIO].AudioEncoder: \"" + get + "\"") << std::endl;
 			}
 		}
+
+		if (ini_object.get("AUDIO").has("AudioPreset") && !adata.get_audioEncoder()->preset1.internalValues.empty()) {
+			std::string get = ini_object.get("AUDIO").get("AudioPreset");
+			if (!get.empty() && get != "default") {
+				const GenericCodecPreset& ac_p1 = adata.get_audioEncoder()->preset1;
+				size_t index = std::distance(ac_p1.internalValues.begin(), std::find(ac_p1.internalValues.begin(), ac_p1.internalValues.end(), get));
+				if (index != ac_p1.internalValues.size()) {
+					adata.set_encoder_preset1_idx(index);
+				} else {
+					std::cerr << ("Unknown value for [AUDIO].AudioPreset: \"" + get + "\"") << std::endl;
+				}
+			}
+		}
 	}
 
+	// Setting the bitrate without a codec doesn't really make sense, but oh well
 	if (ini_object.get("AUDIO").has("AudioBitrateKbps") && !adata.get_audioEncoder()->isLossless) {
 		std::string get = ini_object.get("AUDIO").get("AudioBitrateKbps");
 		if (!get.empty()) {
@@ -300,19 +348,6 @@ void Fill_AudioData(AudioData& adata, const mINI::INIStructure& ini_object, bool
 			}
 			catch (const std::exception&) {
 				std::cerr << ("Unable to parse [AUDIO].AudioBitrateKbps: \"" + get + "\"") << std::endl;
-			}
-		}
-	}
-
-	if (ini_object.get("AUDIO").has("AudioPreset") && !adata.get_audioEncoder()->preset1.internalValues.empty()) {
-		std::string get = ini_object.get("AUDIO").get("AudioPreset");
-		if (!get.empty() && get != "default") {
-			const GenericCodecPreset& ac_p1 = adata.get_audioEncoder()->preset1;
-			size_t index = std::distance(ac_p1.internalValues.begin(), std::find(ac_p1.internalValues.begin(), ac_p1.internalValues.end(), get));
-			if (index != ac_p1.internalValues.size()) {
-				adata.set_encoder_preset1_idx(index);
-			} else {
-				std::cerr << ("Unknown value for [AUDIO].AudioPreset: \"" + get + "\"") << std::endl;
 			}
 		}
 	}
@@ -340,30 +375,44 @@ void Fill_VideoData(VideoData& vdata, const mINI::INIStructure& ini_object, bool
 				std::cerr << ("Unknown value for [VIDEO].VideoEncoder: \"" + get + "\"") << std::endl;
 			}
 		}
-	}
 
-	if (ini_object.get("VIDEO").has("VideoPreset1") && !vdata.get_videoEncoder()->preset1.internalValues.empty()) {
-		std::string get = ini_object.get("VIDEO").get("VideoPreset1");
-		if (!get.empty() && get != "default") {
-			const GenericCodecPreset& vc_p1 = vdata.get_videoEncoder()->preset1;
-			size_t index = std::distance(vc_p1.internalValues.begin(), std::find(vc_p1.internalValues.begin(), vc_p1.internalValues.end(), get));
-			if (index != vc_p1.internalValues.size()) {
-				vdata.set_encoder_preset1_idx(index);
-			} else {
-				std::cerr << ("Unknown value for [VIDEO].VideoPreset1: \"" + get + "\"") << std::endl;
+		if (ini_object.get("VIDEO").has("VideoPreset1") && !vdata.get_videoEncoder()->preset1.internalValues.empty()) {
+			std::string get = ini_object.get("VIDEO").get("VideoPreset1");
+			if (!get.empty() && get != "default") {
+				const GenericCodecPreset& vc_p1 = vdata.get_videoEncoder()->preset1;
+				size_t index = std::distance(vc_p1.internalValues.begin(), std::find(vc_p1.internalValues.begin(), vc_p1.internalValues.end(), get));
+				if (index != vc_p1.internalValues.size()) {
+					vdata.set_encoder_preset1_idx(index);
+				} else {
+					std::cerr << ("Unknown value for [VIDEO].VideoPreset1: \"" + get + "\"") << std::endl;
+				}
+			}
+		}
+
+		if (ini_object.get("VIDEO").has("VideoPreset2") && !vdata.get_videoEncoder()->preset2.internalValues.empty()) {
+			std::string get = ini_object.get("VIDEO").get("VideoPreset2");
+			if (!get.empty() && get != "default") {
+				const GenericCodecPreset& vc_p2 = vdata.get_videoEncoder()->preset2;
+				size_t index = std::distance(vc_p2.internalValues.begin(), std::find(vc_p2.internalValues.begin(), vc_p2.internalValues.end(), get));
+				if (index != vc_p2.internalValues.size()) {
+					vdata.set_encoder_preset2_idx(index);
+				} else {
+					std::cerr << ("Unknown value for [VIDEO].VideoPreset2: \"" + get + "\"") << std::endl;
+				}
 			}
 		}
 	}
 
-	if (ini_object.get("VIDEO").has("VideoPreset2") && !vdata.get_videoEncoder()->preset2.internalValues.empty()) {
-		std::string get = ini_object.get("VIDEO").get("VideoPreset2");
-		if (!get.empty() && get != "default") {
-			const GenericCodecPreset& vc_p2 = vdata.get_videoEncoder()->preset2;
-			size_t index = std::distance(vc_p2.internalValues.begin(), std::find(vc_p2.internalValues.begin(), vc_p2.internalValues.end(), get));
-			if (index != vc_p2.internalValues.size()) {
-				vdata.set_encoder_preset2_idx(index);
-			} else {
-				std::cerr << ("Unknown value for [VIDEO].VideoPreset2: \"" + get + "\"") << std::endl;
+	// Setting the CRF without a codec doesn't really make sense, but oh well
+	if (ini_object.get("VIDEO").has("VideoCRF") && !vdata.get_videoEncoder()->isLossless) {
+		std::string get = ini_object.get("VIDEO").get("VideoCRF");
+		if (!get.empty()) {
+			try {
+				int8_t val = std::stoi(get);
+				vdata.set_videoCrf(val);
+			}
+			catch (const std::exception&) {
+				std::cerr << ("Unable to parse [VIDEO].VideoCRF: \"" + get + "\"") << std::endl;
 			}
 		}
 	}
@@ -404,19 +453,6 @@ void Fill_VideoData(VideoData& vdata, const mINI::INIStructure& ini_object, bool
 				catch (const std::exception&) {
 					std::cerr << ("Unable to parse [VIDEO].VideoFPS: \"" + get + "\"") << std::endl;
 				}
-			}
-		}
-	}
-
-	if (ini_object.get("VIDEO").has("VideoCRF") && !vdata.get_videoEncoder()->isLossless) {
-		std::string get = ini_object.get("VIDEO").get("VideoCRF");
-		if (!get.empty()) {
-			try {
-				int8_t val = std::stoi(get);
-				vdata.set_videoCrf(val);
-			}
-			catch (const std::exception&) {
-				std::cerr << ("Unable to parse [VIDEO].VideoCRF: \"" + get + "\"") << std::endl;
 			}
 		}
 	}
@@ -524,32 +560,6 @@ void Fill_ProgramData(ProgramData& pdata, const mINI::INIStructure& ini_object) 
 		}
 	}
 
-	if (ini_object.get("APPLICATION").has("UseExtraCodecs")) {
-		std::string get = ini_object.get("APPLICATION").get("UseExtraCodecs");
-		if (!get.empty()) {
-			if (get == "true" || get == "True" || get == "TRUE" || get == "1") {
-				pdata.useExtraCodecs = true;
-			} else if (get == "false" || get == "False" || get == "FALSE" || get == "0") {
-				pdata.useExtraCodecs = false;
-			} else {
-				std::cerr << ("Unknown value for [APPLICATION].UseExtraCodecs: \"" + get + "\"") << std::endl;
-			}
-		}
-	}
-
-	if (ini_object.get("APPLICATION").has("InitialOpenTab")) {
-		std::string get = ini_object.get("APPLICATION").get("InitialOpenTab");
-		if (!get.empty()) {
-			try {
-				int val = std::stoi(get);
-				pdata.default_tab_idx = val;
-			}
-			catch (const std::exception&) {
-				std::cerr << ("Unable to parse [APPLICATION].InitialOpenTab: \"" + get + "\"") << std::endl;
-			}
-		}
-	}
-
 	// This is actually the most complicated case, even beating video FPS. If
 	// the first character is '#', it's a hex code, and fail on anything not 6
 	// digits. If the first character is '(', it's a vec3. Other cases not
@@ -653,6 +663,32 @@ void Fill_ProgramData(ProgramData& pdata, const mINI::INIStructure& ini_object) 
 			}
 		}
 	}
+
+	if (ini_object.get("APPLICATION").has("UseExtraCodecs")) {
+		std::string get = ini_object.get("APPLICATION").get("UseExtraCodecs");
+		if (!get.empty()) {
+			if (get == "true" || get == "True" || get == "TRUE" || get == "1") {
+				pdata.useExtraCodecs = true;
+			} else if (get == "false" || get == "False" || get == "FALSE" || get == "0") {
+				pdata.useExtraCodecs = false;
+			} else {
+				std::cerr << ("Unknown value for [APPLICATION].UseExtraCodecs: \"" + get + "\"") << std::endl;
+			}
+		}
+	}
+
+	if (ini_object.get("APPLICATION").has("InitialOpenTab")) {
+		std::string get = ini_object.get("APPLICATION").get("InitialOpenTab");
+		if (!get.empty()) {
+			try {
+				int val = std::stoi(get);
+				pdata.startup_tab_idx = val;
+			}
+			catch (const std::exception&) {
+				std::cerr << ("Unable to parse [APPLICATION].InitialOpenTab: \"" + get + "\"") << std::endl;
+			}
+		}
+	}
 }
 
 void CopySettingsToIni(mINI::INIStructure& ini_object, const ImageData& idata, const AudioData& adata, const VideoData& vdata) {
@@ -675,21 +711,22 @@ void CopySettingsToIni(mINI::INIStructure& ini_object, const ImageData& idata, c
 
 	ini_object["IMAGE"]["ImageFormat"] = idata.get_imageFormat();
 
-	ini_object["AUDIO"]["VoiceEngine"] = adata.get_voiceEngine();
+	ini_object["AUDIO"]["SpeechEngine"] = adata.get_speechEngine();
 	ini_object["AUDIO"]["VoiceName"]   = adata.get_voiceName();
 
-	ini_object["AUDIO"]["AudioEncoder"]     = adata.get_audioEncoder()->internalName;
+	ini_object["AUDIO"]["AudioEncoder"] = adata.get_audioEncoder()->internalName;
+	ini_object["AUDIO"]["AudioPreset"]  = adata.get_audioPreset1_currentValue();
+
 	ini_object["AUDIO"]["AudioBitrateKbps"] = std::to_string(adata.audio_bitrate_v); //no need to check if lossless
-	ini_object["AUDIO"]["AudioPreset"]      = adata.get_audioPreset1_currentValue();
 
 	ini_object["VIDEO"]["VideoEncoder"] = vdata.get_videoEncoder()->internalName;
 	ini_object["VIDEO"]["VideoPreset1"] = vdata.get_videoPreset1_currentValue();
 	ini_object["VIDEO"]["VideoPreset2"] = vdata.get_videoPreset2_currentValue();
 
-	ini_object["VIDEO"]["VideoFPS"] = vdata.get_fps();
 	ini_object["VIDEO"]["VideoCRF"] = vdata.get_videoCrf(); //no need to check if lossless
+	ini_object["VIDEO"]["VideoFPS"] = vdata.get_fps();
 
-	ini_object["VIDEO"]["VideoFaststartIfPossible"] = std::to_string(vdata.get_faststart_available() && vdata.faststart_flag);
+	ini_object["VIDEO"]["VideoFaststartIfPossible"] = std::to_string(vdata.faststart_flag);
 	ini_object["VIDEO"]["VideoContainer"]           = vdata.get_videoContainer();
 	ini_object["VIDEO"]["AudioOnly"]                = std::to_string(vdata.audio_only_option_input);
 }

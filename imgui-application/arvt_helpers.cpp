@@ -281,18 +281,18 @@ int call_comment_to_speech(const char* name, const ImageData& idata, const Audio
 		" -n \"" + vdata.get_video_replacement_numbers_input() + "\"" + //needs the -n flag, otherwise Python's argparse will treat something like "-3" as an argument and get confused (pretty sure it's allowed because "-3" is a negative number)
 		(vdata.audio_only_option_input ? " -a" : "") +
 
-		" \"" + adata.get_voiceEngine() + "\"" +
+		" \"" + adata.get_speechEngine() + "\"" +
 		" \"" + adata.get_voiceName() + "\"" +
 		" \"" + adata.get_audioEncoder()->internalName + "\"" +
-		" "   + adata.get_audioBitrate() +
 		" \"" + adata.get_audioPreset1_currentValue() + "\"" +
+		" "   + adata.get_audioBitrate() +
 		" \"" + vdata.get_videoEncoder()->internalName + "\"" +
 		" \"" + vdata.get_videoPreset1_currentValue() + "\"" +
 		" \"" + vdata.get_videoPreset2_currentValue() + "\"" +
-		" "   + std::to_string(vdata.faststart_flag && vdata.get_faststart_available()) +
 
+		" "   + vdata.get_videoCrf() +
 		" "   + vdata.get_fps() +
-		" "   + vdata.get_videoCrf();
+		" "   + std::to_string(vdata.faststart_flag && vdata.get_faststart_available());
 
 	#ifdef _WIN32
 	if (command.size() > 4000) {

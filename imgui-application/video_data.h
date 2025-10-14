@@ -70,8 +70,8 @@ struct VideoData {
 	inline std::string get_fps() const { return fractionalFps ? std::string(fps_numerator_input) + "/" + std::string(fps_denominator_input) : std::string(fpsArray[fpsArray_current]); }
 	inline std::string get_videoCrf() const { return std::to_string(video_crf_v); }
 
-	void update_videoEncoderValues(); // [Internal] Called when changing the video encoder
 	void set_videoCrf(int8_t val); // Used by the INI file, not really needed otherwise
+	void update_videoEncoderValues(); // [Internal] Called when changing the video encoder
 
 	VideoData() {
 		videoEncoderArray_current = 0;

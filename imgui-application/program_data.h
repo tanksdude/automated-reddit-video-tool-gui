@@ -23,7 +23,7 @@ struct ProgramData {
 
 	bool input_comment_word_wrap = true; //TODO
 	bool useExtraCodecs = false; //used for VideoData/AudioData
-	int default_tab_idx = 0; //only used on program startup; *not* clamped to valid range
+	int startup_tab_idx = 0; //*not* clamped to valid range
 
 	int initial_windowWidth;
 	int initial_windowHeight;
