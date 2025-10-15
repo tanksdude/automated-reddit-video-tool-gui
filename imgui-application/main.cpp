@@ -85,6 +85,10 @@ auto integerOnlyPositiveFunc = [] (ImGuiInputTextCallbackData* data) {
 	if (data->EventChar >= '0' && data->EventChar <= '9') { return 0; }
 	return 1;
 };
+auto numberOnlyPositiveFunc = [] (ImGuiInputTextCallbackData* data) {
+	if ((data->EventChar >= '0' && data->EventChar <= '9') || data->EventChar == '.') { return 0; }
+	return 1;
+};
 auto filenameCleaningFunc = [] (ImGuiInputTextCallbackData* data) {
 	//main goal: don't allow quotes
 	//additionally, don't allow NTFS-invalid characters, list from https://en.wikipedia.org/wiki/NTFS
@@ -92,13 +96,18 @@ auto filenameCleaningFunc = [] (ImGuiInputTextCallbackData* data) {
 	    data->EventChar == '\\' ||
 	    data->EventChar == ':'  ||
 	    data->EventChar == '*'  ||
-	    data->EventChar == '\"' ||
+	    data->EventChar == '\"' || //TODO: should single quotes also be disallowed?
 	    data->EventChar == '?'  ||
 	    data->EventChar == '<'  ||
 	    data->EventChar == '>'  ||
 	    data->EventChar == '|')
-	{ return 1; }
+		{ return 1; }
 	return 0;
+};
+auto filenameCleaningFunc_inputFile = [] (ImGuiInputTextCallbackData* data) {
+	//main goal: don't allow '$' because that's used for the number in the Python script
+	if (data->EventChar == '$') { return 1; }
+	return filenameCleaningFunc(data);
 };
 auto filepathCleaningFunc = [] (ImGuiInputTextCallbackData* data) {
 	//identical to filenameCleaningFunc but allows slashes (and colons)
@@ -108,11 +117,12 @@ auto filepathCleaningFunc = [] (ImGuiInputTextCallbackData* data) {
 	    data->EventChar == '<'  ||
 	    data->EventChar == '>'  ||
 	    data->EventChar == '|')
-	{ return 1; }
+		{ return 1; }
 	return 0;
 };
-auto quoteScrubbingFunc = [] (ImGuiInputTextCallbackData* data) {
+auto quoteAndSlashScrubbingFunc = [] (ImGuiInputTextCallbackData* data) {
 	if (data->EventChar == '\"' || data->EventChar == '\'') { return 1; }
+	if (data->EventChar == '\\' || data->EventChar == '/')  { return 1; }
 	return 0;
 };
 auto video_replacement_scrubbingFunc = [] (ImGuiInputTextCallbackData* data) {
@@ -369,7 +379,7 @@ int main(int, char**)
 
 						ImGui::Text("File Name:"); //TODO: this isn't horizontally or vertically centered
 						ImGui::SameLine();
-						ImGui::InputText("##Main Input Comment", pdata.the_file_input_name, IM_ARRAYSIZE(pdata.the_file_input_name), ImGuiInputTextFlags_CallbackCharFilter, filenameCleaningFunc);
+						ImGui::InputText("##Main Input Comment", pdata.the_file_input_name, IM_ARRAYSIZE(pdata.the_file_input_name), ImGuiInputTextFlags_CallbackCharFilter, filenameCleaningFunc_inputFile);
 						ImGui::SameLine();
 
 						if (filenameIsLocked) {
@@ -506,15 +516,15 @@ int main(int, char**)
 
 						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
 						ImGui::SeparatorText("Image");
-						ImGui::InputText("Image Width",     idata.image_width_input,    IM_ARRAYSIZE(idata.image_width_input),    ImGuiInputTextFlags_CharsDecimal);
-						ImGui::InputText("Image Height",    idata.image_height_input,   IM_ARRAYSIZE(idata.image_height_input),   ImGuiInputTextFlags_CharsDecimal);
-						ImGui::InputText("Width Border",    idata.image_w_border_input, IM_ARRAYSIZE(idata.image_w_border_input), ImGuiInputTextFlags_CharsDecimal);
-						ImGui::InputText("Height Border",   idata.image_h_border_input, IM_ARRAYSIZE(idata.image_h_border_input), ImGuiInputTextFlags_CharsDecimal);
+						ImGui::InputText("Image Width",     idata.image_width_input,    IM_ARRAYSIZE(idata.image_width_input),    ImGuiInputTextFlags_CallbackCharFilter, integerOnlyPositiveFunc);
+						ImGui::InputText("Image Height",    idata.image_height_input,   IM_ARRAYSIZE(idata.image_height_input),   ImGuiInputTextFlags_CallbackCharFilter, integerOnlyPositiveFunc);
+						ImGui::InputText("Width Border",    idata.image_w_border_input, IM_ARRAYSIZE(idata.image_w_border_input), ImGuiInputTextFlags_CallbackCharFilter, integerOnlyPositiveFunc);
+						ImGui::InputText("Height Border",   idata.image_h_border_input, IM_ARRAYSIZE(idata.image_h_border_input), ImGuiInputTextFlags_CallbackCharFilter, integerOnlyPositiveFunc);
 
 						ImGui::SeparatorText("Font"); //TODO: align SeparatorText to center
-						ImGui::InputText("Font Size",             idata.font_size_input,           IM_ARRAYSIZE(idata.font_size_input),        ImGuiInputTextFlags_CharsDecimal);
-						ImGui::InputText("Font Color",            idata.font_color_input,          IM_ARRAYSIZE(idata.font_color_input),       ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc);
-						ImGui::InputText("Background Color",      idata.background_color_input,    IM_ARRAYSIZE(idata.background_color_input), ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc); //TODO: think these need to also scrub backslashes
+						ImGui::InputText("Font Size",             idata.font_size_input,           IM_ARRAYSIZE(idata.font_size_input),        ImGuiInputTextFlags_CallbackCharFilter, numberOnlyPositiveFunc);
+						ImGui::InputText("Font Color",            idata.font_color_input,          IM_ARRAYSIZE(idata.font_color_input),       ImGuiInputTextFlags_CallbackCharFilter, quoteAndSlashScrubbingFunc);
+						ImGui::InputText("Background Color",      idata.background_color_input,    IM_ARRAYSIZE(idata.background_color_input), ImGuiInputTextFlags_CallbackCharFilter, quoteAndSlashScrubbingFunc);
 						ImGui::SliderScalar("Newline Count", ImGuiDataType_U8, &idata.paragraph_newline_v, &idata.paragraph_newline_min, &idata.paragraph_newline_max);
 						ImGui::Checkbox("Paragraph Tabbed Start", &idata.paragraph_tabbed_start_input);
 
@@ -522,7 +532,7 @@ int main(int, char**)
 						if (opened_additional_options_test_image) {
 							ImGui::Unindent(style.IndentSpacing); //TODO: why isn't ImGui::GetTreeNodeToLabelSpacing() correct? //TODO: it seems to align it with the tree node's parent, which is weird (requires DPI=1)
 
-							ImGui::InputText("Font Name",             idata.font_name,                 IM_ARRAYSIZE(idata.font_name),              ImGuiInputTextFlags_CallbackCharFilter, quoteScrubbingFunc);
+							ImGui::InputText("Font Name",             idata.font_name,                 IM_ARRAYSIZE(idata.font_name),              ImGuiInputTextFlags_CallbackCharFilter, filenameCleaningFunc);
 							ImGui::Indent();
 							ImGui::Checkbox("Font is a family",       &idata.font_is_family_input);
 							ImGui::SameLine();
