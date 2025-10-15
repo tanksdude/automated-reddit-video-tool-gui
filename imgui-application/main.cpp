@@ -655,17 +655,20 @@ int main(int, char**)
 							ImGui::BeginDisabled();
 						}
 
+						const float write_settings_width = ImGui::GetContentRegionAvail().x * .75f;
 						if (ImGui::BeginPopup("Settings")) {
-							//TODO: fix size
 							ARVT::copyEvaluatedFileName_toVideoSettingsPath(pdata.the_file_input_name, pdata.evaluated_video_settings_path, IM_ARRAYSIZE(pdata.evaluated_video_settings_path));
+							ImGui::PushItemWidth(write_settings_width);
 							ImGui::InputText("##Settings File Path", pdata.evaluated_video_settings_path, IM_ARRAYSIZE(pdata.evaluated_video_settings_path), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
-							if (ImGui::Button("Write Current Settings", ImVec2(-FLT_MIN, 0.0f))) {
+							ImGui::PopItemWidth();
+
+							if (ImGui::Button("Write Current Settings", ImVec2(write_settings_width, 0.0f))) {
 								mINI::INIFile video_settings_file(pdata.evaluated_video_settings_path);
 								mINI::INIStructure video_settings_object;
 
 								ARVT::CopySettingsToIni(video_settings_object, idata, adata, vdata);
 								bool result = video_settings_file.generate(video_settings_object, true);
-								//TODO: maybe put a "confirm" box before actually writing the file
+								//don't bother with a "confirm" box before actually writing the file if it already exists
 
 								if (!result) {
 									//TODO: better messages
@@ -674,7 +677,8 @@ int main(int, char**)
 									global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Settings", ("Successfully wrote " + std::string(pdata.evaluated_video_settings_path)).c_str());
 								}
 							}
-							if (ImGui::Button("Import Settings", ImVec2(-FLT_MIN, 0.0f))) {
+
+							if (ImGui::Button("Import Settings", ImVec2(write_settings_width, 0.0f))) {
 								mINI::INIFile video_settings_file(pdata.evaluated_video_settings_path);
 								mINI::INIStructure video_settings_object;
 								bool result = video_settings_file.read(video_settings_object);
@@ -690,19 +694,22 @@ int main(int, char**)
 									global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Settings", ("Successfully loaded " + std::string(pdata.evaluated_video_settings_path)).c_str());
 								}
 							}
-							if (ImGui::Button("Reveal in File Explorer##Video Settings", ImVec2(-FLT_MIN, 0.0f))) {
+
+							if (ImGui::Button("Reveal in File Explorer##Video Settings", ImVec2(write_settings_width, 0.0f))) {
 								int result = ARVT::revealFileExplorer(pdata.evaluated_video_settings_path);
 								if (result) {
 									//strcpy(, "error"); //TODO: red text
 									//global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
 								}
 							}
+
 							ImGui::EndPopup();
 						}
 
-						ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("Settings").x) / 2 - style.FramePadding.x);
+						const float button_width = ImGui::GetContentRegionAvail().x / 2; //ImGui::GetContentRegionAvail() changes after changing the cursor position
+						ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x / 4);
 						ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetFrameHeightWithSpacing() / 2);
-						if (ImGui::Button("Settings")) {
+						if (ImGui::Button("Settings", { button_width, ImGui::GetFrameHeightWithSpacing() })) {
 							ImGui::OpenPopup("Settings");
 						}
 						lock_filename_tooltip(filenameIsLocked);
