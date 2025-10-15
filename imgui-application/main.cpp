@@ -1031,6 +1031,11 @@ int main(int, char**)
 							}
 						}
 
+						if (ImGui::Button("Clear queried files")) {
+							deleteFileList.clear();
+							deleteFileLogger.Clear();
+						}
+
 						ImGui::SeparatorText("Delete");
 
 						//only allowed to delete what's in the list: if something new suddenly meets the cutoff, it's spared; if something old gets its modified time changed, it's gone
@@ -1059,9 +1064,12 @@ int main(int, char**)
 							ImGui::EndPopup();
 						}
 
+						// Check the logger's data instead of deleteFileList so it's possible to "delete" 0 files
+						if (deleteFileLogger.Buf.empty()) { ImGui::BeginDisabled(); }
 						if (ImGui::Button("Delete queried files")) {
 							ImGui::OpenPopup("Delete queried files");
 						}
+						if (deleteFileLogger.Buf.empty()) { ImGui::EndDisabled(); }
 
 						ImGui::TableNextColumn();
 
