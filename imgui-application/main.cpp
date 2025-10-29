@@ -132,12 +132,13 @@ auto video_replacement_scrubbingFunc = [] (ImGuiInputTextCallbackData* data) {
 };
 
 //called when the lock button is clicked
-void clear_input_data(bool lockNewState) {
+void clear_input_data(bool lockNewState, GLuint& createdTestImage_texture, int& createdTestImage_width, int& createdTestImage_height) {
 	if (lockNewState) {
 		//now locked
 		strcpy(pdata.input_comment_data, "");
 		strcpy(pdata.input_split_1_data, "");
 		strcpy(pdata.input_split_2_data, "");
+		createdTestImage_texture = createdTestImage_width = createdTestImage_height = 0;
 	} else {
 		//now unlocked
 		//nothing
@@ -387,7 +388,7 @@ int main(int, char**)
 						}
 
 						if (ImGui::ImageButton("##Lock Icon", filenameIsLocked ? lock_icon_texture : unlock_icon_texture, ImageButtonSize)) {
-							clear_input_data(filenameIsLocked);
+							clear_input_data(filenameIsLocked, createdTestImage_texture, createdTestImage_width, createdTestImage_height);
 							filenameIsLocked = !filenameIsLocked;
 						}
 						const float lock_icon_frame_height = 32.0f + ImGui::GetStyle().FramePadding.y;
@@ -564,6 +565,8 @@ int main(int, char**)
 							if (result) {
 								//TODO: better messages
 								global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Image", strerror(result));
+								//TODO: should this really be cleared on error?
+								createdTestImage_texture = createdTestImage_width = createdTestImage_height = 0;
 							} else {
 								global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Image", ("Successfully created test image " + std::string(pdata.evaluated_test_image_path)).c_str());
 								ret = ImGuiHelpers::LoadTextureFromFile(pdata.evaluated_test_image_path, &createdTestImage_texture, &createdTestImage_width, &createdTestImage_height);
