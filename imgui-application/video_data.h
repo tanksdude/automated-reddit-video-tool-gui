@@ -7,37 +7,36 @@
 #include "av_codecs.h"
 
 struct VideoData {
-	static const std::array<const VideoCodecData*, 7>  videoEncoderArray;
 	static const std::array<const VideoCodecData*, 13> videoEncoderArrayExtended;
 	static inline size_t get_videoEncoderArraySize(bool extended) {
-		return extended ? videoEncoderArrayExtended.size() : videoEncoderArray.size();
+		return extended ? videoEncoderArrayExtended.size() : 7;
 	}
 
-	int videoEncoderArray_current;
-	int videoEncoder_preset1_current;
-	int videoEncoder_preset2_current;
+	int videoEncoder_idx;
+	int videoEncoder_preset1_idx;
+	int videoEncoder_preset2_idx;
 	void set_encoder_idx(int idx) {
-		videoEncoderArray_current = idx;
-		videoEncoder_preset1_current = 0;
-		videoEncoder_preset2_current = 0;
+		videoEncoder_idx = idx;
+		videoEncoder_preset1_idx = 0;
+		videoEncoder_preset2_idx = 0;
 		update_videoEncoderValues();
 	}
 	void set_encoder_preset1_idx(int idx) {
-		videoEncoder_preset1_current = idx;
+		videoEncoder_preset1_idx = idx;
 		//TODO: in the future this would be used when the codec's second preset changes its range depending on its first preset (like VP9)
 	}
 	void set_encoder_preset2_idx(int idx) {
-		videoEncoder_preset2_current = idx;
+		videoEncoder_preset2_idx = idx;
 	}
 
-	inline const VideoCodecData* get_videoEncoder() const { return videoEncoderArrayExtended[videoEncoderArray_current]; }
+	inline const VideoCodecData* get_videoEncoder() const { return videoEncoderArrayExtended[videoEncoder_idx]; }
 	inline std::string get_videoPreset1_currentValue() const {
 		const GenericCodecPreset& vc_p1 = get_videoEncoder()->preset1;
-		return vc_p1.displayValues.empty() ? "default" : vc_p1.internalValues[videoEncoder_preset1_current];
+		return vc_p1.displayValues.empty() ? "default" : vc_p1.internalValues[videoEncoder_preset1_idx];
 	}
 	inline std::string get_videoPreset2_currentValue() const {
 		const GenericCodecPreset& vc_p2 = get_videoEncoder()->preset2;
-		return vc_p2.displayValues.empty() ? "default" : vc_p2.internalValues[videoEncoder_preset2_current];
+		return vc_p2.displayValues.empty() ? "default" : vc_p2.internalValues[videoEncoder_preset2_idx];
 	}
 
 	bool use_speech_text = false;
@@ -74,9 +73,9 @@ struct VideoData {
 	void update_videoEncoderValues(); // [Internal] Called when changing the video encoder
 
 	VideoData() {
-		videoEncoderArray_current = 0;
-		videoEncoder_preset1_current = 0;
-		videoEncoder_preset2_current = 0;
+		videoEncoder_idx = 0;
+		videoEncoder_preset1_idx = 0;
+		videoEncoder_preset2_idx = 0;
 		update_videoEncoderValues();
 
 		strcpy(video_replacement_numbers_input, "");

@@ -794,7 +794,7 @@ int main(int, char**)
 
 						if (ImGui::BeginCombo("Audio Encoder", adata.get_audioEncoder()->displayName)) {
 							for (int n = 0; n < AudioData::get_audioEncoderArraySize(pdata.useExtraCodecs); n++) {
-								if (ImGui::Selectable(AudioData::audioEncoderArrayExtended[n]->displayName, adata.audioEncoderArray_current == n)) {
+								if (ImGui::Selectable(AudioData::audioEncoderArrayExtended[n]->displayName, adata.audioEncoder_idx == n)) {
 									adata.set_encoder_idx(n);
 								}
 							}
@@ -814,9 +814,9 @@ int main(int, char**)
 
 						if (!ac->preset1.displayValues.empty()) {
 							const GenericCodecPreset& ac_p1 = ac->preset1;
-							if (ImGui::BeginCombo(ac_p1.displayTerm, ac_p1.displayValues[adata.audioEncoder_preset1_current])) {
+							if (ImGui::BeginCombo(ac_p1.displayTerm, ac_p1.displayValues[adata.audioEncoder_preset1_idx])) {
 								for (int n = 0; n < ac_p1.displayValues.size(); n++) {
-									if (ImGui::Selectable(ac_p1.displayValues[n], adata.audioEncoder_preset1_current == n)) {
+									if (ImGui::Selectable(ac_p1.displayValues[n], adata.audioEncoder_preset1_idx == n)) {
 										adata.set_encoder_preset1_idx(n);
 									}
 								}
@@ -850,7 +850,7 @@ int main(int, char**)
 
 						if (ImGui::BeginCombo("Video Encoder", vdata.get_videoEncoder()->displayName)) {
 							for (int n = 0; n < VideoData::get_videoEncoderArraySize(pdata.useExtraCodecs); n++) {
-								if (ImGui::Selectable(VideoData::videoEncoderArrayExtended[n]->displayName, vdata.videoEncoderArray_current == n)) {
+								if (ImGui::Selectable(VideoData::videoEncoderArrayExtended[n]->displayName, vdata.videoEncoder_idx == n)) {
 									vdata.set_encoder_idx(n);
 								}
 							}
@@ -872,9 +872,9 @@ int main(int, char**)
 
 						if (!vc->preset1.displayValues.empty()) {
 							const GenericCodecPreset& vc_p1 = vc->preset1;
-							if (ImGui::BeginCombo(vc_p1.displayTerm, vc_p1.displayValues[vdata.videoEncoder_preset1_current])) {
+							if (ImGui::BeginCombo(vc_p1.displayTerm, vc_p1.displayValues[vdata.videoEncoder_preset1_idx])) {
 								for (int n = 0; n < vc_p1.displayValues.size(); n++) {
-									if (ImGui::Selectable(vc_p1.displayValues[n], vdata.videoEncoder_preset1_current == n)) {
+									if (ImGui::Selectable(vc_p1.displayValues[n], vdata.videoEncoder_preset1_idx == n)) {
 										vdata.set_encoder_preset1_idx(n);
 									}
 								}
@@ -882,9 +882,9 @@ int main(int, char**)
 							}
 							if (!vc->preset2.displayValues.empty()) {
 								const GenericCodecPreset& vc_p2 = vc->preset2;
-								if (ImGui::BeginCombo(vc_p2.displayTerm, vc_p2.displayValues[vdata.videoEncoder_preset2_current])) {
+								if (ImGui::BeginCombo(vc_p2.displayTerm, vc_p2.displayValues[vdata.videoEncoder_preset2_idx])) {
 									for (int n = 0; n < vc_p2.displayValues.size(); n++) {
-										if (ImGui::Selectable(vc_p2.displayValues[n], vdata.videoEncoder_preset2_current == n)) {
+										if (ImGui::Selectable(vc_p2.displayValues[n], vdata.videoEncoder_preset2_idx == n)) {
 											vdata.set_encoder_preset2_idx(n);
 										}
 									}
@@ -958,10 +958,10 @@ int main(int, char**)
 
 						if (ImGui::Checkbox("Extra Codecs", &pdata.useExtraCodecs)) {
 							if (!pdata.useExtraCodecs) {
-								if (adata.audioEncoderArray_current >= AudioData::get_audioEncoderArraySize(false)) {
+								if (adata.audioEncoder_idx >= AudioData::get_audioEncoderArraySize(false)) {
 									adata.set_encoder_idx(0);
 								}
-								if (vdata.videoEncoderArray_current >= VideoData::get_videoEncoderArraySize(false)) {
+								if (vdata.videoEncoder_idx >= VideoData::get_videoEncoderArraySize(false)) {
 									vdata.set_encoder_idx(0);
 								}
 							}

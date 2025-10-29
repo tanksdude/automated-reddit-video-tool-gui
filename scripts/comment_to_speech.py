@@ -195,7 +195,7 @@ VIDEO_VID_CODEC_lib = videoCodecLookup[VIDEO_VID_CODEC_name]
 VIDEO_VID_PRESET_1 = args.videoPreset1
 VIDEO_VID_PRESET_2 = args.videoPreset2
 VIDEO_VID_EXTRA_ARGS = videoExtraArgsLookup[VIDEO_VID_CODEC_name]
-VIDEO_VID_FASTSTART = bool(args.faststart_flag)
+VIDEO_VID_FASTSTART = int(args.faststart_flag) # Must be int() because bool("0") is True
 
 input_image_text_file_path = args.input_text_file
 output_vid_file_path = args.output_mp4_files

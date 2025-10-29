@@ -30,27 +30,26 @@ struct AudioData {
 	static void getVoiceListFromExe_Balabolka(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList);
 	static void getVoiceListFromExe_Espeak(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList);
 
-	static const std::array<const AudioCodecData*, 7>  audioEncoderArray;
 	static const std::array<const AudioCodecData*, 13> audioEncoderArrayExtended;
 	static inline size_t get_audioEncoderArraySize(bool extended) {
-		return extended ? audioEncoderArrayExtended.size() : audioEncoderArray.size();
+		return extended ? audioEncoderArrayExtended.size() : 7;
 	}
 
-	int audioEncoderArray_current;
-	int audioEncoder_preset1_current;
+	int audioEncoder_idx;
+	int audioEncoder_preset1_idx;
 	void set_encoder_idx(int idx) {
-		audioEncoderArray_current = idx;
-		audioEncoder_preset1_current = 0;
+		audioEncoder_idx = idx;
+		audioEncoder_preset1_idx = 0;
 		update_audioEncoderValues();
 	}
 	void set_encoder_preset1_idx(int idx) {
-		audioEncoder_preset1_current = idx;
+		audioEncoder_preset1_idx = idx;
 	}
 
-	inline const AudioCodecData* get_audioEncoder() const { return audioEncoderArrayExtended[audioEncoderArray_current]; }
+	inline const AudioCodecData* get_audioEncoder() const { return audioEncoderArrayExtended[audioEncoder_idx]; }
 	inline std::string get_audioPreset1_currentValue() const {
 		const GenericCodecPreset& ac_p1 = get_audioEncoder()->preset1;
-		return ac_p1.displayValues.empty() ? "default" : ac_p1.internalValues[audioEncoder_preset1_current];
+		return ac_p1.displayValues.empty() ? "default" : ac_p1.internalValues[audioEncoder_preset1_idx];
 	}
 
 	int16_t audio_bitrate_v;
@@ -79,8 +78,8 @@ struct AudioData {
 
 	// Make sure to call update_voiceArray() to finish initialization! (Assuming you want a voice list populated.)
 	AudioData() {
-		audioEncoderArray_current = 1;
-		audioEncoder_preset1_current = 0;
+		audioEncoder_idx = 1;
+		audioEncoder_preset1_idx = 0;
 		update_audioEncoderValues();
 	}
 	~AudioData() {

@@ -13,8 +13,22 @@ const std::array<const char*, 5> AudioData::speechEngineArray = { "eSpeak", "eSp
 const std::array<const char*, 5> AudioData::speechEngineArray_exeForUpdatingVoiceList = { "espeak --voices", "espeak-ng --voices", "", "", "" }; //note: internal use only
 #endif
 
-const std::array<const AudioCodecData*, 7>  AudioData::audioEncoderArray         = { &CODEC_AUDIO_copypcm, &CODEC_AUDIO_AAC, &CODEC_AUDIO_Opus, &CODEC_AUDIO_FLAC, &CODEC_AUDIO_Vorbis, &CODEC_AUDIO_MP3, &CODEC_AUDIO_ALAC };
-const std::array<const AudioCodecData*, 13> AudioData::audioEncoderArrayExtended = { &CODEC_AUDIO_copypcm, &CODEC_AUDIO_AAC, &CODEC_AUDIO_Opus, &CODEC_AUDIO_FLAC, &CODEC_AUDIO_Vorbis, &CODEC_AUDIO_MP3, &CODEC_AUDIO_ALAC, &CODEC_AUDIO_AC3, &CODEC_AUDIO_EAC3, &CODEC_AUDIO_Speex, &CODEC_AUDIO_TTA, &CODEC_AUDIO_WMA2, &CODEC_AUDIO_MP2 };
+const std::array<const AudioCodecData*, 13> AudioData::audioEncoderArrayExtended = {
+	&CODEC_AUDIO_copypcm,
+	&CODEC_AUDIO_AAC,
+	&CODEC_AUDIO_Opus,
+	&CODEC_AUDIO_FLAC,
+	&CODEC_AUDIO_Vorbis,
+	&CODEC_AUDIO_MP3,
+	&CODEC_AUDIO_ALAC,
+
+	&CODEC_AUDIO_AC3,
+	&CODEC_AUDIO_EAC3,
+	&CODEC_AUDIO_Speex,
+	&CODEC_AUDIO_TTA,
+	&CODEC_AUDIO_WMA2,
+	&CODEC_AUDIO_MP2,
+};
 
 void AudioData::getVoiceListFromExe_Balabolka(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList) {
 	// Balabolka lists the voices under "SAPI" with a space, so it's a voice if it's indented
