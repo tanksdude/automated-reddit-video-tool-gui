@@ -6,6 +6,7 @@
 #include <algorithm> //std::max_element
 #include <cstring> //strerror, strcmp
 #include <filesystem> //only for refreshApplicationFontName(), though plenty of other files also use <filesystem>
+#include <iostream> //not actually needed, but it's useful for debugging
 
 #include <GLFW/glfw3.h>
 #define MINI_CASE_SENSITIVE
@@ -96,7 +97,7 @@ auto filenameCleaningFunc = [] (ImGuiInputTextCallbackData* data) {
 	    data->EventChar == '\\' ||
 	    data->EventChar == ':'  ||
 	    data->EventChar == '*'  ||
-	    data->EventChar == '\"' || //TODO: should single quotes also be disallowed?
+	    data->EventChar == '\"' || //single quotes can be allowed as long as system() calls use double quotes
 	    data->EventChar == '?'  ||
 	    data->EventChar == '<'  ||
 	    data->EventChar == '>'  ||
@@ -118,11 +119,6 @@ auto filepathCleaningFunc = [] (ImGuiInputTextCallbackData* data) {
 	    data->EventChar == '>'  ||
 	    data->EventChar == '|')
 		{ return 1; }
-	return 0;
-};
-auto quoteAndSlashScrubbingFunc = [] (ImGuiInputTextCallbackData* data) {
-	if (data->EventChar == '\"' || data->EventChar == '\'') { return 1; }
-	if (data->EventChar == '\\' || data->EventChar == '/')  { return 1; }
 	return 0;
 };
 auto video_replacement_scrubbingFunc = [] (ImGuiInputTextCallbackData* data) {
@@ -156,6 +152,31 @@ inline void lock_filename_tooltip(bool filenameIsLocked) {
 	}
 }
 
+#include <thread>
+#include <atomic>
+std::atomic_bool thread_func_speech_working = false;
+
+/* Note: this function MUST take pointers rather than references because
+ * detached threads' destructors destroy all their objects, which for some
+ * reason includes const references.
+ * If this isn't done, then AudioData's destructor frees its voiceArray, and
+ * calling this function again will call the destructor again, resulting in a
+ * double free.
+ * Maybe it would be easier to write a basic thread manager and have the
+ * threads exit on program exit...
+ */
+void thread_func_speech(const ProgramData* pdata, const ImageData* idata, const AudioData* adata, const VideoData* vdata) {
+	int result = ARVT::call_comment_to_speech((*pdata).the_file_input_name, *idata, *adata, *vdata);
+	thread_func_speech_working.store(false);
+	//return result;
+
+	if (result) {
+		//TODO(v1.0): better messages
+		global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Video", strerror(result));
+	} else {
+		global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Video", ("Successfully created videos " + std::string((*pdata).evaluated_output_speech_path)).c_str());
+	}
+}
 
 
 static void glfw_error_callback(int error, const char* description)
@@ -346,6 +367,7 @@ int main(int, char**)
 
 		// main window
 		{
+			const bool THREAD_IS_WORKING = thread_func_speech_working.load();
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 			int window_width, window_height;
 			glfwGetWindowSize(window, &window_width, &window_height);
@@ -374,18 +396,14 @@ int main(int, char**)
 						ImGui::TableNextRow();
 						ImGui::TableSetColumnIndex(0);
 
-						if (filenameIsLocked) {
-							ImGui::BeginDisabled();
-						}
+						if (THREAD_IS_WORKING) { ImGui::BeginDisabled(); }
 
+						if (filenameIsLocked) { ImGui::BeginDisabled(); }
 						ImGui::Text("File Name:"); //TODO: this isn't horizontally or vertically centered
 						ImGui::SameLine();
 						ImGui::InputText("##Main Input Comment", pdata.the_file_input_name, IM_ARRAYSIZE(pdata.the_file_input_name), ImGuiInputTextFlags_CallbackCharFilter, filenameCleaningFunc_inputFile);
 						ImGui::SameLine();
-
-						if (filenameIsLocked) {
-							ImGui::EndDisabled();
-						}
+						if (filenameIsLocked) { ImGui::EndDisabled(); }
 
 						if (ImGui::ImageButton("##Lock Icon", filenameIsLocked ? lock_icon_texture : unlock_icon_texture, ImageButtonSize)) {
 							clear_input_data(filenameIsLocked, createdTestImage_texture, createdTestImage_width, createdTestImage_height);
@@ -524,8 +542,8 @@ int main(int, char**)
 
 						ImGui::SeparatorText("Font"); //TODO: align SeparatorText to center
 						ImGui::InputText("Font Size",             idata.font_size_input,           IM_ARRAYSIZE(idata.font_size_input),        ImGuiInputTextFlags_CallbackCharFilter, numberOnlyPositiveFunc);
-						ImGui::InputText("Font Color",            idata.font_color_input,          IM_ARRAYSIZE(idata.font_color_input),       ImGuiInputTextFlags_CallbackCharFilter, quoteAndSlashScrubbingFunc);
-						ImGui::InputText("Background Color",      idata.background_color_input,    IM_ARRAYSIZE(idata.background_color_input), ImGuiInputTextFlags_CallbackCharFilter, quoteAndSlashScrubbingFunc);
+						ImGui::InputText("Font Color",            idata.font_color_input,          IM_ARRAYSIZE(idata.font_color_input),       ImGuiInputTextFlags_CallbackCharFilter, filenameCleaningFunc);
+						ImGui::InputText("Background Color",      idata.background_color_input,    IM_ARRAYSIZE(idata.background_color_input), ImGuiInputTextFlags_CallbackCharFilter, filenameCleaningFunc);
 						ImGui::SliderScalar("Newline Count", ImGuiDataType_U8, &idata.paragraph_newline_v, &idata.paragraph_newline_min, &idata.paragraph_newline_max);
 						ImGui::Checkbox("Paragraph Tabbed Start", &idata.paragraph_tabbed_start_input);
 
@@ -620,6 +638,8 @@ int main(int, char**)
 						const float availableHeight = std::max(0.0f, std::min(largestColumn, contentAvailableY));
 						const float availableWidth = std::max(0.0f, ImGui::GetContentRegionAvail().x);
 
+						if (THREAD_IS_WORKING) { ImGui::EndDisabled(); }
+
 						if ((availableWidth / createdTestImage_width) * createdTestImage_height > availableHeight) {
 							if (availableHeight > createdTestImage_height) {
 								ImGui::Image((ImTextureID)(intptr_t)createdTestImage_texture, ImVec2(createdTestImage_width, createdTestImage_height));
@@ -633,6 +653,8 @@ int main(int, char**)
 								ImGui::Image((ImTextureID)(intptr_t)createdTestImage_texture, ImVec2(availableWidth, (availableWidth / createdTestImage_width) * createdTestImage_height));
 							}
 						}
+
+						if (THREAD_IS_WORKING) { ImGui::BeginDisabled(); }
 
 						ImGui::TableNextRow();
 						ImGui::TableSetColumnIndex(0);
@@ -733,24 +755,41 @@ int main(int, char**)
 
 						ImGui::TableNextColumn();
 
+						if (THREAD_IS_WORKING) { ImGui::EndDisabled(); }
+
 						if (!filenameIsLocked) {
 							ImGui::BeginDisabled();
 						}
 
-						if (adata.voiceArray_current < 0) { ImGui::BeginDisabled(); }
-						if (ImGui::Button("GO!", ImVec2(-FLT_MIN, 0.0f))) {
-							//TODO: progress bar and async
-							int result = ARVT::call_comment_to_speech(pdata.the_file_input_name, idata, adata, vdata);
-							if (result) {
-								//TODO: better messages
-								global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Video", strerror(result));
-							} else {
-								global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Video", ("Successfully created videos " + std::string(pdata.evaluated_output_speech_path)).c_str());
+						if (THREAD_IS_WORKING) {
+							ImGui::ProgressBar(-0.75f * (float)ImGui::GetTime(), ImVec2(-FLT_MIN, 0.0f), "Running...");
+						} else {
+							if (adata.voiceArray_current < 0) { ImGui::BeginDisabled(); }
+							if (ImGui::Button("GO!", ImVec2(-FLT_MIN, 0.0f))) {
+								// Note: std::async(std::launch::async, ...) will not work because
+								// std::future will get destructed here and that seems to call .join()
+								// which is blocking, defeating the whole point of separate threads.
+								// Using std::async(std::launch::deferred, ...) will theoretically
+								// solve that issue, however it didn't seem to actually start, or it
+								// crashed. Therefore, the solution is to not use std::async and
+								// instead just use std::thread (not std::jthread because the threads
+								// here are created on the stack and thus immediately destructed, and
+								// std::jthread destruction calls .join()), followed by .detach() to
+								// avoid the std::terminate on destruction.
+
+								thread_func_speech_working.store(true);
+								std::thread t(thread_func_speech, &pdata, &idata, &adata, &vdata);
+								t.detach();
+
+								// Technically checking thread_func_speech_working before this store
+								// is race-y... but I don't think ImGui can handle multiple clicks at
+								// different areas on the same frame, so no problem (unless
+								// touchscreens are different?)
 							}
-							//TODO: at program start-up, check programs' existence and maybe ffmpeg version
+							lock_filename_tooltip(filenameIsLocked);
+							if (adata.voiceArray_current < 0) { ImGui::EndDisabled(); }
 						}
-						lock_filename_tooltip(filenameIsLocked);
-						if (adata.voiceArray_current < 0) { ImGui::EndDisabled(); }
+
 						if (ImGui::Button("Reveal in File Explorer##Final Video", ImVec2(-FLT_MIN, 0.0f))) {
 							//TODO: this should open in the folder if the file doesn't exist
 							//yes it's *kinda* a hack to open on just the first video, but it's better than iterating through every file in the folder and checking what's available
@@ -774,6 +813,9 @@ int main(int, char**)
 				}
 
 				if (ImGui::BeginTabItem("Configure", nullptr, tab_flags[1])) {
+
+					if (THREAD_IS_WORKING) { ImGui::BeginDisabled(); }
+
 					if (ImGui::BeginTable("Configure##table1", 3, table_flags)) {
 						ImGui::TableSetupColumn("Audio");
 						ImGui::TableSetupColumn("Video");
@@ -980,14 +1022,12 @@ int main(int, char**)
 						ImGui::Checkbox("Demo Window", &show_demo_window);
 						#endif
 
-						ImGui::Text("TODO: reset all to default button");
-
 						ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 1.0f);
 						ImGui::EndTable();
 						ImGui::PopStyleVar();
 					}
 
-					if (ImGui::BeginTable("Configure##table2", 2, table_flags | ImGuiTableFlags_ScrollY, {0.0f, 10.0f * ImGui::GetFrameHeightWithSpacing()})) {
+					if (ImGui::BeginTable("Configure##table2", 2, table_flags | ImGuiTableFlags_ScrollY, { 0.0f, 10.0f * ImGui::GetFrameHeightWithSpacing() })) {
 						ImGui::TableSetupColumn("Delete Old Files");
 						ImGui::TableSetupColumn("##Logger");
 						ImGui::TableHeadersRow();
@@ -1068,11 +1108,12 @@ int main(int, char**)
 						}
 
 						// Check the logger's data instead of deleteFileList so it's possible to "delete" 0 files
-						if (deleteFileLogger.Buf.empty()) { ImGui::BeginDisabled(); }
+						const bool deleteFileLogger_empty = deleteFileLogger.Buf.empty();
+						if (deleteFileLogger_empty) { ImGui::BeginDisabled(); }
 						if (ImGui::Button("Delete queried files")) {
 							ImGui::OpenPopup("Delete queried files");
 						}
-						if (deleteFileLogger.Buf.empty()) { ImGui::EndDisabled(); }
+						if (deleteFileLogger_empty) { ImGui::EndDisabled(); }
 
 						ImGui::TableNextColumn();
 
@@ -1082,6 +1123,8 @@ int main(int, char**)
 						ImGui::EndTable();
 						//ImGui::PopStyleVar();
 					}
+
+					if (THREAD_IS_WORKING) { ImGui::EndDisabled(); }
 
 					ImGui::EndTabItem();
 				}
