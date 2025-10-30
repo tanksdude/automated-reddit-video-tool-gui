@@ -223,17 +223,17 @@ int deleteAllOldFiles(const std::vector<std::string>& fileList) {
 
 
 
-int call_comment_splitter(const char* name) {
+int call_comment_splitter(const char* name, const ProgramData& pdata) {
 	const std::string input_path = inputFileName_toCommentSplitterPath(name);
 	const std::string output_path = inputFileName_toCommentTestImagePath_Text(name);
-	const std::string command = PYTHON_CMD + " ../scripts/comment_splitter.py \"" + input_path + "\" \"" + output_path + "\"";
+	const std::string command = pdata.get_pythonCmd() + " ../scripts/comment_splitter.py \"" + input_path + "\" \"" + output_path + "\"";
 	return system_helper(command.c_str(), true);
 }
 
-int call_comment_test_image(const char* name, const ImageData& idata) {
+int call_comment_test_image(const char* name, const ProgramData& pdata, const ImageData& idata) {
 	const std::string text_path = inputFileName_toCommentTestImagePath_Text(name);
 	const std::string image_path = inputFileName_toCommentTestImagePath_TestImage(name, idata.get_imageFormat().c_str());
-	const std::string command = PYTHON_CMD + " ../scripts/comment_test_image.py \"" + std::string(text_path) + "\" \"" + std::string(image_path) + "\"" +
+	const std::string command = pdata.get_pythonCmd() + " ../scripts/comment_test_image.py \"" + std::string(text_path) + "\" \"" + std::string(image_path) + "\"" +
 		" "   + idata.get_image_width_input() +
 		" "   + idata.get_image_height_input() +
 		" "   + idata.get_image_w_border_input() +
@@ -257,11 +257,11 @@ int call_comment_test_image(const char* name, const ImageData& idata) {
 	return system_helper(command.c_str(), false);
 }
 
-int call_comment_to_speech(const char* name, const ImageData& idata, const AudioData& adata, const VideoData& vdata) {
+int call_comment_to_speech(const char* name, const ProgramData& pdata, const ImageData& idata, const AudioData& adata, const VideoData& vdata) {
 	const std::string text_path = inputFileName_toCommentTestImagePath_Text(name);
 	const std::string speech_path = inputFileName_toCommentTestImagePath_Speech(name);
 	const std::string video_path = inputFileName_toCommentToSpeechPath(name, vdata.get_videoContainer().c_str(), vdata.audio_only_option_input);
-	const std::string command = PYTHON_CMD + " ../scripts/comment_to_speech.py \"" + std::string(text_path) + "\" \"" + std::string(video_path) + "\"" +
+	const std::string command = pdata.get_pythonCmd() + " ../scripts/comment_to_speech.py \"" + std::string(text_path) + "\" \"" + std::string(video_path) + "\"" +
 		(vdata.use_speech_text ? (" -s \"" + std::string(speech_path) + "\"") : "") +
 		" "   + idata.get_image_width_input() +
 		" "   + idata.get_image_height_input() +

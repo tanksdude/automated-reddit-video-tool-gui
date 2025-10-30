@@ -1,6 +1,12 @@
 #include "program_data.h"
 #include <cstring> //strcpy
 
+#ifdef _WIN32
+const std::array<const char*, 3> ProgramData::pythonCmdArray = { "python", "python3", "py -3" };
+#else
+const std::array<const char*, 3> ProgramData::pythonCmdArray = { "python", "python3", "py" }; //"py" is only used by people who explicitly made a symlink/alias
+#endif
+
 const std::array<const char*, 6> ProgramData::fileDeleteAgeList = { "0 seconds", "1 hour", "24 hours", "2 weeks", "1 month", "6 months" };
 const std::array<int, 6> ProgramData::fileDeleteAgeList_values = { 0, 1, 24, 14*24, 30*24, 180*24 };
 

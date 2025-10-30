@@ -4,6 +4,7 @@
 #include "image_data.h"
 #include "audio_data.h"
 #include "video_data.h"
+#include "program_data.h"
 
 namespace ARVT {
 
@@ -14,10 +15,8 @@ const std::string OUTPUT_SPEECH = "../arvt_output_speech/";
 const std::string VIDEO_SETTINGS = "../arvt_video_settings/";
 #ifdef _WIN32
 const std::string COMMAND_QUOTE = "\""; //TODO: actually use
-const std::string PYTHON_CMD = "python";
 #else
 const std::string COMMAND_QUOTE = "\'";
-const std::string PYTHON_CMD = "python3";
 #endif
 
 // Public methods:
@@ -41,9 +40,9 @@ int revealFileExplorer(const char* path); //note: this also checks for existence
 int getListOfOldFiles(const char* dir, int hourCount, std::vector<std::string>& deleteFileList);
 int deleteAllOldFiles(const std::vector<std::string>& fileList); //no undo!
 
-int call_comment_splitter(const char* name);
-int call_comment_test_image(const char* name, const ImageData& idata);
-int call_comment_to_speech(const char* name, const ImageData& idata, const AudioData& adata, const VideoData& vdata);
+int call_comment_splitter(const char* name, const ProgramData& pdata);
+int call_comment_test_image(const char* name, const ProgramData& pdata, const ImageData& idata);
+int call_comment_to_speech(const char* name, const ProgramData& pdata, const ImageData& idata, const AudioData& adata, const VideoData& vdata);
 
 
 

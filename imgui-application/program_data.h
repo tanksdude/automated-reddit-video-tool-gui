@@ -4,6 +4,15 @@
 #include "imgui/imgui.h"
 
 struct ProgramData {
+	#ifdef _WIN32
+	static const std::array<const char*, 3> pythonCmdArray;
+	int pythonCmdArray_current = 0;
+	#else
+	static const std::array<const char*, 3> pythonCmdArray;
+	int pythonCmdArray_current = 1;
+	#endif
+	inline std::string get_pythonCmd() const { return std::string(pythonCmdArray[pythonCmdArray_current]); }
+
 	char the_file_input_name[1024];
 	char evaluated_input_file_name[1024];
 	char input_comment_data[16 * 1024];

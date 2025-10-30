@@ -166,7 +166,7 @@ std::atomic_bool thread_func_speech_working = false;
  * threads exit on program exit...
  */
 void thread_func_speech(const ProgramData* pdata, const ImageData* idata, const AudioData* adata, const VideoData* vdata) {
-	int result = ARVT::call_comment_to_speech((*pdata).the_file_input_name, *idata, *adata, *vdata);
+	int result = ARVT::call_comment_to_speech((*pdata).the_file_input_name, *pdata, *idata, *adata, *vdata);
 	thread_func_speech_working.store(false);
 	//return result;
 
@@ -579,7 +579,7 @@ int main(int, char**)
 						ImGui::InputText("##Test Image Path", pdata.evaluated_test_image_path, IM_ARRAYSIZE(pdata.evaluated_test_image_path), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 
 						if (ImGui::Button("Create \u2192", ImVec2(-FLT_MIN, 0.0f))) {
-							int result = ARVT::call_comment_test_image(pdata.the_file_input_name, idata);
+							int result = ARVT::call_comment_test_image(pdata.the_file_input_name, pdata, idata);
 							if (result) {
 								//TODO: better messages
 								global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Image", strerror(result));
@@ -664,7 +664,7 @@ int main(int, char**)
 						}
 
 						if (ImGui::Button("Split!", ImVec2(-FLT_MIN, 0.0f))) {
-							int result = ARVT::call_comment_splitter(pdata.the_file_input_name);
+							int result = ARVT::call_comment_splitter(pdata.the_file_input_name, pdata);
 							if (result) {
 								//TODO: better messages
 								global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Splitter", strerror(result));
@@ -1017,6 +1017,10 @@ int main(int, char**)
 						//other TODO: display what the commands will be (though maybe this should be in the main section?)
 
 						ImGui::SeparatorText("Misc");
+
+						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.5f);
+						ImGui::Combo("Python Command", &pdata.pythonCmdArray_current, pdata.pythonCmdArray.data(), pdata.pythonCmdArray.size());
+						ImGui::PopItemWidth();
 
 						#if 1
 						ImGui::Checkbox("Demo Window", &show_demo_window);

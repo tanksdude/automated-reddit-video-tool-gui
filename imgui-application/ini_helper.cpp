@@ -67,6 +67,11 @@ void CreateDefaultIniIfNeeded(const std::string& path) {
 	"UseExtraCodecs = false\n"
 	"InitialOpenTab = 0\n"
 	"\n"
+	"; Windows:\n"
+	";CmdPython = python\n"
+	"; Linux:\n"
+	";CmdPython = python3\n"
+	"\n"
 
 	"[IMAGE]\n"
 	"\n"
@@ -686,6 +691,18 @@ void Fill_ProgramData(ProgramData& pdata, const mINI::INIStructure& ini_object) 
 			}
 			catch (const std::exception&) {
 				std::cerr << ("Unable to parse [APPLICATION].InitialOpenTab: \"" + get + "\"") << std::endl;
+			}
+		}
+	}
+
+	if (ini_object.get("APPLICATION").has("CmdPython")) {
+		std::string get = ini_object.get("APPLICATION").get("CmdPython");
+		if (!get.empty()) {
+			size_t index = std::distance(pdata.pythonCmdArray.begin(), std::find(pdata.pythonCmdArray.begin(), pdata.pythonCmdArray.end(), get));
+			if (index != pdata.pythonCmdArray.size()) {
+				pdata.pythonCmdArray_current = index;
+			} else {
+				std::cerr << ("Unknown value for [APPLICATION].CmdPython: \"" + get + "\"") << std::endl;
 			}
 		}
 	}
