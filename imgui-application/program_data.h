@@ -10,6 +10,10 @@ struct ProgramData {
 	#else
 	static const std::array<const char*, 3> pythonCmdArray;
 	int pythonCmdArray_current = 1;
+	static const std::array<const char*, 7> fileExplorerCmdArray;
+	static const std::array<const char*, 7> fileExplorerCmdArray_iniValues;
+	static const std::array<const char*, 7> fileExplorerCmdArray_exe;
+	int fileExplorerCmdArray_current = 1;
 	#endif
 	inline std::string get_pythonCmd() const { return std::string(pythonCmdArray[pythonCmdArray_current]); }
 

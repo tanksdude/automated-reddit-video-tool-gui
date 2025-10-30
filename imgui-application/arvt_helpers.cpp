@@ -169,12 +169,8 @@ int copy_file(const char* path, const char* newPath) {
 }
 
 //note: this also checks for existence using <filesystem>
-int revealFileExplorer(const char* path) {
-	//note: this vvv call can throw
-	if (!std::filesystem::exists(path)) {
-		return 1;
-		//TODO: don't have to check for existence?
-	}
+int revealFileExplorer(const char* path, const ProgramData& pdata) {
+	//TODO: this can throw
 	if (!std::filesystem::is_regular_file(path)) {
 		return 1;
 	}
@@ -185,13 +181,21 @@ int revealFileExplorer(const char* path) {
 	std::string command = "explorer /select, \"" + windows_stupid_backslash_requirement + "\"";
 	//TODO: HACK: prepend powershell to avoid replacing slashes
 	return system_helper(command.c_str(), true);
+	(void)pdata;
 	#else
-	// Current temporary solution: open on the folder; not great but it's better than nothing
-	std::string temp_path = std::string(path);
-	size_t pos = temp_path.find_last_of("/");
-	temp_path = temp_path.substr(0, pos);
-	return system_helper(("xdg-open " + temp_path).c_str(), true);
-	//TODO: better solution
+	const std::string fileExplorerCmd = std::string(ProgramData::fileExplorerCmdArray_exe[pdata.fileExplorerCmdArray_current]);
+	if (pdata.fileExplorerCmdArray_current == 0) {
+		//TODO: xdg-mime query default inode/directory
+		return system_helper((fileExplorerCmd + " \"" + path + "\"").c_str(), true);
+	} else if (pdata.fileExplorerCmdArray_current == 1) {
+		// Open on the folder
+		std::string temp_path = std::string(path);
+		size_t pos = temp_path.find_last_of("/");
+		temp_path = temp_path.substr(0, pos);
+		return system_helper((fileExplorerCmd + " \"" + temp_path + "\"").c_str(), true);
+	} else {
+		return system_helper((fileExplorerCmd + " \"" + path + "\"").c_str(), true);
+	}
 	#endif
 }
 

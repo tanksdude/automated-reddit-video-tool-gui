@@ -3,8 +3,13 @@
 
 #ifdef _WIN32
 const std::array<const char*, 3> ProgramData::pythonCmdArray = { "python", "python3", "py -3" };
+//explorer.exe is enough
 #else
 const std::array<const char*, 3> ProgramData::pythonCmdArray = { "python", "python3", "py" }; //"py" is only used by people who explicitly made a symlink/alias
+//"auto" queries the system, xdg-open opens on the folder (feels like a hack), then the rest are the default file managers: GNOME, KDE Plasma, Cinnamon, Xfce, MATE
+const std::array<const char*, 7> ProgramData::fileExplorerCmdArray           = { "auto (NOT SUPPORTED)", "xdg-open (folder only)", "Nautilus / GNOME Files", "Dolphin",          "Nemo", "Thunar", "Caja" };
+const std::array<const char*, 7> ProgramData::fileExplorerCmdArray_iniValues = { "auto",                 "xdg-open",               "Nautilus",               "Dolphin",          "Nemo", "Thunar", "Caja" };
+const std::array<const char*, 7> ProgramData::fileExplorerCmdArray_exe       = { "echo",                 "xdg-open",               "nautilus",               "dolphin --select", "nemo", "thunar", "caja --select" };
 #endif
 
 const std::array<const char*, 6> ProgramData::fileDeleteAgeList = { "0 seconds", "1 hour", "24 hours", "2 weeks", "1 month", "6 months" };

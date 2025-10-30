@@ -71,6 +71,7 @@ void CreateDefaultIniIfNeeded(const std::string& path) {
 	";CmdPython = python\n"
 	"; Linux:\n"
 	";CmdPython = python3\n"
+	";CmdFileManager = Nautilus\n"
 	"\n"
 
 	"[IMAGE]\n"
@@ -706,6 +707,22 @@ void Fill_ProgramData(ProgramData& pdata, const mINI::INIStructure& ini_object) 
 			}
 		}
 	}
+
+	#ifdef _WIN32
+	//explorer.exe is enough
+	#else
+	if (ini_object.get("APPLICATION").has("CmdFileManager")) {
+		std::string get = ini_object.get("APPLICATION").get("CmdFileManager");
+		if (!get.empty()) {
+			size_t index = std::distance(pdata.fileExplorerCmdArray_iniValues.begin(), std::find(pdata.fileExplorerCmdArray_iniValues.begin(), pdata.fileExplorerCmdArray_iniValues.end(), get));
+			if (index != pdata.fileExplorerCmdArray_iniValues.size()) {
+				pdata.fileExplorerCmdArray_current = index;
+			} else {
+				std::cerr << ("Unknown value for [APPLICATION].CmdFileManager: \"" + get + "\"") << std::endl;
+			}
+		}
+	}
+	#endif
 }
 
 void CopySettingsToIni(mINI::INIStructure& ini_object, const ImageData& idata, const AudioData& adata, const VideoData& vdata) {

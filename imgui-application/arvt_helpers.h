@@ -32,10 +32,10 @@ void copyEvaluatedFileName_toVideoSettingsPath(const char* name, char* dest, siz
 
 //returns 0 if no errors; does not have to completely fill the buffer
 //1: some error; 2: does not exist or is not a file; 3: reading error
-int copyFileToCStr(const char* path, char* dest, int buf_size); //TODO: maybe make separate versions for each textbox
+int copyFileToCStr(const char* path, char* dest, int buf_size);
 
 int copy_file(const char* path, const char* newPath);
-int revealFileExplorer(const char* path); //note: this also checks for existence using <filesystem> //TODO: should make a separate version for each path (going further, should that mean everything this program can do is a function exposed here?)
+int revealFileExplorer(const char* path, const ProgramData& pdata); //note: this also checks for existence using <filesystem>
 
 int getListOfOldFiles(const char* dir, int hourCount, std::vector<std::string>& deleteFileList);
 int deleteAllOldFiles(const std::vector<std::string>& fileList); //no undo!
