@@ -247,6 +247,20 @@ int main(int, char**)
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
 
+	// Load an icon for fun
+	{
+		const char* favicon_path = "../favicon.png";
+		GLFWimage images[1];
+		auto ret = stbi_load(favicon_path, &images[0].width, &images[0].height, NULL, 4);
+		if (ret == NULL) {
+			std::cerr << "Could not load \"" << favicon_path << "\": " << stbi_failure_reason() << std::endl;
+		} else {
+			images[0].pixels = ret;
+			glfwSetWindowIcon(window, 1, images);
+			stbi_image_free(images[0].pixels);
+		}
+	}
+
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
