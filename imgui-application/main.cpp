@@ -178,15 +178,12 @@ void thread_func_speech(const ProgramData* pdata, const ImageData* idata, const 
 	}
 }
 
-
-static void glfw_error_callback(int error, const char* description)
-{
-    fprintf(stderr, "GLFW Error %d: %s\n", error, description);
+static void glfw_error_callback(int error, const char* description) {
+	fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
 // Main code
-int main(int, char**)
-{
+int main(int, char**) {
 	ARVT::CreateDefaultIniIfNeeded("../arvt.ini");
 	mINI::INIFile ini_file("../arvt.ini");
 	mINI::INIStructure ini_object;
@@ -204,6 +201,8 @@ int main(int, char**)
 	}
 
 	ARVT::CreateApplicationFoldersIfNeeded();
+
+	/* start ImGui code */
 
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
@@ -238,28 +237,14 @@ int main(int, char**)
     //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
 
-    // Create window with graphics context
 	glfwWindowHint(GLFW_SCALE_TO_MONITOR, pdata.application_scale_to_monitor ? GLFW_TRUE : GLFW_FALSE);
+    // Create window with graphics context
     float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()); // Valid on GLFW 3.3+ only
     GLFWwindow* window = glfwCreateWindow(pdata.initial_windowWidth, pdata.initial_windowHeight, "Automated Reddit Video Tool GUI v0.5.0", nullptr, nullptr);
     if (window == nullptr)
         return 1;
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
-
-	// Load an icon for fun
-	{
-		const char* favicon_path = "../favicon.png";
-		GLFWimage images[1];
-		auto ret = stbi_load(favicon_path, &images[0].width, &images[0].height, NULL, 4);
-		if (ret == NULL) {
-			std::cerr << "Could not load \"" << favicon_path << "\": " << stbi_failure_reason() << std::endl;
-		} else {
-			images[0].pixels = ret;
-			glfwSetWindowIcon(window, 1, images);
-			stbi_image_free(images[0].pixels);
-		}
-	}
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -297,14 +282,31 @@ int main(int, char**)
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf");
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf");
 
-    // Our state
-    bool show_demo_window = false;
+	/* end ImGui code */
+
+	// Load an icon for fun
+	{
+		const char* favicon_path = "../favicon.png";
+		GLFWimage images[1];
+		auto ret = stbi_load(favicon_path, &images[0].width, &images[0].height, NULL, 4);
+		if (ret == NULL) {
+			std::cerr << "Could not load \"" << favicon_path << "\": " << stbi_failure_reason() << std::endl;
+			global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Icon", stbi_failure_reason());
+		} else {
+			images[0].pixels = ret;
+			glfwSetWindowIcon(window, 1, images);
+			stbi_image_free(images[0].pixels);
+		}
+	}
+
+	bool show_demo_window = false;
 	bool set_startup_tab = true;
+	bool filenameIsLocked = false;
+	bool ret;
 
 	int createdTestImage_width = 0;
 	int createdTestImage_height = 0;
 	GLuint createdTestImage_texture = 0;
-	bool ret;
 
 	int lock_icon_width = 0;
 	int lock_icon_height = 0;
@@ -318,13 +320,11 @@ int main(int, char**)
 	ret = ImGuiHelpers::LoadTextureFromFile("../res/unlocked_1f513.png", &unlock_icon_texture, &unlock_icon_width, &unlock_icon_height);
 	IM_ASSERT(ret);
 
-	bool filenameIsLocked = false;
-
 	GLuint recommended_awful, recommended_okay, recommended_good, recommended_best, recommended_noopinion;
 	ret = ImGuiHelpers::LoadTextureFromFile("../res/cross-mark_274c.png", &recommended_awful, NULL, NULL);
-	ret = ImGuiHelpers::LoadTextureFromFile("../res/warning_26a0-fe0f.png", &recommended_okay,  NULL, NULL);
-	ret = ImGuiHelpers::LoadTextureFromFile("../res/heavy-check-mark_2714.png", &recommended_good,  NULL, NULL);
-	ret = ImGuiHelpers::LoadTextureFromFile("../res/gem-stone_1f48e.png", &recommended_best,  NULL, NULL);
+	ret = ImGuiHelpers::LoadTextureFromFile("../res/warning_26a0-fe0f.png", &recommended_okay, NULL, NULL); //TODO: it really shouldn't be a warning sign...
+	ret = ImGuiHelpers::LoadTextureFromFile("../res/heavy-check-mark_2714.png", &recommended_good, NULL, NULL);
+	ret = ImGuiHelpers::LoadTextureFromFile("../res/gem-stone_1f48e.png", &recommended_best, NULL, NULL);
 	ret = ImGuiHelpers::LoadTextureFromFile("../res/white-question-mark-ornament_2754.png", &recommended_noopinion, NULL, NULL);
 	//wow, this is a bad emoji: ❎
 
@@ -346,9 +346,8 @@ int main(int, char**)
 
 	global_log.AddLog("[%06.2fs] [info] %s\n", ImGui::GetTime(), "Startup");
 
-    // Main loop
-    while (!glfwWindowShouldClose(window))
-    {
+	// Main loop
+	while (!glfwWindowShouldClose(window)) {
 		// Font handling
 		if (needToChangeFonts) [[unlikely]] {
 			if (newFontToSwitchTo == nullptr) {
@@ -360,6 +359,8 @@ int main(int, char**)
 			}
 			needToChangeFonts = false;
 		}
+
+		/* start ImGui code */
 
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -378,8 +379,9 @@ int main(int, char**)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+		/* end ImGui code */
 
-		// main window
+		// Main window:
 		{
 			const bool THREAD_IS_WORKING = thread_func_speech_working.load();
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
@@ -1202,6 +1204,8 @@ int main(int, char**)
 		if (show_demo_window)
 			ImGui::ShowDemoWindow(&show_demo_window);
 
+		/* start ImGui code */
+
         // Rendering
         ImGui::Render();
         int display_w, display_h;
@@ -1221,6 +1225,8 @@ int main(int, char**)
 
     glfwDestroyWindow(window);
     glfwTerminate();
+
+	/* end ImGui code */
 
     return 0;
 }

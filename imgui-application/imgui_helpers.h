@@ -8,6 +8,17 @@
 
 namespace ImGuiHelpers {
 
+inline float getMultilineInputHeight(float height) {
+	if (height <= 0) {
+		height = ImGui::GetTextLineHeight() * 8.0f;
+		//default height found in imgui_widgets.cpp:
+		//const ImVec2 frame_size = CalcItemSize(size_arg, CalcItemWidth(), (is_multiline ? g.FontSize * 8.0f : label_size.y) + style.FramePadding.y * 2.0f); // Arbitrary default of 8 lines high for multi-line
+	}
+	return height + 2 * ImGui::GetStyle().ItemSpacing.y;
+}
+
+/* Everything below this is from ImGui (sometimes with minor edits) */
+
 // Helper to display a little (?) mark which shows a tooltip when hovered.
 // In your own code you may want to display an actual icon if you are using a merged icon fonts (see docs/FONTS.md)
 void HelpMarker(const char* desc)
@@ -20,15 +31,6 @@ void HelpMarker(const char* desc)
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
     }
-}
-
-inline float getMultilineInputHeight(float height) {
-	if (height <= 0) {
-		height = ImGui::GetTextLineHeight() * 8.0f;
-		//default height found in imgui_widgets.cpp:
-		//const ImVec2 frame_size = CalcItemSize(size_arg, CalcItemWidth(), (is_multiline ? g.FontSize * 8.0f : label_size.y) + style.FramePadding.y * 2.0f); // Arbitrary default of 8 lines high for multi-line
-	}
-	return height + 2 * ImGui::GetStyle().ItemSpacing.y;
 }
 
 // Simple helper function to load an image into a OpenGL texture with common settings
