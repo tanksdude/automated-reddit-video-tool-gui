@@ -336,10 +336,6 @@ int main(int, char**) {
 		{ CodecRecommendedLevel::No_Opinion, recommended_noopinion },
 	};
 
-	GLuint return_symbol_texture, circle_arrows_texture;
-	ret = ImGuiHelpers::LoadTextureFromFile("../res/leftwards-arrow-with-hook_21a9.png", &return_symbol_texture, NULL, NULL);
-	ret = ImGuiHelpers::LoadTextureFromFile("../res/counterclockwise-arrows-button_1f504.png", &circle_arrows_texture, NULL, NULL);
-
 	refreshApplicationFontSize();
 	refreshApplicationFontName(true);
 	style.Colors[ImGuiCol_WindowBg] = pdata.window_color; //TODO: have the color selector be for pdata.window_color, so the style is updated every frame
