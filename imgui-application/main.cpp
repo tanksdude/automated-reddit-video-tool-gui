@@ -416,16 +416,13 @@ int main(int, char**)
 						ImGui::Text("File Name:"); //TODO: this isn't horizontally or vertically centered
 						ImGui::SameLine();
 						ImGui::InputText("##Main Input Comment", pdata.the_file_input_name, IM_ARRAYSIZE(pdata.the_file_input_name), ImGuiInputTextFlags_CallbackCharFilter, filenameCleaningFunc_inputFile);
-						ImGui::SameLine();
 						if (filenameIsLocked) { ImGui::EndDisabled(); }
+						ImGui::SameLine();
 
 						if (ImGui::ImageButton("##Lock Icon", filenameIsLocked ? lock_icon_texture : unlock_icon_texture, ImageButtonSize)) {
 							clear_input_data(filenameIsLocked, createdTestImage_texture, createdTestImage_width, createdTestImage_height);
 							filenameIsLocked = !filenameIsLocked;
 						}
-						const float lock_icon_frame_height = 32.0f + ImGui::GetStyle().FramePadding.y;
-						//HACK: apparently there's ImGui::GetStyle().FramePadding.y*2.0f extra size on image buttons, but that seems like 2px off
-						//regardless, it's irrelevant because this column isn't the largest
 
 						ARVT::copyEvaluatedFileName_toCommentSplitterPath(pdata.the_file_input_name, pdata.evaluated_input_file_name, IM_ARRAYSIZE(pdata.evaluated_input_file_name));
 						ImGui::InputText("##Input Comment Path", pdata.evaluated_input_file_name, IM_ARRAYSIZE(pdata.evaluated_input_file_name), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
@@ -457,6 +454,18 @@ int main(int, char**)
 						if (pdata.input_comment_word_wrap) {
 							ImGui::PopTextWrapPos();
 						}
+
+						if (adata.voiceArray_current < 0) {
+							const char* text1 = "You haven't set a voice yet!";
+							const char* text2 = "Go to the Configure tab.";
+							const float text1_size = ImGui::CalcTextSize(text1).x; //adding 2*style.FramePadding.x looks wrong
+							const float text2_size = ImGui::CalcTextSize(text2).x;
+							ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - text1_size)/2);
+							ImGui::TextColored(ImVec4(1, 0, 0, 1), text1);
+							ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - text2_size)/2);
+							ImGui::TextColored(ImVec4(1, 0, 0, 1), text2);
+						}
+						const float no_voice_height = (adata.voiceArray_current < 0) ? 2 * ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemSpacing.y : 0.0f;
 
 						ImGui::TableNextColumn();
 
@@ -624,11 +633,6 @@ int main(int, char**)
 							ImGui::EndDisabled();
 						}
 
-						if (adata.voiceArray_current < 0) {
-							ImGui::TextColored(ImVec4(1, 0, 0, 1), "You haven't set a voice yet!\nGo to the Configure tab.");
-						}
-						const float no_voice_height = (adata.voiceArray_current < 0) ? 2 * ImGui::GetTextLineHeight() : 0.0f; //no ItemSpacing.y
-
 						ImGui::TableNextColumn();
 
 						/* NOTE: ImGui currently doesn't have a way to calculate
@@ -643,9 +647,9 @@ int main(int, char**)
 						//sizing: https://github.com/ocornut/imgui/issues/3714
 
 						float columnHeights[3];
-						columnHeights[0] = lock_icon_frame_height + ImGui::GetFrameHeightWithSpacing() + ImGuiHelpers::getMultilineInputHeight(ImGui::GetTextLineHeight() * 16);
+						columnHeights[0] = 2 * ImGui::GetFrameHeightWithSpacing() + ImGuiHelpers::getMultilineInputHeight(ImGui::GetTextLineHeight() * 16) + no_voice_height;
 						columnHeights[1] = 7 * ImGui::GetFrameHeightWithSpacing() + 2 * ImGuiHelpers::getMultilineInputHeight(0);
-						columnHeights[2] = (5 + test_image_font_item_count + 4 + 4) * ImGui::GetFrameHeightWithSpacing() + no_voice_height;
+						columnHeights[2] = (5 + test_image_font_item_count + 4 + 4) * ImGui::GetFrameHeightWithSpacing();
 
 						const float largestColumn = *std::max_element(columnHeights, columnHeights + IM_ARRAYSIZE(columnHeights));
 						const float contentAvailableY = ImGui::GetContentRegionAvail().y + 2*ImGui::GetStyle().ItemSpacing.y;
