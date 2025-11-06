@@ -176,13 +176,18 @@ int revealFileExplorer(const char* path, const ProgramData& pdata) {
 	}
 
 	#ifdef _WIN32
+
+	//TODO: HACK: prepend powershell to avoid replacing slashes
 	std::string windows_stupid_backslash_requirement = std::string(path);
 	std::replace(windows_stupid_backslash_requirement.begin(), windows_stupid_backslash_requirement.end(), '/', '\\');
 	std::string command = "explorer /select, \"" + windows_stupid_backslash_requirement + "\"";
-	//TODO: HACK: prepend powershell to avoid replacing slashes
-	return system_helper(command.c_str(), true);
+	//explorer.exe will always return 1: https://github.com/microsoft/WSL/issues/6565
+	system_helper(command.c_str(), true);
+	return 0;
 	(void)pdata;
+
 	#else
+
 	const std::string fileExplorerCmd = std::string(ProgramData::fileExplorerCmdArray_exe[pdata.fileExplorerCmdArray_current]);
 	if (pdata.fileExplorerCmdArray_current == 0) {
 		//TODO: xdg-mime query default inode/directory
@@ -196,6 +201,7 @@ int revealFileExplorer(const char* path, const ProgramData& pdata) {
 	} else {
 		return system_helper((fileExplorerCmd + " \"" + path + "\"").c_str(), true);
 	}
+
 	#endif
 }
 

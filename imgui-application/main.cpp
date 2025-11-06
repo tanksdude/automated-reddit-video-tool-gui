@@ -491,8 +491,7 @@ int main(int, char**) {
 						if (ImGui::Button("Reveal in File Explorer##Input Split 1")) {
 							int result = ARVT::revealFileExplorer(pdata.evaluated_input_split_1, pdata);
 							if (result) {
-								//strcpy(pdata.input_split_1_data, "error"); //TODO: red text
-								//global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
+								global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
 							}
 						}
 						ImGui::SameLine();
@@ -534,8 +533,7 @@ int main(int, char**) {
 						if (ImGui::Button("Reveal in File Explorer##Input Split 2")) {
 							int result = ARVT::revealFileExplorer(pdata.evaluated_input_split_2, pdata);
 							if (result) {
-								//strcpy(pdata.input_split_2_data, "error"); //TODO: red text
-								//global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
+								global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", "Could not reveal file");
 							}
 						}
 
@@ -749,8 +747,7 @@ int main(int, char**) {
 							if (ImGui::Button("Reveal in File Explorer##Video Settings", ImVec2(write_settings_width, 0.0f))) {
 								int result = ARVT::revealFileExplorer(pdata.evaluated_video_settings_path, pdata);
 								if (result) {
-									//strcpy(, "error"); //TODO: red text
-									//global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
+									global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
 								}
 							}
 
@@ -811,8 +808,7 @@ int main(int, char**) {
 							//yes it's *kinda* a hack to open on just the first video, but it's better than iterating through every file in the folder and checking what's available
 							int result = ARVT::revealFileExplorer(ARVT::inputFileName_toCommentToSpeechPath_getFileExplorerName(pdata.the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current], vdata.audio_only_option_input).c_str(), pdata);
 							if (result) {
-								//strcpy(, "error"); //TODO: red text
-								//global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
+								global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
 							}
 						}
 
