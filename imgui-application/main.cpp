@@ -842,6 +842,14 @@ int main(int, char**) {
 							adata.update_voiceArray();
 						}
 
+						ImGui::Indent();
+						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.2f);
+						ImGui::InputText("Voice Language", adata.speech_language_input, IM_ARRAYSIZE(adata.speech_language_input), ImGuiInputTextFlags_CallbackCharFilter, filenameCleaningFunc);
+						ImGui::SameLine();
+						ImGuiHelpers::HelpMarker("Not all speech engines support filtering by language.\nCan leave this blank.");
+						ImGui::PopItemWidth();
+						ImGui::Unindent();
+
 						ImGui::Combo("Voice", &adata.voiceArray_current, adata.voiceArray, adata.voiceArray_length);
 						//TODO: some kind of visual indicator when one isn't selected
 						ImGui::SameLine();

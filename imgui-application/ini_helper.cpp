@@ -98,6 +98,7 @@ void CreateDefaultIniIfNeeded(const std::string& path) {
 
 	"[AUDIO]\n"
 	"\n"
+	";SpeechLanguage = en\n"
 	"SpeechEngine =\n"
 	"VoiceName =\n"
 	"\n"
@@ -285,6 +286,12 @@ void Fill_ImageData(ImageData& idata, const mINI::INIStructure& ini_object) {
 void Fill_AudioData(AudioData& adata, const mINI::INIStructure& ini_object, bool useExtraCodecs) {
 	if (!ini_object.has("AUDIO")) {
 		return;
+	}
+
+	if (ini_object.get("AUDIO").has("SpeechLanguage")) {
+		std::string get = ini_object.get("AUDIO").get("SpeechLanguage");
+		//setting it to empty is valid
+		copyUserStringToCharBuffer(adata.speech_language_input, sizeof(adata.speech_language_input)/sizeof(*adata.speech_language_input), get.c_str(), get.size());
 	}
 
 	if (ini_object.get("AUDIO").has("SpeechEngine")) {
@@ -745,8 +752,9 @@ void CopySettingsToIni(mINI::INIStructure& ini_object, const ImageData& idata, c
 
 	ini_object["IMAGE"]["ImageFormat"] = idata.get_imageFormat();
 
-	ini_object["AUDIO"]["SpeechEngine"] = adata.get_speechEngine();
-	ini_object["AUDIO"]["VoiceName"]   = adata.get_voiceName();
+	ini_object["AUDIO"]["SpeechLanguage"] = std::string(adata.speech_language_input);
+	ini_object["AUDIO"]["SpeechEngine"]   = adata.get_speechEngine();
+	ini_object["AUDIO"]["VoiceName"]      = adata.get_voiceName();
 
 	ini_object["AUDIO"]["AudioEncoder"] = adata.get_audioEncoder()->internalName;
 	ini_object["AUDIO"]["AudioPreset"]  = adata.get_audioPreset1_currentValue();

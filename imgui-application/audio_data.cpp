@@ -7,10 +7,8 @@
 
 #ifdef _WIN32
 const std::array<const char*, 3> AudioData::speechEngineArray = { "Balabolka", "eSpeak", "eSpeak NG" };
-const std::array<const char*, 3> AudioData::speechEngineArray_exeForUpdatingVoiceList = { "\"balcon\" -l", "\"espeak\" --voices=en", "\"espeak-ng\" --voices=en" }; //note: internal use only
 #else
 const std::array<const char*, 5> AudioData::speechEngineArray = { "eSpeak", "eSpeak NG", "say (TODO)", "spd-say (TODO)", "Festival (TODO)" }; //TODO: https://askubuntu.com/questions/501910/how-to-text-to-speech-output-using-command-line/501917#501917
-const std::array<const char*, 5> AudioData::speechEngineArray_exeForUpdatingVoiceList = { "espeak --voices", "espeak-ng --voices", "", "", "" }; //note: internal use only
 #endif
 
 const std::array<const AudioCodecData*, 13> AudioData::audioEncoderArrayExtended = {
@@ -29,6 +27,34 @@ const std::array<const AudioCodecData*, 13> AudioData::audioEncoderArrayExtended
 	&CODEC_AUDIO_WMA2,
 	&CODEC_AUDIO_MP2,
 };
+
+std::string AudioData::getExeForUpdatingVoiceList() {
+	std::string lang = std::string(speech_language_input);
+
+	switch (speechEngineArray_current) {
+	#ifdef _WIN32
+		case 0: //Balabolka
+			return "balcon -l";
+
+		case 1: //eSpeak
+			return    "espeak --voices=" + lang;
+		case 2: //eSpeak NG
+			return "espeak-ng --voices=" + lang;
+
+		default:
+			return "";
+
+	#else
+		case 0: //eSpeak
+			return    "espeak --voices=" + lang;
+		case 1: //eSpeak NG
+			return "espeak-ng --voices=" + lang;
+
+		default:
+			return "";
+	#endif
+	}
+}
 
 void AudioData::getVoiceListFromExe_Balabolka(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList) {
 	// Balabolka lists the voices under "SAPI" with a space, so it's a voice if it's indented
@@ -96,7 +122,7 @@ void AudioData::getVoiceListFromExe_Espeak(std::vector<std::string>& file_lines,
 
 void AudioData::update_voiceArray() {
 	// Step 1: poll available voices
-	int result = ARVT::system_helper((std::string(speechEngineArray_exeForUpdatingVoiceList[speechEngineArray_current]) + " > temp.txt").c_str(), false);
+	int result = ARVT::system_helper((getExeForUpdatingVoiceList() + " > temp.txt").c_str(), false);
 
 	//temp.txt will be created even if the executable doesn't exist (on most systems)
 	//most systems return an error code if piping to a file fails

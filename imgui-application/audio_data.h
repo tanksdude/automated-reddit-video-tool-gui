@@ -3,18 +3,19 @@
 #include <vector>
 #include <unordered_map>
 #include <array>
+#include <cstring> //strcpy
 #include "av_codecs.h"
 
 struct AudioData {
 #ifdef _WIN32
 	static const std::array<const char*, 3> speechEngineArray;
-	static const std::array<const char*, 3> speechEngineArray_exeForUpdatingVoiceList; //note: internal use only
 	int speechEngineArray_current = 0;
 #else
 	static const std::array<const char*, 5> speechEngineArray;
-	static const std::array<const char*, 5> speechEngineArray_exeForUpdatingVoiceList; //note: internal use only
 	int speechEngineArray_current = 1;
 #endif
+	char speech_language_input[32];
+	std::string getExeForUpdatingVoiceList();
 
 	char** voiceArray = nullptr;
 	int voiceArray_current = -1;
@@ -81,6 +82,7 @@ struct AudioData {
 		audioEncoder_idx = 1;
 		audioEncoder_preset1_idx = 0;
 		update_audioEncoderValues();
+		strcpy(speech_language_input, "en");
 	}
 	~AudioData() {
 		voiceArray_free();
