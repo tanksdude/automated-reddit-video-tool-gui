@@ -46,7 +46,7 @@ Currently only Windows x64 with MSVC 2022 is officially supported.
 1. Enable the MSVC environment variables in your command prompt: `"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"`
 1. `cd imgui-application`
 1. `build_win64.bat`
-1. Executable: `"Debug/automated-reddit-video-tool-gui.exe"` (don't `cd`)
+1. Executable: `"Debug/arvt.exe"` (don't `cd`)
 
 [Pre-compiled executables](https://github.com/tanksdude/automated-reddit-video-tool-gui/releases) are provided for Windows.
 
@@ -60,7 +60,7 @@ Seems to work on all distributions and desktop environments. Only regularly test
 	* Arch/Manjaro: `sudo pacman -S gcc make glfw pkg-config`
 1. `cd imgui-application`
 1. `make -j$(nproc)`
-1. Executable: `./automated-reddit-video-tool-gui`
+1. Executable: `./arvt-gui`
 
 ### Linux ImageMagick woes
 
