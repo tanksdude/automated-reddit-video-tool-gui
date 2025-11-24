@@ -57,7 +57,7 @@ void CreateDefaultIniIfNeeded(const std::string& path) {
 	";ApplicationFontSize = 22\n"
 	"\n"
 	"ApplicationWindowWidth = 1600\n"
-	"ApplicationWindowHeight = 900\n"
+	"ApplicationWindowHeight = 1000\n"
 	"ApplicationScaleWithMonitorScale = true\n"
 	"\n"
 	"; Accepts hex codes and RGB floats:\n"

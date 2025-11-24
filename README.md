@@ -62,8 +62,6 @@ Seems to work on all distributions and desktop environments. Only regularly test
 1. `make -j$(nproc)`
 1. Executable: `./automated-reddit-video-tool-gui`
 
-Some distros/DEs pass on the monitor's scaling very weirdly. For instance, Fedora KDE Plasma usually needs a font size of 24 for comfortable reading at 100% scale, but at 125% it becomes ~12. At 150% it's ~10. I don't understand this scaling; is it being applying twice? 24/1.5^2 is around 12... Keep this in mind if your text is far larger than it should be. (Also LibreOffice seems to suffer from the same problem so I don't think I'm doing something wrong.) Fedora KDE Plasma on X11 does not suffer from this scaling issue (requires `plasma-workspace-x11` package).
-
 ### Linux ImageMagick woes
 
 I have spent many hours trying to get ImageMagick to work. If you want something that "just works", you should [compile from source](https://imagemagick.org/script/install-source.php#linux), as you won't have to worry about all sorts of stupid permission issues. If you want to use your distro's package manager, this is the best I could come up with:
