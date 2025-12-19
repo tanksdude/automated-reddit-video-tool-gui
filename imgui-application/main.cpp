@@ -127,14 +127,31 @@ auto video_replacement_scrubbingFunc = [] (ImGuiInputTextCallbackData* data) {
 	return 1;
 };
 
-//called when the lock button is clicked
-void clear_input_data(bool lockNewState, GLuint& createdTestImage_texture, int& createdTestImage_width, int& createdTestImage_height) {
+// Note: this only holds the data that can get changed by other functions,
+// does not actually hold all state data needed for this program
+struct GlobalStateStruct {
+	// Preview data, for coloring text red on errors:
+	bool input_comment_data_is_bad = false;
+	bool input_split_1_data_is_bad = false;
+	bool input_split_2_data_is_bad = false;
+
+	// The test image:
+	int createdTestImage_width = 0;
+	int createdTestImage_height = 0;
+	GLuint createdTestImage_texture = 0;
+};
+
+// Called when the lock button is clicked
+void clear_input_data(bool lockNewState, GlobalStateStruct& global_state) {
 	if (lockNewState) {
 		//now locked
 		strcpy(pdata.input_comment_data, "");
 		strcpy(pdata.input_split_1_data, "");
 		strcpy(pdata.input_split_2_data, "");
-		createdTestImage_texture = createdTestImage_width = createdTestImage_height = 0;
+		global_state.input_comment_data_is_bad = false;
+		global_state.input_split_1_data_is_bad = false;
+		global_state.input_split_2_data_is_bad = false;
+		global_state.createdTestImage_texture = global_state.createdTestImage_width = global_state.createdTestImage_height = 0;
 	} else {
 		//now unlocked
 		//nothing
@@ -299,14 +316,12 @@ int main(int, char**) {
 		}
 	}
 
+	GlobalStateStruct global_state;
+
 	bool show_demo_window = false;
 	bool set_startup_tab = true;
 	bool filenameIsLocked = false;
 	bool ret;
-
-	int createdTestImage_width = 0;
-	int createdTestImage_height = 0;
-	GLuint createdTestImage_texture = 0;
 
 	int lock_icon_width = 0;
 	int lock_icon_height = 0;
@@ -418,7 +433,7 @@ int main(int, char**) {
 						ImGui::SameLine();
 
 						if (ImGui::ImageButton("##Lock Icon", filenameIsLocked ? lock_icon_texture : unlock_icon_texture, ImageButtonSize)) {
-							clear_input_data(filenameIsLocked, createdTestImage_texture, createdTestImage_width, createdTestImage_height);
+							clear_input_data(filenameIsLocked, global_state);
 							filenameIsLocked = !filenameIsLocked;
 						}
 
@@ -429,8 +444,11 @@ int main(int, char**) {
 						if (ImGui::Button("Preview File##Input Comment")) { //TODO: add?: https://github.com/mlabbe/nativefiledialog
 							int result = ARVT::copyFileToCStr(pdata.evaluated_input_file_name, pdata.input_comment_data, IM_ARRAYSIZE(pdata.input_comment_data));
 							if (result) {
-								strcpy(pdata.input_comment_data, "error"); //TODO: red text
+								strcpy(pdata.input_comment_data, "error");
+								global_state.input_comment_data_is_bad = true;
 								global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Preview", strerror(result));
+							} else {
+								global_state.input_comment_data_is_bad = false;
 							}
 						}
 						if (ImGui::BeginItemTooltip()) {
@@ -445,13 +463,21 @@ int main(int, char**) {
 						//TODO: doesn't seem like word wrap affects TextMultiline so remove this option
 						*/
 
+						/*
 						if (pdata.input_comment_word_wrap) {
-							ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + ImGui::GetContentRegionAvail().x - 400.f);
+							ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + ImGui::GetContentRegionAvail().x);
 						}
+						*/
+
+						if (global_state.input_comment_data_is_bad) { ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.0f, 0.0f, 1.0f }); }
 						ImGui::InputTextMultiline("##input comment", pdata.input_comment_data, IM_ARRAYSIZE(pdata.input_comment_data), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
+						if (global_state.input_comment_data_is_bad) { ImGui::PopStyleColor(); }
+
+						/*
 						if (pdata.input_comment_word_wrap) {
 							ImGui::PopTextWrapPos();
 						}
+						*/
 
 						if (adata.voiceArray_current < 0) {
 							const char* text1 = "You haven't set a voice yet!";
@@ -481,13 +507,18 @@ int main(int, char**) {
 						if (ImGui::Button("Preview File##Input Split 1")) {
 							int result = ARVT::copyFileToCStr(pdata.evaluated_input_split_1, pdata.input_split_1_data, IM_ARRAYSIZE(pdata.input_split_1_data));
 							if (result) {
-								strcpy(pdata.input_split_1_data, "error"); //TODO: red text
+								strcpy(pdata.input_split_1_data, "error");
+								global_state.input_split_1_data_is_bad = true;
 								global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Preview", strerror(result));
+							} else {
+								global_state.input_split_1_data_is_bad = false;
 							}
 						}
 
+						if (global_state.input_split_1_data_is_bad) { ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.0f, 0.0f, 1.0f }); }
 						ImGui::InputTextMultiline("##Input Split 1 Data", pdata.input_split_1_data, IM_ARRAYSIZE(pdata.input_split_1_data), ImVec2(-FLT_MIN, 0), ImGuiInputTextFlags_ReadOnly);
-						//TODO: there should be a third box for ImageMagick text, which basically just replaces "&" with "&amp;" and other stuff
+						if (global_state.input_split_1_data_is_bad) { ImGui::PopStyleColor(); }
+						//TODO: checkbox for ImageMagick text replace (&, <, >) in Python; not exactly sure if it should go here
 						if (ImGui::Button("Reveal in File Explorer##Input Split 1")) {
 							int result = ARVT::revealFileExplorer(pdata.evaluated_input_split_1, pdata);
 							if (result) {
@@ -498,14 +529,18 @@ int main(int, char**) {
 						if (ImGui::Button("\u2193 Make Copy \u2193")) {
 							int result = ARVT::copy_file(pdata.evaluated_input_split_1, pdata.evaluated_input_split_2);
 							if (result) {
-								strcpy(pdata.input_split_2_data, "error copying"); //TODO: red text
+								strcpy(pdata.input_split_2_data, "error copying");
+								global_state.input_split_2_data_is_bad = true;
 								global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Copy", strerror(result));
 							} else {
 								global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Copy", ("Successfully copied to " + std::string(pdata.evaluated_input_split_2)).c_str());
 								int result = ARVT::copyFileToCStr(pdata.evaluated_input_split_2, pdata.input_split_2_data, IM_ARRAYSIZE(pdata.input_split_2_data));
 								if (result) {
-									strcpy(pdata.input_split_2_data, "error"); //TODO: red text
+									strcpy(pdata.input_split_2_data, "error");
+									global_state.input_split_2_data_is_bad = true;
 									global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Preview", strerror(result));
+								} else {
+									global_state.input_split_2_data_is_bad = false;
 								}
 							}
 						}
@@ -524,12 +559,17 @@ int main(int, char**) {
 						if (ImGui::Button("Preview File##Input Split 2")) {
 							int result = ARVT::copyFileToCStr(pdata.evaluated_input_split_2, pdata.input_split_2_data, IM_ARRAYSIZE(pdata.input_split_2_data));
 							if (result) {
-								strcpy(pdata.input_split_2_data, "error"); //TODO: red text
+								strcpy(pdata.input_split_2_data, "error");
+								global_state.input_split_2_data_is_bad = true;
 								global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Preview", strerror(result));
+							} else {
+								global_state.input_split_2_data_is_bad = false;
 							}
 						}
 
+						if (global_state.input_split_2_data_is_bad) { ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.0f, 0.0f, 1.0f }); }
 						ImGui::InputTextMultiline("##Input Split 2 Data", pdata.input_split_2_data, IM_ARRAYSIZE(pdata.input_split_2_data), ImVec2(-FLT_MIN, 0), ImGuiInputTextFlags_ReadOnly);
+						if (global_state.input_split_2_data_is_bad) { ImGui::PopStyleColor(); }
 						if (ImGui::Button("Reveal in File Explorer##Input Split 2")) {
 							int result = ARVT::revealFileExplorer(pdata.evaluated_input_split_2, pdata);
 							if (result) {
@@ -602,12 +642,13 @@ int main(int, char**) {
 							if (result) {
 								//TODO: better messages
 								global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Image", strerror(result));
-								//TODO: should this really be cleared on error?
-								createdTestImage_texture = createdTestImage_width = createdTestImage_height = 0;
+								global_state.createdTestImage_texture = global_state.createdTestImage_width = global_state.createdTestImage_height = 0;
 							} else {
 								global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Image", ("Successfully created test image " + std::string(pdata.evaluated_test_image_path)).c_str());
-								ret = ImGuiHelpers::LoadTextureFromFile(pdata.evaluated_test_image_path, &createdTestImage_texture, &createdTestImage_width, &createdTestImage_height);
-								//TODO: check if success
+								ret = ImGuiHelpers::LoadTextureFromFile(pdata.evaluated_test_image_path, &global_state.createdTestImage_texture, &global_state.createdTestImage_width, &global_state.createdTestImage_height);
+								if (!ret) {
+									global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Image", "Could not load test image");
+								}
 							}
 						}
 						lock_filename_tooltip(filenameIsLocked);
@@ -615,7 +656,6 @@ int main(int, char**) {
 						ImGui::SeparatorText("Video Settings (optional)");
 						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
 						ImGui::InputText("Video Replacement", vdata.video_replacement_numbers_input, IM_ARRAYSIZE(vdata.video_replacement_numbers_input), ImGuiInputTextFlags_CallbackCharFilter, video_replacement_scrubbingFunc);
-						//TODO: clear these when unlocking?
 						ImGui::SameLine();
 						ImGuiHelpers::HelpMarker("ex. \"1,2,3\" or \"4,6-8,15,20-30\"\n"
 						                         "\"-3\" is start to 3; \"30-\" is 30 to end");
@@ -654,17 +694,17 @@ int main(int, char**) {
 
 						if (THREAD_IS_WORKING) { ImGui::EndDisabled(); }
 
-						if ((availableWidth / createdTestImage_width) * createdTestImage_height > availableHeight) {
-							if (availableHeight > createdTestImage_height) {
-								ImGui::Image((ImTextureID)(intptr_t)createdTestImage_texture, ImVec2(createdTestImage_width, createdTestImage_height));
+						if ((availableWidth / global_state.createdTestImage_width) * global_state.createdTestImage_height > availableHeight) {
+							if (availableHeight > global_state.createdTestImage_height) {
+								ImGui::Image((ImTextureID)(intptr_t)global_state.createdTestImage_texture, ImVec2(global_state.createdTestImage_width, global_state.createdTestImage_height));
 							} else {
-								ImGui::Image((ImTextureID)(intptr_t)createdTestImage_texture, ImVec2((availableHeight / createdTestImage_height) * createdTestImage_width, availableHeight));
+								ImGui::Image((ImTextureID)(intptr_t)global_state.createdTestImage_texture, ImVec2((availableHeight / global_state.createdTestImage_height) * global_state.createdTestImage_width, availableHeight));
 							}
 						} else {
-							if (availableWidth > createdTestImage_width) {
-								ImGui::Image((ImTextureID)(intptr_t)createdTestImage_texture, ImVec2(createdTestImage_width, createdTestImage_height));
+							if (availableWidth > global_state.createdTestImage_width) {
+								ImGui::Image((ImTextureID)(intptr_t)global_state.createdTestImage_texture, ImVec2(global_state.createdTestImage_width, global_state.createdTestImage_height));
 							} else {
-								ImGui::Image((ImTextureID)(intptr_t)createdTestImage_texture, ImVec2(availableWidth, (availableWidth / createdTestImage_width) * createdTestImage_height));
+								ImGui::Image((ImTextureID)(intptr_t)global_state.createdTestImage_texture, ImVec2(availableWidth, (availableWidth / global_state.createdTestImage_width) * global_state.createdTestImage_height));
 							}
 						}
 
@@ -680,14 +720,19 @@ int main(int, char**) {
 						if (ImGui::Button("Split!", ImVec2(-FLT_MIN, 0.0f))) {
 							int result = ARVT::call_comment_splitter(pdata.the_file_input_name, pdata);
 							if (result) {
+								strcpy(pdata.input_split_1_data, "error");
+								global_state.input_split_1_data_is_bad = true;
 								//TODO: better messages
 								global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Splitter", strerror(result));
 							} else {
 								global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Splitter", ("Successfully split " + std::string(pdata.evaluated_input_file_name)).c_str());
 								int result = ARVT::copyFileToCStr(ARVT::inputFileName_toCommentTestImagePath_Text(pdata.the_file_input_name).c_str(), pdata.input_split_1_data, IM_ARRAYSIZE(pdata.input_split_1_data));
 								if (result) {
-									strcpy(pdata.input_split_1_data, "error"); //TODO: red text
+									strcpy(pdata.input_split_1_data, "error");
+									global_state.input_split_1_data_is_bad = true;
 									global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Preview", strerror(result));
+								} else {
+									global_state.input_split_1_data_is_bad = false;
 								}
 							}
 						}
