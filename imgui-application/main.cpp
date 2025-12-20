@@ -426,12 +426,18 @@ int main(int, char**) {
 						if (THREAD_IS_WORKING) { ImGui::BeginDisabled(); }
 
 						if (filenameIsLocked) { ImGui::BeginDisabled(); }
-						ImGui::Text("File Name:"); //TODO: this isn't horizontally or vertically centered
+						ImGui::SetCursorPosY(ImGui::GetCursorPosY() + style.FramePadding.y); // Because an InputText doesn't exist yet, Text will not be y-aligned with it
+						//ImGui::PushStyleVarX(ImGuiStyleVar_ItemSpacing, style.ItemSpacing.x * .5f); //unsure
+						ImGui::Text("File Name:");
 						ImGui::SameLine();
+
+						ImGui::SetCursorPosY(ImGui::GetCursorPosY() - style.FramePadding.y); // "Correct" the cursor pos back to where it "should" be
 						ImGui::InputText("##Main Input Comment", pdata.the_file_input_name, IM_ARRAYSIZE(pdata.the_file_input_name), ImGuiInputTextFlags_CallbackCharFilter, filenameCleaningFunc_inputFile);
+						//ImGui::PopStyleVar();
 						if (filenameIsLocked) { ImGui::EndDisabled(); }
 						ImGui::SameLine();
 
+						ImGui::SetCursorPosY(ImGui::GetCursorPosY() - style.FramePadding.y); // Again
 						if (ImGui::ImageButton("##Lock Icon", filenameIsLocked ? lock_icon_texture : unlock_icon_texture, ImageButtonSize)) {
 							clear_input_data(filenameIsLocked, global_state);
 							filenameIsLocked = !filenameIsLocked;
