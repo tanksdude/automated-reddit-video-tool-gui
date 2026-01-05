@@ -27,6 +27,7 @@ struct ImageData {
 
 	static const std::array<const char*, 6> imageFormatArray;
 	int imageFormatArray_current = 0;
+	//-quality exists, don't bother, it's kinda confusing
 
 	inline std::string get_image_width_input() const { return std::string(image_width_input); }
 	inline std::string get_image_height_input() const { return std::string(image_height_input); }

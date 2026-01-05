@@ -465,8 +465,8 @@ int main(int, char**) {
 						}
 
 						/*
-						ImGui::Checkbox("Word Wrap##Input Comment", &input_comment_word_wrap);
-						//TODO: doesn't seem like word wrap affects TextMultiline so remove this option
+						ImGui::Checkbox("Word Wrap##Input Comment", &pdata.input_comment_word_wrap);
+						//word wrap doesn't affect TextMultiline for some reason
 						*/
 
 						/*
@@ -495,13 +495,11 @@ int main(int, char**) {
 							ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetContentRegionAvail().x - text2_size)/2);
 							ImGui::TextColored(ImVec4(1, 0, 0, 1), text2);
 						}
-						const float no_voice_height = (adata.voiceArray_current < 0) ? 2 * ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemSpacing.y : 0.0f;
+						const float no_voice_height = (adata.voiceArray_current < 0) ? 2 * ImGui::GetTextLineHeight() + style.ItemSpacing.y : 0.0f;
 
 						ImGui::TableNextColumn();
 
-						if (!filenameIsLocked) {
-							ImGui::BeginDisabled();
-						}
+						if (!filenameIsLocked) { ImGui::BeginDisabled(); }
 
 						ImGui::SeparatorText("Image Text");
 
@@ -553,7 +551,7 @@ int main(int, char**) {
 
 						ImGui::SeparatorText("Speech Text (optional)");
 
-						ImGui::Checkbox("Use Speech Text", &vdata.use_speech_text);
+						ImGui::Checkbox("Use Speech Text", &vdata.use_speech_text); //don't clear when the lock is clicked, could be locked/unlocked many times
 
 						if (!vdata.use_speech_text) {
 							ImGui::BeginDisabled();
@@ -588,15 +586,11 @@ int main(int, char**) {
 							//pops from disabled stack
 						}
 
-						if (!filenameIsLocked) {
-							ImGui::EndDisabled();
-						}
+						if (!filenameIsLocked) { ImGui::EndDisabled(); }
 
 						ImGui::TableNextColumn();
 
-						if (!filenameIsLocked) {
-							ImGui::BeginDisabled();
-						}
+						if (!filenameIsLocked) { ImGui::BeginDisabled(); }
 
 						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
 						ImGui::SeparatorText("Image");
@@ -605,7 +599,7 @@ int main(int, char**) {
 						ImGui::InputText("Width Border",    idata.image_w_border_input, IM_ARRAYSIZE(idata.image_w_border_input), ImGuiInputTextFlags_CallbackCharFilter, integerOnlyPositiveFunc);
 						ImGui::InputText("Height Border",   idata.image_h_border_input, IM_ARRAYSIZE(idata.image_h_border_input), ImGuiInputTextFlags_CallbackCharFilter, integerOnlyPositiveFunc);
 
-						ImGui::SeparatorText("Font"); //TODO: align SeparatorText to center
+						ImGui::SeparatorText("Font");
 						ImGui::InputText("Font Size",             idata.font_size_input,           IM_ARRAYSIZE(idata.font_size_input),        ImGuiInputTextFlags_CallbackCharFilter, numberOnlyPositiveFunc);
 						ImGui::InputText("Font Color",            idata.font_color_input,          IM_ARRAYSIZE(idata.font_color_input),       ImGuiInputTextFlags_CallbackCharFilter, filenameCleaningFunc);
 						ImGui::InputText("Background Color",      idata.background_color_input,    IM_ARRAYSIZE(idata.background_color_input), ImGuiInputTextFlags_CallbackCharFilter, filenameCleaningFunc);
@@ -654,6 +648,7 @@ int main(int, char**) {
 								ret = ImGuiHelpers::LoadTextureFromFile(pdata.evaluated_test_image_path, &global_state.createdTestImage_texture, &global_state.createdTestImage_width, &global_state.createdTestImage_height);
 								if (!ret) {
 									global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Image", "Could not load test image");
+									global_state.createdTestImage_texture = global_state.createdTestImage_width = global_state.createdTestImage_height = 0;
 								}
 							}
 						}
@@ -671,9 +666,7 @@ int main(int, char**) {
 						ARVT::copyEvaluatedFileName_toCommentToSpeechPath(pdata.the_file_input_name, vdata, pdata.evaluated_output_speech_path, IM_ARRAYSIZE(pdata.evaluated_output_speech_path));
 						ImGui::InputText("##Output Videos Path", pdata.evaluated_output_speech_path, IM_ARRAYSIZE(pdata.evaluated_output_speech_path), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 
-						if (!filenameIsLocked) {
-							ImGui::EndDisabled();
-						}
+						if (!filenameIsLocked) { ImGui::EndDisabled(); }
 
 						ImGui::TableNextColumn();
 
@@ -694,7 +687,7 @@ int main(int, char**) {
 						columnHeights[2] = (5 + test_image_font_item_count + 4 + 4) * ImGui::GetFrameHeightWithSpacing();
 
 						const float largestColumn = *std::max_element(columnHeights, columnHeights + IM_ARRAYSIZE(columnHeights));
-						const float contentAvailableY = ImGui::GetContentRegionAvail().y + 2*ImGui::GetStyle().ItemSpacing.y;
+						const float contentAvailableY = ImGui::GetContentRegionAvail().y + 2*style.ItemSpacing.y;
 						const float availableHeight = std::max(0.0f, std::min(largestColumn, contentAvailableY));
 						const float availableWidth = std::max(0.0f, ImGui::GetContentRegionAvail().x);
 
@@ -719,9 +712,7 @@ int main(int, char**) {
 						ImGui::TableNextRow();
 						ImGui::TableSetColumnIndex(0);
 
-						if (!filenameIsLocked) {
-							ImGui::BeginDisabled();
-						}
+						if (!filenameIsLocked) { ImGui::BeginDisabled(); }
 
 						if (ImGui::Button("Split!", ImVec2(-FLT_MIN, 0.0f))) {
 							int result = ARVT::call_comment_splitter(pdata.the_file_input_name, pdata);
@@ -744,16 +735,12 @@ int main(int, char**) {
 						}
 						lock_filename_tooltip(filenameIsLocked);
 
-						if (!filenameIsLocked) {
-							ImGui::EndDisabled();
-						}
+						if (!filenameIsLocked) { ImGui::EndDisabled(); }
 
 						ImGui::TableNextColumn();
 						ImGui::TableNextColumn();
 
-						if (!filenameIsLocked) {
-							ImGui::BeginDisabled();
-						}
+						if (!filenameIsLocked) { ImGui::BeginDisabled(); }
 
 						const float write_settings_width = ImGui::GetContentRegionAvail().x * .75f;
 						if (ImGui::BeginPopup("Settings")) {
@@ -813,17 +800,13 @@ int main(int, char**) {
 						}
 						lock_filename_tooltip(filenameIsLocked);
 
-						if (!filenameIsLocked) {
-							ImGui::EndDisabled();
-						}
+						if (!filenameIsLocked) { ImGui::EndDisabled(); }
 
 						ImGui::TableNextColumn();
 
 						if (THREAD_IS_WORKING) { ImGui::EndDisabled(); }
 
-						if (!filenameIsLocked) {
-							ImGui::BeginDisabled();
-						}
+						if (!filenameIsLocked) { ImGui::BeginDisabled(); }
 
 						if (THREAD_IS_WORKING) {
 							ImGui::ProgressBar(-0.75f * (float)ImGui::GetTime(), ImVec2(-FLT_MIN, 0.0f), "Running...");
@@ -863,9 +846,7 @@ int main(int, char**) {
 							}
 						}
 
-						if (!filenameIsLocked) {
-							ImGui::EndDisabled();
-						}
+						if (!filenameIsLocked) { ImGui::EndDisabled(); }
 
 						ImGui::PushStyleVarY(ImGuiStyleVar_ItemSpacing, 1.0f);
 						ImGui::EndTable();
@@ -1117,11 +1098,7 @@ int main(int, char**) {
 						ImGui::SeparatorText("Query");
 
 						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
-						if (ImGui::Combo("File Delete Age", &pdata.fileDeleteAgeList_current, pdata.fileDeleteAgeList.data(), pdata.fileDeleteAgeList.size())) {
-							//TODO: not sure
-							//deleteFileList.clear();
-							//deleteFileLogger.Clear();
-						}
+						ImGui::Combo("File Delete Age", &pdata.fileDeleteAgeList_current, pdata.fileDeleteAgeList.data(), pdata.fileDeleteAgeList.size());
 						ImGui::PopItemWidth();
 
 						if (ImGui::Button("Query images")) {
@@ -1224,7 +1201,6 @@ int main(int, char**) {
 				if (ImGui::BeginTabItem("About", nullptr, tab_flags[3])) {
 					ImGui::Text("License: GNU General Public License v3.0");
 					ImGui::Text("SPDX-License-Identifier: GPL-3.0-only");
-					ImGui::Text("Requirements: TODO");
 					ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 					ImGui::TextLinkOpenURL("GitHub link", "https://github.com/tanksdude/automated-reddit-video-tool-gui");
 					ImGui::EndTabItem();

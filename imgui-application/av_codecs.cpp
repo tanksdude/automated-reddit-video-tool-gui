@@ -276,7 +276,7 @@ const VideoCodecData CODEC_VIDEO_H265 = {
 	.preset2 = PRESET_empty,
 
 	.crfInfo = { 24, 23, 34, 28,  0, 51 }, //+6 to H.264
-	.recommendation = CodecRecommendedLevel::Okay,
+	.recommendation = CodecRecommendedLevel::Good,
 	.isLossless    = false,
 	.supportsAlpha = false,
 	.information_text = "H.264's successor. Achieves smaller filesizes, though encoding takes longer. Also compression artifacts may be more noticeable."

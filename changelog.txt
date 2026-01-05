@@ -1,6 +1,6 @@
 0.5.0
 * organization: renamed the main folders to start with "arvt_" and moved the Python scripts to their own folder
-* fixed names of eSpeak voices
+* fixed eSpeak voice names
 * read/write video settings
 * preliminary error logging
 * image font option & text alignment
@@ -9,7 +9,7 @@
 0.4.1
 * option to scale the window with the monitor's scale factor
 
-0.4.0 "release"
+0.4.0 "usable release"
 * mostly complete Linux support
 * preliminary INI settings
 * added more codecs, added comments on the various codecs

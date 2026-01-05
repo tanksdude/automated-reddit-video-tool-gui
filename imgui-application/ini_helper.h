@@ -18,4 +18,7 @@ void Fill_ProgramData(ProgramData& pdata, const mINI::INIStructure& ini_object);
 
 void CopySettingsToIni(mINI::INIStructure& ini_object, const ImageData& idata, const AudioData& adata, const VideoData& vdata);
 
+//helper func:
+void copyUserStringToCharBuffer(char* dest, size_t dest_size, const char* src, size_t src_length);
+
 } // namespace ARVT

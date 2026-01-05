@@ -137,10 +137,9 @@ void CreateDefaultIniIfNeeded(const std::string& path) {
 // is a C function that does not exist in C++. (I didn't know that was a
 // thing...) Anyway, a careful memcpy accomplishes the same thing.
 // Note: "length" here is the number of characters before the null terminator.
-static void copyUserStringToCharBuffer(char* dest, size_t dest_size, const char* src, size_t src_length) {
-	if (dest_size - 1 >= src_length) {
-		memcpy(dest, src, src_length);
-		dest[src_length] = '\0';
+void copyUserStringToCharBuffer(char* dest, size_t dest_size, const char* src, size_t src_length) {
+	if (dest_size >= src_length+1) {
+		memcpy(dest, src, src_length+1);
 	} else {
 		memcpy(dest, src, dest_size - 1);
 		dest[dest_size - 1] = '\0';

@@ -4,17 +4,17 @@
 #include "imgui/imgui.h"
 
 struct ProgramData {
-	#ifdef _WIN32
+#ifdef _WIN32
 	static const std::array<const char*, 3> pythonCmdArray;
 	int pythonCmdArray_current = 0;
-	#else
+#else
 	static const std::array<const char*, 3> pythonCmdArray;
 	int pythonCmdArray_current = 1;
 	static const std::array<const char*, 7> fileExplorerCmdArray;
 	static const std::array<const char*, 7> fileExplorerCmdArray_iniValues;
 	static const std::array<const char*, 7> fileExplorerCmdArray_exe;
 	int fileExplorerCmdArray_current = 1;
-	#endif
+#endif
 	inline std::string get_pythonCmd() const { return std::string(pythonCmdArray[pythonCmdArray_current]); }
 
 	char the_file_input_name[1024];
@@ -34,7 +34,7 @@ struct ProgramData {
 	float application_font_size;
 	bool application_scale_to_monitor;
 
-	bool input_comment_word_wrap = true; //TODO
+	//bool input_comment_word_wrap = true; //TODO: word wrap doesn't affect TextMultiline for some reason
 	bool useExtraCodecs = false; //used for VideoData/AudioData
 	int startup_tab_idx = 0; //*not* clamped to valid range
 
