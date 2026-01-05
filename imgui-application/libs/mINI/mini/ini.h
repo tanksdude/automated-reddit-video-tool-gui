@@ -124,11 +124,7 @@ namespace mINI
 				}
 			}
 		}
-#ifdef _WIN32
-		const char* const endl = "\r\n";
-#else
-		const char* const endl = "\n";
-#endif
+		const char* const endl = "\n"; /* EDITED: \n on all platforms */
 	}
 
 	template<typename T>
