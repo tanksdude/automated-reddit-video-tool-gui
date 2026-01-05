@@ -3,10 +3,12 @@ import re
 import argparse
 import time
 
-# python comment_splitter.py input output
+### INITIALIZATION ###
 
 SPLIT_CHARS = "".join([".", "!", "\\?"])
 SPLIT_REGEX = "[" + SPLIT_CHARS + r"]+\S*\s+"
+
+### ARGPARSE ###
 
 parser = argparse.ArgumentParser()
 parser.add_argument("input_comment_file", help="comment to split")
@@ -16,6 +18,8 @@ args = parser.parse_args()
 
 input_file_path = args.input_comment_file
 output_file_path = args.output_comment_file
+
+### START SCRIPT ###
 
 start_time = time.time()
 
@@ -33,12 +37,12 @@ except Exception as e:
 file_text = input_file.read().rstrip()
 input_file.close()
 
-# split file text on newline (mostly to trim excess newlines)
+# Split file text on newline:
 
 file_lines = []
 
 while len(file_text) > 0:
-	re_match = re.search("[\n]+", file_text)
+	re_match = re.search("[\n]+", file_text) # files are read in "universal newline" mode, so only check \n
 	if re_match == None:
 		# not found, rest of the text gets appended
 		file_lines.append(file_text)
@@ -50,7 +54,7 @@ while len(file_text) > 0:
 		file_lines.append(file_text[0:start+1])
 		file_text = file_text[end:]
 
-# split each line on a period or whatever
+# Split each line on a period or whatever:
 
 file_sentences = []
 
@@ -69,13 +73,15 @@ for line in file_lines:
 			file_sentences[-1].append(line[0:end])
 			line = line[end:]
 
-# write each line to the output file
+# Write each line to the output file:
 
 output_file = open(output_file_path, "w", encoding="utf8")
 for line in file_sentences:
 	for sentence in line:
 		output_file.write(sentence + "\n")
 output_file.close()
+
+### FINISH ###
 
 end_time = time.time()
 print(f"Wrote {output_file_path} in {(end_time - start_time):.3f}s")

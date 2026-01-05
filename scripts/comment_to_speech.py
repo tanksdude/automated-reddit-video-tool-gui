@@ -4,7 +4,7 @@ import argparse
 import time
 import platform
 
-# python comment_to_speech.py input_text.txt [-s input_speech] output_speech/vid_$.mp4 [-n replace] [-a] VIDEO_PARAMTERS
+### INITIALIZATION ###
 
 audioProgramLookup = None
 MAGICK_CMD = None
@@ -124,8 +124,11 @@ videoExtraArgsLookup = {
 	"EVC":              [],
 }
 
-#print(sys.argv[1:]);
 
+
+### ARGPARSE ###
+
+#print(sys.argv[1:]);
 parser = argparse.ArgumentParser()
 parser.add_argument("input_text_file", help="text to show on screen")
 parser.add_argument("-s", "--input_speech_file", metavar="input_speech_file", required=False, help="text to read aloud")
@@ -159,8 +162,12 @@ parser.add_argument("videoPreset2")
 parser.add_argument("crf")
 parser.add_argument("fps")
 parser.add_argument("faststart_flag")
-#TODO: option to erase all old videos (of the same project name)? needed to "replace" one container with another
+
 args = parser.parse_args()
+
+
+
+### GLOBAL VARS ###
 
 # Image parameters:
 IMAGE_W_BORDER = int(args.image_w_border_input)
@@ -177,7 +184,7 @@ IMAGE_FONT_IS_FAMILY = int(args.font_is_family)
 IMAGE_TEXT_ALIGN_ARGS = textAlignmentArgsLookup[args.text_alignment]
 IMAGE_SKIP_LF_LINE = int(args.skip_lf_line)
 IMAGE_FORMAT = args.imageFormat
-# evaluated image parameters:
+# Evaluated image parameters:
 IMAGE_SIZE = str(IMAGE_WIDTH) + "x" + str(IMAGE_HEIGHT)
 IMAGE_SIZE_EXTENDED = str(IMAGE_WIDTH + 2*IMAGE_W_BORDER) + "x" + str(IMAGE_HEIGHT + 2*IMAGE_H_BORDER)
 
@@ -197,6 +204,7 @@ VIDEO_VID_PRESET_2 = args.videoPreset2
 VIDEO_VID_EXTRA_ARGS = videoExtraArgsLookup[VIDEO_VID_CODEC_name]
 VIDEO_VID_FASTSTART = int(args.faststart_flag) # Must be int() because bool("0") is True
 
+# File paths:
 input_image_text_file_path = args.input_text_file
 output_vid_file_path = args.output_mp4_files
 if output_vid_file_path.find('$') == -1:
@@ -204,6 +212,7 @@ if output_vid_file_path.find('$') == -1:
 input_speech_text_file_path = args.input_speech_file
 AUDIO_ONLY = args.audio_only
 
+# ImageMagick command arguments:
 text_to_image_command_args = [MAGICK_CMD, "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_FONT_COLOR, "-pointsize", IMAGE_FONT_SIZE]
 if IMAGE_FONT_IS_FAMILY:
 	text_to_image_command_args.extend(["-family", IMAGE_FONT_NAME])
@@ -211,8 +220,9 @@ else:
 	text_to_image_command_args.extend(["-font", IMAGE_FONT_NAME])
 text_to_image_command_args.extend(IMAGE_TEXT_ALIGN_ARGS)
 
+# FFmpeg command arguments:
 speech_and_image_to_vid_command_args = []
-# FFmpeg video args
+# Video
 speech_and_image_to_vid_command_args.extend(["-c:v", VIDEO_VID_CODEC_lib])
 speech_and_image_to_vid_command_args.extend(VIDEO_VID_EXTRA_ARGS)
 if VIDEO_VID_PRESET_1 != "default":
@@ -225,18 +235,22 @@ if VIDEO_VID_CODEC_name not in videoCodecIsLosslessList:
 	speech_and_image_to_vid_command_args.extend(["-crf", VIDEO_VID_CRF])
 if VIDEO_VID_FASTSTART:
 	speech_and_image_to_vid_command_args.extend(["-movflags", "+faststart"])
-# FFmpeg audio args
+# Audio
 speech_and_image_to_vid_command_args.extend(["-c:a", VIDEO_AUD_CODEC_lib])
 if VIDEO_AUD_CODEC_name not in audioCodecIsLosslessList:
 	# unnecessary check as bitrate is ignored for lossless codecs
 	speech_and_image_to_vid_command_args.extend(["-b:a", VIDEO_AUD_BITRATE])
 if VIDEO_AUD_PRESET != "default":
 	speech_and_image_to_vid_command_args.extend([audioPresetKeywordLookup[VIDEO_AUD_CODEC_name][0], VIDEO_AUD_PRESET])
-# FFmpeg other args
+# Other
 speech_and_image_to_vid_command_args.extend(["-loglevel", "error", "-y"]) # loglevels: quiet, fatal, error, warning; note that libx265 needs this set separately: none, error, warning
 
+
+
+### GLOBAL FUNCS ###
+
 def text_to_speech_func_balabolka(wav_file_name, text_file_name):
-	# make sure to do -w arg before the -f arg, because sometimes it just won't write to a wav file otherwise
+	# Make sure to do -w arg before the -f arg, because sometimes it just won't write to a wav file otherwise
 	return subprocess.run([AUDIO_PROGRAM_CMD, "-n", AUDIO_VOICE, "-enc", "utf8", "-w", wav_file_name, "-f", text_file_name])
 def text_to_speech_func_espeak(wav_file_name, text_file_name):
 	# Voice names have spaces replaced with underscores when printed to the
@@ -278,6 +292,10 @@ gen_output_wav_file_path = gen_output_wav_file_path_audio_only if AUDIO_ONLY els
 def gen_output_img_file_path(num):
 	return output_vid_file_path.replace("$", str(num)) + IMAGE_FORMAT
 
+
+
+### START SCRIPT ###
+
 start_time = time.time()
 
 try:
@@ -315,6 +333,8 @@ else:
 if len(image_text_file_lines) != len(speech_text_file_lines):
 	sys.exit("Lines in image text file and speech text file don't match")
 
+
+
 video_replacement_set = set() # {} is a dictionary
 for nums in args.video_replacement_numbers.split(","):
 	numRange = nums.split("-")
@@ -345,6 +365,8 @@ if len(video_replacement_set) == 0:
 	for i in range(1, len(image_text_file_lines)+1):
 		video_replacement_set.add(i)
 
+
+
 files_count = 0 # for the vid_$.mp4 file; the file number won't match the line number
 replaced_files_count = 0 #TODO: this is a pretty hacky solution
 #print(len([line for line in speech_text_file_lines if len(line) > 1])) #TODO: does this always get the file count?
@@ -365,7 +387,7 @@ for i in range(len(image_text_file_lines)):
 	files_count += 1
 
 	if files_count in video_replacement_set:
-		# speech file:
+		# Speech file:
 		output_file = open(gen_output_wav_file_path(files_count)+".txt", "w", encoding="utf8")
 		output_file.write(speech_line)
 		output_file.close()
@@ -377,7 +399,7 @@ for i in range(len(image_text_file_lines)):
 			sys.exit("ERROR: Could not generate the audio file for video " + str(files_count))
 
 		if not AUDIO_ONLY:
-			# image file:
+			# Image file:
 			output_file = open(gen_output_img_file_path(files_count)+".txt", "w", encoding="utf8")
 			output_file.write(curr_text_file_read)
 			output_file.close()
@@ -389,10 +411,10 @@ for i in range(len(image_text_file_lines)):
 				os.remove(gen_output_wav_file_path(files_count))
 				sys.exit("ERROR: Could not generate the image file for video " + str(files_count))
 
-			# video:
+			# Video:
 			result = speech_and_image_to_vid_func(gen_output_vid_file_path(files_count), gen_output_wav_file_path(files_count), gen_output_img_file_path(files_count))
 
-			# cleanup:
+			# Cleanup:
 			os.remove(gen_output_wav_file_path(files_count))
 			os.remove(gen_output_img_file_path(files_count))
 
@@ -400,6 +422,10 @@ for i in range(len(image_text_file_lines)):
 				sys.exit("ERROR: Could not generate the video file for video " + str(files_count))
 
 		replaced_files_count += 1
+
+
+
+### FINISH ###
 
 end_time = time.time()
 if replaced_files_count == files_count:

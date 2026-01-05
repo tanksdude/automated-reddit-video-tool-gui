@@ -4,7 +4,7 @@ import argparse
 import time
 import platform
 
-# python comment_test_image.py input_text test_images/output IMAGE_PARAMETERS
+### INITIALIZATION ###
 
 MAGICK_CMD = None
 if platform.system() == "Windows":
@@ -27,6 +27,8 @@ textAlignmentArgsLookup = {
 	# pango options: https://imagemagick.org/script/formats.php
 }
 
+### ARGPARSE ###
+
 parser = argparse.ArgumentParser()
 parser.add_argument("input_split_comment_file", help="split comment input")
 parser.add_argument("output_image_file", help="output image file")
@@ -45,12 +47,7 @@ parser.add_argument("font_is_family")
 parser.add_argument("text_alignment")
 parser.add_argument("skip_lf_line")
 
-# TODO: don't force parameter order
-
 args = parser.parse_args()
-
-input_image_text_file_path = args.input_split_comment_file
-output_img_file_path = args.output_image_file
 
 # Image parameters:
 IMAGE_W_BORDER = int(args.image_w_border_input)
@@ -66,10 +63,15 @@ IMAGE_FONT_NAME = args.font_name
 IMAGE_FONT_IS_FAMILY = int(args.font_is_family)
 IMAGE_TEXT_ALIGN_ARGS = textAlignmentArgsLookup[args.text_alignment]
 IMAGE_SKIP_LF_LINE = int(args.skip_lf_line)
-# evaluated image parameters:
+# Evaluated image parameters:
 IMAGE_SIZE = str(IMAGE_WIDTH) + "x" + str(IMAGE_HEIGHT)
 IMAGE_SIZE_EXTENDED = str(IMAGE_WIDTH + 2*IMAGE_W_BORDER) + "x" + str(IMAGE_HEIGHT + 2*IMAGE_H_BORDER)
 
+# File paths:
+input_image_text_file_path = args.input_split_comment_file
+output_img_file_path = args.output_image_file
+
+# ImageMagick command arguments:
 text_to_image_command_args = [MAGICK_CMD, "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_FONT_COLOR, "-pointsize", IMAGE_FONT_SIZE]
 if IMAGE_FONT_IS_FAMILY:
 	text_to_image_command_args.extend(["-family", IMAGE_FONT_NAME])
@@ -83,6 +85,8 @@ def text_to_image_func(img_file_name, text_file_name):
 	command_args.extend(["pango:@" + text_file_name, "-gravity", "center", "-extent", IMAGE_SIZE_EXTENDED, img_file_name])
 	return subprocess.run(command_args)
 	# https://imagemagick.org/Usage/text/#caption
+
+### START SCRIPT ###
 
 start_time = time.time()
 
@@ -100,7 +104,7 @@ except Exception as e:
 image_text_file_lines = input_image_text_file.readlines()
 input_image_text_file.close()
 
-# split the sentences into their own files, append them, then convert it to an image:
+# Split the sentences into their own files, append them, then convert it to an image:
 
 curr_file_read = IMAGE_PARAGRAPH_START
 
@@ -122,6 +126,8 @@ os.remove(output_img_file_path+".txt")
 
 if result.returncode:
 	sys.exit("ERROR: Could not generate the test image " + output_img_file_path)
+
+### FINISH ###
 
 end_time = time.time()
 print(f"Test image made in {(end_time - start_time):.3f}s")
