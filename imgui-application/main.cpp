@@ -11,6 +11,7 @@
 #include <GLFW/glfw3.h>
 #define MINI_CASE_SENSITIVE
 #include <mini/ini.h>
+#include "libs/IconFontCppHeaders/IconsFontAwesome6.h"
 
 #include "imgui_helpers.h"
 #include "arvt_helpers.h"
@@ -33,6 +34,17 @@ std::vector<std::string> deleteFileList;
 
 bool needToChangeFonts = false;
 ImFont* newFontToSwitchTo = nullptr;
+
+inline bool mergeIconFontToCurrentFont() {
+	if (std::filesystem::exists("../res/fa6-solid-900.ttf")) {
+		ImFontConfig config;
+		config.MergeMode = true;
+		ImGui::GetIO().Fonts->AddFontFromFileTTF("../res/fa6-solid-900.ttf", 0.0f, &config);
+		return true;
+	} else {
+		return false;
+	}
+}
 
 void refreshApplicationFontName(bool loadingStartupFont = false) {
 	//if the input is empty, load ImGui's default font
@@ -62,6 +74,9 @@ void refreshApplicationFontName(bool loadingStartupFont = false) {
 		return;
 	}
 	io.FontDefault = newFont;
+	if (!mergeIconFontToCurrentFont()) {
+		global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Font", "Could not add icon font");
+	}
 
 	//ideally this would be used but it doesn't change the font for some reason:
 	//ImGui::PushFont(newFont, newSize);
@@ -293,6 +308,7 @@ int main(int, char**) {
     // - Our Emscripten build process allows embedding fonts to be accessible at runtime from the "fonts/" folder. See Makefile.emscripten for details.
     //style.FontSizeBase = 20.0f;
     io.Fonts->AddFontDefault();
+	mergeIconFontToCurrentFont();
     //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf");
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf");
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf");
@@ -530,7 +546,7 @@ int main(int, char**) {
 							}
 						}
 						ImGui::SameLine();
-						if (ImGui::Button("\u2193 Make Copy \u2193")) {
+						if (ImGui::Button(ICON_FA_ARROW_DOWN " Make Copy " ICON_FA_ARROW_DOWN)) {
 							int result = ARVT::copy_file(pdata.evaluated_input_split_1, pdata.evaluated_input_split_2);
 							if (result) {
 								strcpy(pdata.input_split_2_data, "error copying");
@@ -637,7 +653,7 @@ int main(int, char**) {
 						ARVT::copyEvaluatedFileName_toCommentTestImagePath_TestImage(pdata.the_file_input_name, idata, pdata.evaluated_test_image_path, IM_ARRAYSIZE(pdata.evaluated_test_image_path));
 						ImGui::InputText("##Test Image Path", pdata.evaluated_test_image_path, IM_ARRAYSIZE(pdata.evaluated_test_image_path), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 
-						if (ImGui::Button("Create \u2192", ImVec2(-FLT_MIN, 0.0f))) {
+						if (ImGui::Button("Create " ICON_FA_ARROW_RIGHT, ImVec2(-FLT_MIN, 0.0f))) {
 							int result = ARVT::call_comment_test_image(pdata.the_file_input_name, pdata, idata);
 							if (result) {
 								//TODO: better messages
