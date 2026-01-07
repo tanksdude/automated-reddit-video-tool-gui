@@ -122,6 +122,7 @@ GNU General Public License v3.0
 * [GLFW](https://www.glfw.org/): zlib
 * [stb_image](https://github.com/nothings/stb): MIT or The Unlicense
 * [mINI](https://github.com/metayeti/mINI): MIT
+* [Noto Sans](https://notofonts.github.io/): [SIL OFL 1.1](https://openfontlicense.org/open-font-license-official-text/)
 * [Font Awesome 6](https://fontawesome.com/): [SIL OFL 1.1](https://openfontlicense.org/open-font-license-official-text/)
 * [IconFontCppHeaders](https://github.com/juliettef/IconFontCppHeaders): zlib
 

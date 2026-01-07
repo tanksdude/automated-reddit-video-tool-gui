@@ -33,12 +33,6 @@ ProgramData::ProgramData() {
 	// accessed; they are always written to (using the_file_input_name)
 	// before being used or sent to ImGui.
 
-	#ifdef _WIN32
-	strcpy(application_font_path, "C:\\Windows\\Fonts\\segoeui.ttf");
+	strcpy(application_font_path, "../res/NotoSans-Regular.otf");
 	application_font_size = 24.0f;
-	#else
-	//just assume Ubuntu
-	strcpy(application_font_path, "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc");
-	application_font_size = 24.0f;
-	#endif
 }
