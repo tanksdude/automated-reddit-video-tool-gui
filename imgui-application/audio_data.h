@@ -11,10 +11,10 @@ struct AudioData {
 	/*   SPEECH   */
 
 #ifdef _WIN32
-	static const std::array<const char*, 3> speechEngineArray;
+	static const std::array<const char*, 4> speechEngineArray;
 	int speechEngineArray_current = 0;
 #else
-	static const std::array<const char*, 5> speechEngineArray;
+	static const std::array<const char*, 2> speechEngineArray;
 	int speechEngineArray_current = 1;
 #endif
 	char speech_language_input[32];
@@ -33,6 +33,7 @@ struct AudioData {
 
 	static void getVoiceListFromExe_Balabolka(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList);
 	static void getVoiceListFromExe_Espeak(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList);
+	static void getVoiceListFromExe_Wsay(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList);
 
 	// [Internal] Called during update_voiceArray():
 	inline void voiceArray_free() {

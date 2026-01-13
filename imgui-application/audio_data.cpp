@@ -6,9 +6,9 @@
 #include <algorithm> //std::clamp, std::replace
 
 #ifdef _WIN32
-const std::array<const char*, 3> AudioData::speechEngineArray = { "Balabolka", "eSpeak", "eSpeak NG" };
+const std::array<const char*, 4> AudioData::speechEngineArray = { "Balabolka", "eSpeak", "eSpeak NG", "wsay [EXPERIMENTAL]" };
 #else
-const std::array<const char*, 5> AudioData::speechEngineArray = { "eSpeak", "eSpeak NG", "say (TODO)", "spd-say (TODO)", "Festival (TODO)" }; //TODO: https://askubuntu.com/questions/501910/how-to-text-to-speech-output-using-command-line/501917#501917
+const std::array<const char*, 2> AudioData::speechEngineArray = { "eSpeak", "eSpeak NG" };
 #endif
 
 const std::array<const AudioCodecData*, 13> AudioData::audioEncoderArrayExtended = {
@@ -40,6 +40,9 @@ std::string AudioData::getExeForUpdatingVoiceList() {
 			return    "espeak --voices=" + lang;
 		case 2: //eSpeak NG
 			return "espeak-ng --voices=" + lang;
+
+		case 3: //wsay
+			return "wsay -l";
 
 		default:
 			return "";
@@ -120,6 +123,34 @@ void AudioData::getVoiceListFromExe_Espeak(std::vector<std::string>& file_lines,
 	}
 }
 
+void AudioData::getVoiceListFromExe_Wsay(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList) {
+	// Selecting the voice uses the number but displaying should have the name...
+	// so it's not going to be displayed nicely but oh well
+	// One voice per line (with some empty lines), so this is really easy...
+	// except the dumped file was UTF-16...
+
+	//TODO: make this not incredibly hacky
+	//might require std::codecvt from <locale>, might require reading the input file using a separate function
+
+	bool firstLine = true;
+	for (std::string& l : file_lines) {
+		if (l.size() <= 3) [[unlikely]] {
+			continue;
+		}
+
+		int start = firstLine ? 1 : 0;
+		firstLine = false;
+
+		for (int i = start; i < l.size(); i++) {
+			l.erase(l.begin() + i);
+		}
+
+		if (!l.empty()) [[likely]] {
+			voiceList.push_back(l);
+		}
+	}
+}
+
 void AudioData::update_voiceArray() {
 	// Step 1: poll available voices
 	int result = ARVT::system_helper((getExeForUpdatingVoiceList() + " > temp.txt").c_str(), false);
@@ -161,8 +192,11 @@ void AudioData::update_voiceArray() {
 			getVoiceListFromExe_Espeak(file_lines, voiceList);
 			break;
 
+		case 3: //wsay
+			getVoiceListFromExe_Wsay(file_lines, voiceList);
+			break;
+
 	#else
-		//TODO
 		case 0: //eSpeak
 			[[fallthrough]];
 		case 1: //eSpeak NG

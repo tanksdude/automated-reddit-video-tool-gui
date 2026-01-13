@@ -36,7 +36,9 @@ Note that these programs must be accessible from a plain command line, meaning t
 
 * Python 3.8+
 * ImageMagick (Ubuntu: see below for issues)
-* Windows: Balabolka or eSpeak | Linux: eSpeak
+* a text-to-speech program
+	* Windows: Balabolka, eSpeak, [wsay](https://github.com/p-groarke/wsay)
+	* Linux: eSpeak
 * FFmpeg 4.4+ (corresponds to Ubuntu 22.04 (Jammy Jellyfish) or higher), older versions likely work but are not officially supported
 
 ### Compiling from source (Windows)

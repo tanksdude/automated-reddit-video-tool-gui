@@ -13,6 +13,7 @@ if platform.system() == "Windows":
 		"Balabolka": "balcon",
 		"eSpeak":    "espeak",
 		"eSpeak NG": "espeak-ng",
+		"wsay [EXPERIMENTAL]": "wsay",
 	}
 	MAGICK_CMD = "magick"
 elif platform.system() == "Darwin":
@@ -256,11 +257,15 @@ def text_to_speech_func_espeak(wav_file_name, text_file_name):
 	# Voice names have spaces replaced with underscores when printed to the
 	# console, but that's fixed before being sent to this script.
 	return subprocess.run([AUDIO_PROGRAM_CMD, "-v", AUDIO_VOICE, "-w", wav_file_name, "-f", text_file_name])
+def text_to_speech_func_wsay(wav_file_name, text_file_name):
+	# This receives the full voice name but only the number is used
+	return subprocess.run([AUDIO_PROGRAM_CMD, "-v", AUDIO_VOICE.split(' ')[0], "-o", wav_file_name, "-i", text_file_name])
 
 ttsFunctionLookup = {
 	"Balabolka": text_to_speech_func_balabolka,
 	"eSpeak":    text_to_speech_func_espeak,
 	"eSpeak NG": text_to_speech_func_espeak,
+	"wsay [EXPERIMENTAL]": text_to_speech_func_wsay,
 }
 
 text_to_speech_func = ttsFunctionLookup[args.speechEngine]
