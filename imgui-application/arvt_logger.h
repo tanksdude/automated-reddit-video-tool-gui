@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "imgui/imgui.h"
+#include <imgui.h>
 
 //see IMGUI_DEMO_MARKER("Examples/Log") for the base code
 struct ARVT_Logger {

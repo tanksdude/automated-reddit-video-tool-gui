@@ -1,7 +1,7 @@
 CXX = g++
 
 EXE = arvt-gui
-IMGUI_DIR = imgui
+IMGUI_DIR = libs/imgui
 SOURCES = av_codecs.cpp arvt_helpers.cpp ini_helper.cpp image_data.cpp audio_data.cpp video_data.cpp program_data.cpp main.cpp
 SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
 SOURCES += $(IMGUI_DIR)/imgui_impl_glfw.cpp $(IMGUI_DIR)/imgui_impl_opengl3.cpp
@@ -12,7 +12,7 @@ LINUX_GL_LIBS = -lGL
 CXXFLAGS = -std=c++20 -I$(IMGUI_DIR)
 CXXFLAGS += -g -Wall -Wformat
 # NOTE: If you are building this for your own use, you should change the above line to "-O2"
-CXXFLAGS += -Ilibs/mINI -Ilibs/stb
+CXXFLAGS += -Ilibs/imgui -Ilibs/mINI -Ilibs/stb
 LIBS =
 
 ##---------------------------------------------------------------------

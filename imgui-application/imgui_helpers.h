@@ -1,5 +1,5 @@
 #pragma once
-#include "imgui/imgui.h"
+#include <imgui.h>
 
 #define _CRT_SECURE_NO_WARNINGS
 #define STB_IMAGE_IMPLEMENTATION

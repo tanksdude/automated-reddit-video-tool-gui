@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <array>
-#include "imgui/imgui.h"
+#include <imgui.h>
 
 struct ProgramData {
 #ifdef _WIN32

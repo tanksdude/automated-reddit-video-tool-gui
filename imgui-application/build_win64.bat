@@ -3,10 +3,10 @@ setlocal
 @REM Build for Visual Studio compiler. Run your copy of vcvars32.bat or vcvarsall.bat to setup command-line compiler.
 @set OUT_DIR=Debug
 @set OUT_EXE=arvt-gui
-@set INCLUDES=/I.\libs\glfw\include /I.\libs\mINI /I.\libs\stb
-@set SOURCES=av_codecs.cpp arvt_helpers.cpp ini_helper.cpp image_data.cpp audio_data.cpp video_data.cpp program_data.cpp main.cpp imgui\imgui*.cpp
+@set INCLUDES=/I.\libs\glfw\include /I.\libs\imgui /I.\libs\mINI /I.\libs\stb
+@set SOURCES=av_codecs.cpp arvt_helpers.cpp ini_helper.cpp image_data.cpp audio_data.cpp video_data.cpp program_data.cpp main.cpp libs\imgui\imgui*.cpp
 @REM main.cpp must be last, so the classes can initialize their static members
-@set LIBS=/LIBPATH:libs\glfw\lib-vc2022-64 glfw3.lib opengl32.lib gdi32.lib shell32.lib
+@set LIBS=libs\glfw\lib-vc2022-64\glfw3.lib opengl32.lib gdi32.lib shell32.lib
 @REM NOTE: if building with IMGUI_DISABLE_WIN32_FUNCTIONS, then add to the line above: user32.lib
 
 Taskkill /IM %OUT_EXE%.exe /F
