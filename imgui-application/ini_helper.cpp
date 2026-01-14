@@ -321,7 +321,7 @@ void Fill_AudioData(AudioData& adata, const mINI::INIStructure& ini_object, bool
 		std::string get = ini_object.get("AUDIO").get("AudioBitrateKbps");
 		if (!get.empty()) {
 			try {
-				int16_t val = std::stoi(get);
+				uint16_t val = std::stoull(get);
 				adata.set_audioBitrate(val);
 			}
 			catch (const std::exception&) {
@@ -386,7 +386,7 @@ void Fill_VideoData(VideoData& vdata, const mINI::INIStructure& ini_object, bool
 		std::string get = ini_object.get("VIDEO").get("VideoCRF");
 		if (!get.empty()) {
 			try {
-				int8_t val = std::stoi(get);
+				uint8_t val = std::stoull(get);
 				vdata.set_videoCrf(val);
 			}
 			catch (const std::exception&) {

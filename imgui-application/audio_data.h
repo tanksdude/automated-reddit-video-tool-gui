@@ -74,13 +74,13 @@ struct AudioData {
 		return ac_p1.displayValues.empty() ? "default" : ac_p1.internalValues[audioEncoder_preset1_idx];
 	}
 
-	int16_t audio_bitrate_v;
-	int16_t audio_bitrate_min;
-	int16_t audio_bitrate_max;
-	int16_t audio_bitrate_step = 4; //TODO: unused because ImGui sliders don't support stepping
+	uint16_t audio_bitrate_v;
+	uint16_t audio_bitrate_min;
+	uint16_t audio_bitrate_max;
+	uint16_t audio_bitrate_step = 4; //TODO: unused because ImGui sliders don't support stepping
 
 	inline std::string get_audioBitrate() const { return std::to_string(audio_bitrate_v) + "k"; }
-	void set_audioBitrate(int16_t val); // Used by the INI file, not really needed otherwise
+	void set_audioBitrate(uint16_t val); // Used by the INI file, not really needed otherwise
 	void update_audioEncoderValues(); // [Internal] Called when changing the audio encoder
 
 	// Make sure to call update_voiceArray() to finish initialization! (Assuming you want a voice list populated.)

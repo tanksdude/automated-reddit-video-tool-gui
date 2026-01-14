@@ -20,12 +20,12 @@ struct GenericCodecPreset {
 struct AudioCodecData {
 	struct BitrateData {
 		// Bitrate in kbps
-		int16_t starting_value;
-		int16_t min_value; //"sane" min
-		int16_t max_value; //"sane" max
-		int16_t codec_default_value; //unused
-		int16_t codec_min_value;     //used when clamping inputs
-		int16_t codec_max_value;     //used when clamping inputs
+		uint16_t starting_value;
+		uint16_t min_value; //"sane" min
+		uint16_t max_value; //"sane" max
+		uint16_t codec_default_value; //unused
+		uint16_t codec_min_value;     //used when clamping inputs
+		uint16_t codec_max_value;     //used when clamping inputs
 	};
 
 	const char* displayName;
@@ -42,12 +42,13 @@ struct AudioCodecData {
 
 struct VideoCodecData {
 	struct CrfData {
-		int8_t starting_value;
-		int8_t min_value; //"sane" min
-		int8_t max_value; //"sane" max
-		int8_t codec_default_value; //unused
-		int8_t codec_min_value;     //used when clamping inputs
-		int8_t codec_max_value;     //used when clamping inputs
+		// A value of -1 is technically allowed, but until something actually uses it this will stay unsigned
+		uint8_t starting_value;
+		uint8_t min_value; //"sane" min
+		uint8_t max_value; //"sane" max
+		uint8_t codec_default_value; //unused
+		uint8_t codec_min_value;     //used when clamping inputs
+		uint8_t codec_max_value;     //used when clamping inputs
 	};
 
 	const char* displayName;

@@ -29,7 +29,7 @@ void VideoData::update_videoEncoderValues() {
 	video_crf_max = data.max_value;
 }
 
-void VideoData::set_videoCrf(int8_t val) {
+void VideoData::set_videoCrf(uint8_t val) {
 	const VideoCodecData::CrfData& data = get_videoEncoder()->crfInfo;
 	video_crf_v = std::clamp(val, data.codec_min_value, data.codec_max_value);
 }

@@ -939,7 +939,7 @@ int main(int, char**) {
 
 						if (!ac->isLossless) {
 							//ImGui doesn't support steps for sliders, oh well
-							ImGui::SliderScalar("Bitrate (kbps)", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max);
+							ImGui::SliderScalar("Bitrate (kbps)", ImGuiDataType_U16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max);
 						}
 
 						ImGui::Unindent();
@@ -1007,7 +1007,7 @@ int main(int, char**) {
 						}
 
 						if (!vc->isLossless) {
-							ImGui::SliderScalar("CRF", ImGuiDataType_S8, &vdata.video_crf_v, &vdata.video_crf_min, &vdata.video_crf_max);
+							ImGui::SliderScalar("CRF", ImGuiDataType_U8, &vdata.video_crf_v, &vdata.video_crf_min, &vdata.video_crf_max);
 							//ImGui::SameLine();
 							//ImGuiHelpers::HelpMarker("CTRL+Click to input a value.");
 						}

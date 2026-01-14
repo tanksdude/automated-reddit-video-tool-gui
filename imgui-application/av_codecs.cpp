@@ -362,7 +362,7 @@ const VideoCodecData CODEC_VIDEO_ProRes = {
 	.preset1 = PRESET_empty,
 	.preset2 = PRESET_empty,
 
-	.crfInfo = {  0,  0,  0, -1, -1, -1 },
+	.crfInfo = {  0,  0,  0, UINT8_MAX, UINT8_MAX, UINT8_MAX },
 	.recommendation = CodecRecommendedLevel::Okay,
 	.isLossless    = true, // not lossless, but doesn't support CRF mode
 	.supportsAlpha = true,
@@ -390,7 +390,7 @@ const VideoCodecData CODEC_VIDEO_CineForm = {
 	.preset1 = PRESET_VIDEO_CineForm_quality,
 	.preset2 = PRESET_empty,
 
-	.crfInfo = {  0,  0,  0, -1, -1, -1 }, //intended to use -q instead of CRF
+	.crfInfo = {  0,  0,  0, UINT8_MAX, UINT8_MAX, UINT8_MAX }, //intended to use -q instead of CRF
 	.recommendation = CodecRecommendedLevel::Good,
 	.isLossless    = true, // not lossless, but doesn't support CRF mode (though it is designed as constant quality / variable bitrate)
 	.supportsAlpha = true,
@@ -419,7 +419,7 @@ const VideoCodecData CODEC_VIDEO_VVC = {
 	.preset1 = PRESET_VIDEO_VVC_preset,
 	.preset2 = PRESET_empty,
 
-	.crfInfo = { 27, 26, 37, -1, -1, -1 }, //+3 to H.265
+	.crfInfo = { 27, 26, 37, UINT8_MAX, UINT8_MAX, UINT8_MAX }, //+3 to H.265
 	.recommendation = CodecRecommendedLevel::Awful,
 	.isLossless    = true, // not lossless, but doesn't support CRF mode, might in the future
 	.supportsAlpha = false,

@@ -232,7 +232,7 @@ void AudioData::update_audioEncoderValues() {
 	//audio_bitrate_step = 4; //TODO: unused because ImGui sliders don't support stepping
 }
 
-void AudioData::set_audioBitrate(int16_t val) {
+void AudioData::set_audioBitrate(uint16_t val) {
 	const AudioCodecData::BitrateData& data = get_audioEncoder()->bitrateInfo;
 	audio_bitrate_v = std::clamp(val, data.codec_min_value, data.codec_max_value);
 }

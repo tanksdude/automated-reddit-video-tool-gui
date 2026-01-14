@@ -60,16 +60,16 @@ struct VideoData {
 	char fps_numerator_input[32];
 	char fps_denominator_input[32];
 
-	int8_t video_crf_v;
-	int8_t video_crf_min;
-	int8_t video_crf_max;
+	uint8_t video_crf_v;
+	uint8_t video_crf_min;
+	uint8_t video_crf_max;
 
 	inline std::string get_video_replacement_numbers_input() const { return std::string(video_replacement_numbers_input); }
 	inline std::string get_videoContainer() const { return std::string(videoContainerArray[videoContainerArray_current]); }
 	inline std::string get_fps() const { return fractionalFps ? std::string(fps_numerator_input) + "/" + std::string(fps_denominator_input) : std::string(fpsArray[fpsArray_current]); }
 	inline std::string get_videoCrf() const { return std::to_string(video_crf_v); }
 
-	void set_videoCrf(int8_t val); // Used by the INI file, not really needed otherwise
+	void set_videoCrf(uint8_t val); // Used by the INI file, not really needed otherwise
 	void update_videoEncoderValues(); // [Internal] Called when changing the video encoder
 
 	VideoData() {
