@@ -57,13 +57,13 @@ void refreshApplicationFontName(bool loadingStartupFont = false) {
 				break;
 			}
 		}
-		global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Font", "Successfully loaded ProggyClean.ttf");
+		global_log.AddLog("[info]", "Font", "Successfully loaded ProggyClean.ttf");
 		return;
 	}
 
 	//TODO: should probably use ImFontFlags_NoLoadError instead, but this is good enough
 	if (!std::filesystem::exists(pdata.application_font_path)) {
-		global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Font", "Font does not exist");
+		global_log.AddLog("[error]", "Font", "Font does not exist");
 		return;
 	}
 
@@ -75,14 +75,14 @@ void refreshApplicationFontName(bool loadingStartupFont = false) {
 	}
 	io.FontDefault = newFont;
 	if (!mergeIconFontToCurrentFont()) {
-		global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Font", "Could not add icon font");
+		global_log.AddLog("[error]", "Font", "Could not add icon font");
 	}
 
 	//ideally this would be used but it doesn't change the font for some reason:
 	//ImGui::PushFont(newFont, newSize);
 
 	if (!loadingStartupFont) {
-		global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Font", ("Successfully added font " + std::string(pdata.application_font_path)).c_str());
+		global_log.AddLog("[info]", "Font", ("Successfully added font " + std::string(pdata.application_font_path)).c_str());
 	}
 
 	//TODO: should re-scale for the monitor's scale factor again
@@ -204,9 +204,9 @@ void thread_func_speech(const ProgramData* pdata, const ImageData* idata, const 
 
 	if (result) {
 		//TODO(v1.0): better messages
-		global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Video", strerror(result));
+		global_log.AddLog("[error]", "Video", strerror(result));
 	} else {
-		global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Video", ("Successfully created videos " + std::string((*pdata).evaluated_output_speech_path)).c_str());
+		global_log.AddLog("[info]", "Video", ("Successfully created videos " + std::string((*pdata).evaluated_output_speech_path)).c_str());
 	}
 }
 
@@ -324,7 +324,7 @@ int main(int, char**) {
 		auto ret = stbi_load(favicon_path, &images[0].width, &images[0].height, NULL, 4);
 		if (ret == NULL) {
 			std::cerr << "Could not load \"" << favicon_path << "\": " << stbi_failure_reason() << std::endl;
-			global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Icon", stbi_failure_reason());
+			global_log.AddLog("[error]", "Icon", stbi_failure_reason());
 		} else {
 			images[0].pixels = ret;
 			glfwSetWindowIcon(window, 1, images);
@@ -371,7 +371,7 @@ int main(int, char**) {
 	refreshApplicationFontName(true);
 	style.Colors[ImGuiCol_WindowBg] = pdata.window_color; //TODO: have the color selector be for pdata.window_color, so the style is updated every frame
 
-	global_log.AddLog("[%06.2fs] [info] %s\n", ImGui::GetTime(), "Startup");
+	global_log.AddLog("[info]", "Startup");
 
 	// Main loop
 	while (!glfwWindowShouldClose(window)) {
@@ -381,7 +381,7 @@ int main(int, char**) {
 				refreshApplicationFontName();
 			} else {
 				io.FontDefault = newFontToSwitchTo;
-				global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Font", ("Successfully switched to font " + std::string(newFontToSwitchTo->GetDebugName())).c_str());
+				global_log.AddLog("[info]", "Font", ("Successfully switched to font " + std::string(newFontToSwitchTo->GetDebugName())).c_str());
 				newFontToSwitchTo = nullptr;
 			}
 			needToChangeFonts = false;
@@ -468,7 +468,7 @@ int main(int, char**) {
 							if (result) {
 								strcpy(pdata.input_comment_data, "error");
 								global_state.input_comment_data_is_bad = true;
-								global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Preview", strerror(result));
+								global_log.AddLog("[warn]", "File Preview", strerror(result));
 							} else {
 								global_state.input_comment_data_is_bad = false;
 							}
@@ -529,7 +529,7 @@ int main(int, char**) {
 							if (result) {
 								strcpy(pdata.input_split_1_data, "error");
 								global_state.input_split_1_data_is_bad = true;
-								global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Preview", strerror(result));
+								global_log.AddLog("[warn]", "File Preview", strerror(result));
 							} else {
 								global_state.input_split_1_data_is_bad = false;
 							}
@@ -542,7 +542,7 @@ int main(int, char**) {
 						if (ImGui::Button("Reveal in File Explorer##Input Split 1")) {
 							int result = ARVT::revealFileExplorer(pdata.evaluated_input_split_1, pdata);
 							if (result) {
-								global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
+								global_log.AddLog("[warn]", "File Explorer", strerror(result));
 							}
 						}
 						ImGui::SameLine();
@@ -551,14 +551,14 @@ int main(int, char**) {
 							if (result) {
 								strcpy(pdata.input_split_2_data, "error copying");
 								global_state.input_split_2_data_is_bad = true;
-								global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Copy", strerror(result));
+								global_log.AddLog("[error]", "Copy", strerror(result));
 							} else {
-								global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Copy", ("Successfully copied to " + std::string(pdata.evaluated_input_split_2)).c_str());
+								global_log.AddLog("[info]", "Copy", ("Successfully copied to " + std::string(pdata.evaluated_input_split_2)).c_str());
 								int result = ARVT::copyFileToCStr(pdata.evaluated_input_split_2, pdata.input_split_2_data, IM_ARRAYSIZE(pdata.input_split_2_data));
 								if (result) {
 									strcpy(pdata.input_split_2_data, "error");
 									global_state.input_split_2_data_is_bad = true;
-									global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Preview", strerror(result));
+									global_log.AddLog("[warn]", "File Preview", strerror(result));
 								} else {
 									global_state.input_split_2_data_is_bad = false;
 								}
@@ -581,7 +581,7 @@ int main(int, char**) {
 							if (result) {
 								strcpy(pdata.input_split_2_data, "error");
 								global_state.input_split_2_data_is_bad = true;
-								global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Preview", strerror(result));
+								global_log.AddLog("[warn]", "File Preview", strerror(result));
 							} else {
 								global_state.input_split_2_data_is_bad = false;
 							}
@@ -593,7 +593,7 @@ int main(int, char**) {
 						if (ImGui::Button("Reveal in File Explorer##Input Split 2")) {
 							int result = ARVT::revealFileExplorer(pdata.evaluated_input_split_2, pdata);
 							if (result) {
-								global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", "Could not reveal file");
+								global_log.AddLog("[warn]", "File Explorer", "Could not reveal file");
 							}
 						}
 
@@ -657,13 +657,13 @@ int main(int, char**) {
 							int result = ARVT::call_comment_test_image(pdata.the_file_input_name, pdata, idata);
 							if (result) {
 								//TODO: better messages
-								global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Image", strerror(result));
+								global_log.AddLog("[error]", "Image", strerror(result));
 								global_state.createdTestImage_texture = global_state.createdTestImage_width = global_state.createdTestImage_height = 0;
 							} else {
-								global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Image", ("Successfully created test image " + std::string(pdata.evaluated_test_image_path)).c_str());
+								global_log.AddLog("[info]", "Image", ("Successfully created test image " + std::string(pdata.evaluated_test_image_path)).c_str());
 								ret = ImGuiHelpers::LoadTextureFromFile(pdata.evaluated_test_image_path, &global_state.createdTestImage_texture, &global_state.createdTestImage_width, &global_state.createdTestImage_height);
 								if (!ret) {
-									global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Image", "Could not load test image");
+									global_log.AddLog("[error]", "Image", "Could not load test image");
 									global_state.createdTestImage_texture = global_state.createdTestImage_width = global_state.createdTestImage_height = 0;
 								}
 							}
@@ -736,14 +736,14 @@ int main(int, char**) {
 								strcpy(pdata.input_split_1_data, "error");
 								global_state.input_split_1_data_is_bad = true;
 								//TODO: better messages
-								global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Splitter", strerror(result));
+								global_log.AddLog("[error]", "Splitter", strerror(result));
 							} else {
-								global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Splitter", ("Successfully split " + std::string(pdata.evaluated_input_file_name)).c_str());
+								global_log.AddLog("[info]", "Splitter", ("Successfully split " + std::string(pdata.evaluated_input_file_name)).c_str());
 								int result = ARVT::copyFileToCStr(ARVT::inputFileName_toCommentTestImagePath_Text(pdata.the_file_input_name).c_str(), pdata.input_split_1_data, IM_ARRAYSIZE(pdata.input_split_1_data));
 								if (result) {
 									strcpy(pdata.input_split_1_data, "error");
 									global_state.input_split_1_data_is_bad = true;
-									global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Preview", strerror(result));
+									global_log.AddLog("[warn]", "File Preview", strerror(result));
 								} else {
 									global_state.input_split_1_data_is_bad = false;
 								}
@@ -775,9 +775,9 @@ int main(int, char**) {
 
 								if (!result) {
 									//TODO: better messages
-									global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Settings", strerror(result));
+									global_log.AddLog("[error]", "Settings", strerror(result));
 								} else {
-									global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Settings", ("Successfully wrote " + std::string(pdata.evaluated_video_settings_path)).c_str());
+									global_log.AddLog("[info]", "Settings", ("Successfully wrote " + std::string(pdata.evaluated_video_settings_path)).c_str());
 								}
 							}
 
@@ -788,20 +788,20 @@ int main(int, char**) {
 
 								if (!result) {
 									//TODO: better messages
-									global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Settings", strerror(result));
+									global_log.AddLog("[error]", "Settings", strerror(result));
 								} else {
 									ARVT::Fill_ImageData(idata, video_settings_object);
 									ARVT::Fill_AudioData(adata, video_settings_object, pdata.useExtraCodecs);
 									ARVT::Fill_VideoData(vdata, video_settings_object, pdata.useExtraCodecs);
 									//if the user changed pdata.useExtraCodecs, that's their fault
-									global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Settings", ("Successfully loaded " + std::string(pdata.evaluated_video_settings_path)).c_str());
+									global_log.AddLog("[info]", "Settings", ("Successfully loaded " + std::string(pdata.evaluated_video_settings_path)).c_str());
 								}
 							}
 
 							if (ImGui::Button("Reveal in File Explorer##Video Settings", ImVec2(write_settings_width, 0.0f))) {
 								int result = ARVT::revealFileExplorer(pdata.evaluated_video_settings_path, pdata);
 								if (result) {
-									global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
+									global_log.AddLog("[warn]", "File Explorer", strerror(result));
 								}
 							}
 
@@ -858,7 +858,7 @@ int main(int, char**) {
 							//yes it's *kinda* a hack to open on just the first video, but it's better than iterating through every file in the folder and checking what's available
 							int result = ARVT::revealFileExplorer(ARVT::inputFileName_toCommentToSpeechPath_getFileExplorerName(pdata.the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current], vdata.audio_only_option_input).c_str(), pdata);
 							if (result) {
-								global_log.AddLog("[%06.2fs] [warn] %s: %s\n", ImGui::GetTime(), "File Explorer", strerror(result));
+								global_log.AddLog("[warn]", "File Explorer", strerror(result));
 							}
 						}
 
@@ -1122,12 +1122,12 @@ int main(int, char**) {
 							deleteFileLogger.Clear();
 							int result = ARVT::getListOfOldFiles(ARVT::TEST_IMAGES.c_str(), pdata.fileDeleteAgeList_values[pdata.fileDeleteAgeList_current], deleteFileList);
 							if (result) {
-								global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Query Files", strerror(result));
+								global_log.AddLog("[error]", "Query Files", strerror(result));
 							} else {
-								global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Query Files", ("Successfully queried " + ARVT::TEST_IMAGES).c_str());
-								deleteFileLogger.AddLog("Found %d files that are more than %s old:\n", deleteFileList.size(), pdata.fileDeleteAgeList[pdata.fileDeleteAgeList_current]);
+								global_log.AddLog("[info]", "Query Files", ("Successfully queried " + ARVT::TEST_IMAGES).c_str());
+								deleteFileLogger.AddLogSpecific("Found %d files that are more than %s old:\n", deleteFileList.size(), pdata.fileDeleteAgeList[pdata.fileDeleteAgeList_current]);
 								for (const auto& f : deleteFileList) {
-									deleteFileLogger.AddLog("%s\n", f.c_str());
+									deleteFileLogger.AddLogSpecific("%s\n", f.c_str());
 								}
 							}
 						}
@@ -1137,12 +1137,12 @@ int main(int, char**) {
 							deleteFileLogger.Clear();
 							int result = ARVT::getListOfOldFiles(ARVT::OUTPUT_SPEECH.c_str(), pdata.fileDeleteAgeList_values[pdata.fileDeleteAgeList_current], deleteFileList);
 							if (result) {
-								global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Query Files", strerror(result));
+								global_log.AddLog("[error]", "Query Files", strerror(result));
 							} else {
-								global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Query Files", ("Successfully queried " + ARVT::OUTPUT_SPEECH).c_str());
-								deleteFileLogger.AddLog("Found %d files that are more than %s old:\n", deleteFileList.size(), pdata.fileDeleteAgeList[pdata.fileDeleteAgeList_current]);
+								global_log.AddLog("[info]", "Query Files", ("Successfully queried " + ARVT::OUTPUT_SPEECH).c_str());
+								deleteFileLogger.AddLogSpecific("Found %d files that are more than %s old:\n", deleteFileList.size(), pdata.fileDeleteAgeList[pdata.fileDeleteAgeList_current]);
 								for (const auto& f : deleteFileList) {
-									deleteFileLogger.AddLog("%s\n", f.c_str());
+									deleteFileLogger.AddLogSpecific("%s\n", f.c_str());
 								}
 							}
 						}
@@ -1169,10 +1169,10 @@ int main(int, char**) {
 							if (ImGui::Button("Yes, I understand")) {
 								int result = ARVT::deleteAllOldFiles(deleteFileList);
 								if (result) {
-									global_log.AddLog("[%06.2fs] [error] %s: %s\n", ImGui::GetTime(), "Delete Files", strerror(result));
+									global_log.AddLog("[error]", "Delete Files", strerror(result));
 								} else {
 									deleteFileLogger.Clear();
-									global_log.AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Delete Files", ("Successfully deleted " + std::to_string(deleteFileList.size()) + " files").c_str());
+									global_log.AddLog("[info]", "Delete Files", ("Successfully deleted " + std::to_string(deleteFileList.size()) + " files").c_str());
 								}
 								deleteFileList.clear();
 								ImGui::CloseCurrentPopup();

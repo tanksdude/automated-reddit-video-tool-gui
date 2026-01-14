@@ -25,11 +25,18 @@ struct ARVT_Logger {
 		}
 	}
 
-	void AddLog(const char* fmt, ...) {
+	void AddLogSpecific(const char* fmt, ...) {
 		va_list args;
 		va_start(args, fmt);
 		Buf.appendfv(fmt, args);
 		va_end(args);
+	}
+
+	void AddLog(const char* level, const char* type, const char* msg) {
+		AddLogSpecific("[%06.2fs] %s %s: %s\n", ImGui::GetTime(), level, type, msg);
+	}
+	void AddLog(const char* level, const char* type) {
+		AddLogSpecific("[%06.2fs] %s %s\n",     ImGui::GetTime(), level, type);
 	}
 
 	void Draw() {
@@ -53,7 +60,7 @@ struct ARVT_Logger {
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Test 1")) {
-			AddLog("[%06.2fs] [info] %s: %s\n", ImGui::GetTime(), "Test", "Test log entry");
+			AddLogSpecific("[info]", "Test", "Test log entry");
 		}
 		if (ImGui::Button("Clear 10")) {
 			//be lazy because I don't care
