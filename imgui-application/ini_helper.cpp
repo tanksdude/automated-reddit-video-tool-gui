@@ -57,6 +57,7 @@ void CreateDefaultIniIfNeeded(const std::string& path) {
 	"FontIsFamily = false\n"
 	"TextAlignment = default\n"
 	"SkipLoneLF = true\n"
+	"ReplaceEscapeSequences = true\n"
 	"\n"
 	"ImageFormat = .png\n"
 	"\n"
@@ -231,6 +232,19 @@ void Fill_ImageData(ImageData& idata, const mINI::INIStructure& ini_object) {
 				idata.skip_lone_lf_input = false;
 			} else {
 				std::cerr << ("Unknown value for [IMAGE].SkipLoneLF: \"" + get + "\"") << std::endl;
+			}
+		}
+	}
+
+	if (ini_object.get("IMAGE").has("ReplaceEscapeSequences")) {
+		std::string get = ini_object.get("IMAGE").get("ReplaceEscapeSequences");
+		if (!get.empty()) {
+			if (get == "true" || get == "True" || get == "TRUE" || get == "1") {
+				idata.replace_magick_escape_sequences = true;
+			} else if (get == "false" || get == "False" || get == "FALSE" || get == "0") {
+				idata.replace_magick_escape_sequences = false;
+			} else {
+				std::cerr << ("Unknown value for [IMAGE].ReplaceEscapeSequences: \"" + get + "\"") << std::endl;
 			}
 		}
 	}
@@ -710,10 +724,11 @@ void CopySettingsToIni(mINI::INIStructure& ini_object, const ImageData& idata, c
 	ini_object["IMAGE"]["ParagraphNewlineCount"] = std::to_string(idata.paragraph_newline_v);
 	ini_object["IMAGE"]["ParagraphTabbedStart"]  = std::to_string(idata.paragraph_tabbed_start_input);
 
-	ini_object["IMAGE"]["FontName"]      = idata.font_name;
-	ini_object["IMAGE"]["FontIsFamily"]  = std::to_string(idata.font_is_family_input);
-	ini_object["IMAGE"]["TextAlignment"] = idata.get_textAlignment();
-	ini_object["IMAGE"]["SkipLoneLF"]    = std::to_string(idata.skip_lone_lf_input);
+	ini_object["IMAGE"]["FontName"]               = idata.font_name;
+	ini_object["IMAGE"]["FontIsFamily"]           = std::to_string(idata.font_is_family_input);
+	ini_object["IMAGE"]["TextAlignment"]          = idata.get_textAlignment();
+	ini_object["IMAGE"]["SkipLoneLF"]             = std::to_string(idata.skip_lone_lf_input);
+	ini_object["IMAGE"]["ReplaceEscapeSequences"] = std::to_string(idata.replace_magick_escape_sequences);
 
 	ini_object["IMAGE"]["ImageFormat"] = idata.get_imageFormat();
 

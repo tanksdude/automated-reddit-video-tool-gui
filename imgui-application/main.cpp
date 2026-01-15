@@ -537,7 +537,6 @@ int main(int, char**) {
 						if (global_state.input_split_1_data_is_bad) { ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.0f, 0.0f, 1.0f }); }
 						ImGui::InputTextMultiline("##Input Split 1 Data", pdata.input_split_1_data, IM_ARRAYSIZE(pdata.input_split_1_data), ImVec2(-FLT_MIN, 0), ImGuiInputTextFlags_ReadOnly);
 						if (global_state.input_split_1_data_is_bad) { ImGui::PopStyleColor(); }
-						//TODO: checkbox for ImageMagick text replace (&, <, >) in Python; not exactly sure if it should go here
 						if (ImGui::Button("Reveal in File Explorer##Input Split 1")) {
 							int result = ARVT::revealFileExplorer(pdata.evaluated_input_split_1, pdata);
 							if (result) {
@@ -645,10 +644,17 @@ int main(int, char**) {
 						ImGui::PopItemWidth();
 
 						ImGui::SeparatorText("Export");
+						ImGui::Checkbox("Replace ImageMagick escape sequences", &idata.replace_magick_escape_sequences);
+						if (ImGui::BeginItemTooltip()) {
+							ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+							ImGui::TextUnformatted("Replaces '&', '<', '>' with '&amp;', '&lt;', '&gt;'");
+							ImGui::PopTextWrapPos();
+							ImGui::EndTooltip();
+						}
+
 						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
 						ImGui::Combo("Image Format", &idata.imageFormatArray_current, idata.imageFormatArray.data(), idata.imageFormatArray.size());
 						ImGui::PopItemWidth();
-
 						ARVT::copyEvaluatedFileName_toCommentTestImagePath_TestImage(pdata.the_file_input_name, idata, pdata.evaluated_test_image_path, IM_ARRAYSIZE(pdata.evaluated_test_image_path));
 						ImGui::InputText("##Test Image Path", pdata.evaluated_test_image_path, IM_ARRAYSIZE(pdata.evaluated_test_image_path), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 
@@ -698,7 +704,7 @@ int main(int, char**) {
 						float columnHeights[3];
 						columnHeights[0] = 2 * ImGui::GetFrameHeightWithSpacing() + ImGuiHelpers::getMultilineInputHeight(ImGui::GetTextLineHeight() * 16) + no_voice_height;
 						columnHeights[1] = 7 * ImGui::GetFrameHeightWithSpacing() + 2 * ImGuiHelpers::getMultilineInputHeight(0);
-						columnHeights[2] = (5 + test_image_font_item_count + 4 + 4) * ImGui::GetFrameHeightWithSpacing();
+						columnHeights[2] = (5 + test_image_font_item_count + 5 + 4) * ImGui::GetFrameHeightWithSpacing();
 
 						const float largestColumn = *std::max_element(columnHeights, columnHeights + IM_ARRAYSIZE(columnHeights));
 						const float contentAvailableY = ImGui::GetContentRegionAvail().y + 2*style.ItemSpacing.y;

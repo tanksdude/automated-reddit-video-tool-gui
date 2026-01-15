@@ -46,6 +46,7 @@ parser.add_argument("font_name")
 parser.add_argument("font_is_family")
 parser.add_argument("text_alignment")
 parser.add_argument("skip_lf_line")
+parser.add_argument("replace_escape_sequences")
 
 args = parser.parse_args()
 
@@ -63,6 +64,7 @@ IMAGE_FONT_NAME = args.font_name
 IMAGE_FONT_IS_FAMILY = int(args.font_is_family)
 IMAGE_TEXT_ALIGN_ARGS = textAlignmentArgsLookup[args.text_alignment]
 IMAGE_SKIP_LF_LINE = int(args.skip_lf_line)
+IMAGE_REPLACE_ESCAPE_SEQUENCES = int(args.replace_escape_sequences)
 # Evaluated image parameters:
 IMAGE_SIZE = str(IMAGE_WIDTH) + "x" + str(IMAGE_HEIGHT)
 IMAGE_SIZE_EXTENDED = str(IMAGE_WIDTH + 2*IMAGE_W_BORDER) + "x" + str(IMAGE_HEIGHT + 2*IMAGE_H_BORDER)
@@ -115,6 +117,8 @@ for line in image_text_file_lines:
 	if len(line) == 0:
 		curr_file_read += IMAGE_PARAGRAPH_SEP + IMAGE_PARAGRAPH_START
 		continue
+	if IMAGE_REPLACE_ESCAPE_SEQUENCES:
+		line = line.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 	curr_file_read += line
 
 output_file = open(output_img_file_path+".txt", "w", encoding="utf8")
