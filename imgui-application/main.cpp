@@ -4,7 +4,7 @@
 
 #include <stdio.h> //fprintf for glfwSetErrorCallback
 #include <algorithm> //std::max_element
-#include <cstring> //strerror, strcmp
+#include <cstring> //strcmp
 #include <filesystem> //only for refreshApplicationFontName(), though plenty of other files also use <filesystem>
 #include <iostream> //not actually needed, but it's useful for debugging
 
@@ -203,8 +203,7 @@ void thread_func_speech(const ProgramData* pdata, const ImageData* idata, const 
 	//return result;
 
 	if (result) {
-		//TODO(v1.0): better messages
-		global_log.AddLog("[error]", "Video", strerror(result));
+		global_log.AddLog("[error]", "Video", "Encountered an error when making the videos");
 	} else {
 		global_log.AddLog("[info]", "Video", ("Successfully created videos " + std::string((*pdata).evaluated_output_speech_path)).c_str());
 	}
@@ -466,9 +465,9 @@ int main(int, char**) {
 						if (ImGui::Button("Preview File##Input Comment")) { //TODO: add?: https://github.com/mlabbe/nativefiledialog
 							int result = ARVT::copyFileToCStr(pdata.evaluated_input_file_name, pdata.input_comment_data, IM_ARRAYSIZE(pdata.input_comment_data));
 							if (result) {
-								strcpy(pdata.input_comment_data, "error");
+								strcpy(pdata.input_comment_data, "error reading");
 								global_state.input_comment_data_is_bad = true;
-								global_log.AddLog("[warn]", "File Preview", strerror(result));
+								global_log.AddLog("[warn]", "File Preview", "Could not preview the file");
 							} else {
 								global_state.input_comment_data_is_bad = false;
 							}
@@ -527,9 +526,9 @@ int main(int, char**) {
 						if (ImGui::Button("Preview File##Input Split 1")) {
 							int result = ARVT::copyFileToCStr(pdata.evaluated_input_split_1, pdata.input_split_1_data, IM_ARRAYSIZE(pdata.input_split_1_data));
 							if (result) {
-								strcpy(pdata.input_split_1_data, "error");
+								strcpy(pdata.input_split_1_data, "error reading");
 								global_state.input_split_1_data_is_bad = true;
-								global_log.AddLog("[warn]", "File Preview", strerror(result));
+								global_log.AddLog("[warn]", "File Preview", "Could not preview the file");
 							} else {
 								global_state.input_split_1_data_is_bad = false;
 							}
@@ -542,7 +541,7 @@ int main(int, char**) {
 						if (ImGui::Button("Reveal in File Explorer##Input Split 1")) {
 							int result = ARVT::revealFileExplorer(pdata.evaluated_input_split_1, pdata);
 							if (result) {
-								global_log.AddLog("[warn]", "File Explorer", strerror(result));
+								global_log.AddLog("[warn]", "File Explorer", "Some error");
 							}
 						}
 						ImGui::SameLine();
@@ -551,14 +550,14 @@ int main(int, char**) {
 							if (result) {
 								strcpy(pdata.input_split_2_data, "error copying");
 								global_state.input_split_2_data_is_bad = true;
-								global_log.AddLog("[error]", "Copy", strerror(result));
+								global_log.AddLog("[error]", "Copy", "Encountered an error when copying a file");
 							} else {
 								global_log.AddLog("[info]", "Copy", ("Successfully copied to " + std::string(pdata.evaluated_input_split_2)).c_str());
 								int result = ARVT::copyFileToCStr(pdata.evaluated_input_split_2, pdata.input_split_2_data, IM_ARRAYSIZE(pdata.input_split_2_data));
 								if (result) {
-									strcpy(pdata.input_split_2_data, "error");
+									strcpy(pdata.input_split_2_data, "error reading");
 									global_state.input_split_2_data_is_bad = true;
-									global_log.AddLog("[warn]", "File Preview", strerror(result));
+									global_log.AddLog("[warn]", "File Preview", "Could not preview the file");
 								} else {
 									global_state.input_split_2_data_is_bad = false;
 								}
@@ -579,9 +578,9 @@ int main(int, char**) {
 						if (ImGui::Button("Preview File##Input Split 2")) {
 							int result = ARVT::copyFileToCStr(pdata.evaluated_input_split_2, pdata.input_split_2_data, IM_ARRAYSIZE(pdata.input_split_2_data));
 							if (result) {
-								strcpy(pdata.input_split_2_data, "error");
+								strcpy(pdata.input_split_2_data, "error reading");
 								global_state.input_split_2_data_is_bad = true;
-								global_log.AddLog("[warn]", "File Preview", strerror(result));
+								global_log.AddLog("[warn]", "File Preview", "Could not preview the file");
 							} else {
 								global_state.input_split_2_data_is_bad = false;
 							}
@@ -593,7 +592,7 @@ int main(int, char**) {
 						if (ImGui::Button("Reveal in File Explorer##Input Split 2")) {
 							int result = ARVT::revealFileExplorer(pdata.evaluated_input_split_2, pdata);
 							if (result) {
-								global_log.AddLog("[warn]", "File Explorer", "Could not reveal file");
+								global_log.AddLog("[warn]", "File Explorer", "Some error");
 							}
 						}
 
@@ -656,8 +655,7 @@ int main(int, char**) {
 						if (ImGui::Button("Create " ICON_FA_ARROW_RIGHT, ImVec2(-FLT_MIN, 0.0f))) {
 							int result = ARVT::call_comment_test_image(pdata.the_file_input_name, pdata, idata);
 							if (result) {
-								//TODO: better messages
-								global_log.AddLog("[error]", "Image", strerror(result));
+								global_log.AddLog("[error]", "Image", "Encountered an error when making the test image");
 								global_state.createdTestImage_texture = global_state.createdTestImage_width = global_state.createdTestImage_height = 0;
 							} else {
 								global_log.AddLog("[info]", "Image", ("Successfully created test image " + std::string(pdata.evaluated_test_image_path)).c_str());
@@ -735,15 +733,14 @@ int main(int, char**) {
 							if (result) {
 								strcpy(pdata.input_split_1_data, "error");
 								global_state.input_split_1_data_is_bad = true;
-								//TODO: better messages
-								global_log.AddLog("[error]", "Splitter", strerror(result));
+								global_log.AddLog("[error]", "Splitter", "Encountered an error when splitting the input file");
 							} else {
 								global_log.AddLog("[info]", "Splitter", ("Successfully split " + std::string(pdata.evaluated_input_file_name)).c_str());
 								int result = ARVT::copyFileToCStr(ARVT::inputFileName_toCommentTestImagePath_Text(pdata.the_file_input_name).c_str(), pdata.input_split_1_data, IM_ARRAYSIZE(pdata.input_split_1_data));
 								if (result) {
-									strcpy(pdata.input_split_1_data, "error");
+									strcpy(pdata.input_split_1_data, "error reading");
 									global_state.input_split_1_data_is_bad = true;
-									global_log.AddLog("[warn]", "File Preview", strerror(result));
+									global_log.AddLog("[warn]", "File Preview", "Could not preview the file");
 								} else {
 									global_state.input_split_1_data_is_bad = false;
 								}
@@ -774,8 +771,7 @@ int main(int, char**) {
 								//don't bother with a "confirm" box before actually writing the file if it already exists
 
 								if (!result) {
-									//TODO: better messages
-									global_log.AddLog("[error]", "Settings", strerror(result));
+									global_log.AddLog("[error]", "Settings", "Encountered an error when writing settings");
 								} else {
 									global_log.AddLog("[info]", "Settings", ("Successfully wrote " + std::string(pdata.evaluated_video_settings_path)).c_str());
 								}
@@ -787,8 +783,7 @@ int main(int, char**) {
 								bool result = video_settings_file.read(video_settings_object);
 
 								if (!result) {
-									//TODO: better messages
-									global_log.AddLog("[error]", "Settings", strerror(result));
+									global_log.AddLog("[error]", "Settings", "Encountered an error when reading settings");
 								} else {
 									ARVT::Fill_ImageData(idata, video_settings_object);
 									ARVT::Fill_AudioData(adata, video_settings_object, pdata.useExtraCodecs);
@@ -801,7 +796,7 @@ int main(int, char**) {
 							if (ImGui::Button("Reveal in File Explorer##Video Settings", ImVec2(write_settings_width, 0.0f))) {
 								int result = ARVT::revealFileExplorer(pdata.evaluated_video_settings_path, pdata);
 								if (result) {
-									global_log.AddLog("[warn]", "File Explorer", strerror(result));
+									global_log.AddLog("[warn]", "File Explorer", "Some error");
 								}
 							}
 
@@ -858,7 +853,7 @@ int main(int, char**) {
 							//yes it's *kinda* a hack to open on just the first video, but it's better than iterating through every file in the folder and checking what's available
 							int result = ARVT::revealFileExplorer(ARVT::inputFileName_toCommentToSpeechPath_getFileExplorerName(pdata.the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current], vdata.audio_only_option_input).c_str(), pdata);
 							if (result) {
-								global_log.AddLog("[warn]", "File Explorer", strerror(result));
+								global_log.AddLog("[warn]", "File Explorer", "Some error");
 							}
 						}
 
@@ -1122,7 +1117,7 @@ int main(int, char**) {
 							deleteFileLogger.Clear();
 							int result = ARVT::getListOfOldFiles(ARVT::TEST_IMAGES.c_str(), pdata.fileDeleteAgeList_values[pdata.fileDeleteAgeList_current], deleteFileList);
 							if (result) {
-								global_log.AddLog("[error]", "Query Files", strerror(result));
+								global_log.AddLog("[error]", "Query Files", "Encountered an error when querying images");
 							} else {
 								global_log.AddLog("[info]", "Query Files", ("Successfully queried " + ARVT::TEST_IMAGES).c_str());
 								deleteFileLogger.AddLogSpecific("Found %d files that are more than %s old:\n", deleteFileList.size(), pdata.fileDeleteAgeList[pdata.fileDeleteAgeList_current]);
@@ -1137,7 +1132,7 @@ int main(int, char**) {
 							deleteFileLogger.Clear();
 							int result = ARVT::getListOfOldFiles(ARVT::OUTPUT_SPEECH.c_str(), pdata.fileDeleteAgeList_values[pdata.fileDeleteAgeList_current], deleteFileList);
 							if (result) {
-								global_log.AddLog("[error]", "Query Files", strerror(result));
+								global_log.AddLog("[error]", "Query Files", "Encountered an error when querying videos");
 							} else {
 								global_log.AddLog("[info]", "Query Files", ("Successfully queried " + ARVT::OUTPUT_SPEECH).c_str());
 								deleteFileLogger.AddLogSpecific("Found %d files that are more than %s old:\n", deleteFileList.size(), pdata.fileDeleteAgeList[pdata.fileDeleteAgeList_current]);
@@ -1169,7 +1164,7 @@ int main(int, char**) {
 							if (ImGui::Button("Yes, I understand")) {
 								int result = ARVT::deleteAllOldFiles(deleteFileList);
 								if (result) {
-									global_log.AddLog("[error]", "Delete Files", strerror(result));
+									global_log.AddLog("[error]", "Delete Files", "Encountered an error when deleting files");
 								} else {
 									deleteFileLogger.Clear();
 									global_log.AddLog("[info]", "Delete Files", ("Successfully deleted " + std::to_string(deleteFileList.size()) + " files").c_str());
