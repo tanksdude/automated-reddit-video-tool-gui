@@ -23,7 +23,7 @@ struct AudioData {
 	char** voiceArray = nullptr;
 	int voiceArray_current = -1;
 	int voiceArray_length = 0;
-	void update_voiceArray(); // Call this when changing the speech engine!
+	int update_voiceArray(); // Call this when changing the speech engine! Returns 0 on success
 
 	inline std::string get_speechEngine() const { return std::string(speechEngineArray[speechEngineArray_current]); }
 	inline std::string get_voiceName() const {

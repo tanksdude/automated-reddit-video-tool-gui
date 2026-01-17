@@ -279,7 +279,9 @@ void Fill_AudioData(AudioData& adata, const mINI::INIStructure& ini_object, bool
 			size_t index = std::distance(adata.speechEngineArray.begin(), std::find(adata.speechEngineArray.begin(), adata.speechEngineArray.end(), get));
 			if (index != adata.speechEngineArray.size()) {
 				adata.speechEngineArray_current = index;
-				adata.update_voiceArray();
+				if (adata.update_voiceArray()) {
+					//failed
+				}
 			} else {
 				std::cerr << ("Unknown value for [AUDIO].SpeechEngine: \"" + get + "\"") << std::endl;
 			}

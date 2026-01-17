@@ -151,7 +151,7 @@ void AudioData::getVoiceListFromExe_Wsay(std::vector<std::string>& file_lines, s
 	}
 }
 
-void AudioData::update_voiceArray() {
+int AudioData::update_voiceArray() {
 	// Step 1: poll available voices
 	int result = ARVT::system_helper((getExeForUpdatingVoiceList() + " > temp.txt").c_str(), false);
 
@@ -163,7 +163,7 @@ void AudioData::update_voiceArray() {
 		}
 		voiceArray_free();
 		voiceArray_setToBlank();
-		return;
+		return 1;
 	}
 
 	std::vector<std::string> file_lines;
@@ -212,6 +212,7 @@ void AudioData::update_voiceArray() {
 	if (voiceList.empty()) {
 		//some error
 		voiceArray_setToBlank();
+		return 1;
 	} else {
 		voiceArray = new char*[voiceList.size()];
 		for (int i = 0; i < voiceList.size(); i++) {
@@ -220,6 +221,7 @@ void AudioData::update_voiceArray() {
 		}
 		voiceArray_current = -1;
 		voiceArray_length = voiceList.size();
+		return 0;
 	}
 }
 

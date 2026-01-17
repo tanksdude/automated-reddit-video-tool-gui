@@ -228,7 +228,10 @@ int main(int, char**) {
 	// If the user didn't set a speech engine in the INI, then fill its
 	// available voices. (If the user did, then the values are already filled.)
 	if (ini_object.get("AUDIO").get("SpeechEngine").empty()) {
-		adata.update_voiceArray();
+		if (adata.update_voiceArray()) {
+			// Don't log because if the user doesn't have the default TTS program then it's annoying to get an error on every startup
+			// Also can't log because ImGui hasn't been initialized yet (because ImGui::GetTime() gets called)
+		}
 	}
 
 	ARVT::CreateApplicationFoldersIfNeeded();
@@ -888,7 +891,10 @@ int main(int, char**) {
 						//to align text to the left: use a table
 						if (ImGui::Combo("Speech Engine", &adata.speechEngineArray_current, adata.speechEngineArray.data(), adata.speechEngineArray.size())) {
 							//there was a change
-							adata.update_voiceArray();
+							if (adata.update_voiceArray()) {
+								global_log.AddLog("[error]", "Speech Engine", "Could not update voice list");
+								//TODO: more specific message (like the engine not existing)
+							}
 						}
 
 						ImGui::Indent();
@@ -903,7 +909,9 @@ int main(int, char**) {
 						//TODO: some kind of visual indicator when one isn't selected
 						ImGui::SameLine();
 						if (ImGui::Button("Refresh")) {
-							adata.update_voiceArray();
+							if (adata.update_voiceArray()) {
+								global_log.AddLog("[error]", "Speech Engine", "Could not update voice list");
+							}
 						}
 
 						if (ImGui::BeginCombo("Audio Encoder", adata.get_audioEncoder()->displayName)) {
