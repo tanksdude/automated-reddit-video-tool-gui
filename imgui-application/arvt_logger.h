@@ -60,7 +60,7 @@ struct ARVT_Logger {
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Test 1")) {
-			AddLogSpecific("[info]", "Test", "Test log entry");
+			AddLog("[info]", "Test", "Test log entry");
 		}
 		if (ImGui::Button("Clear 10")) {
 			//be lazy because I don't care
