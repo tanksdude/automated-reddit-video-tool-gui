@@ -290,7 +290,7 @@ int call_comment_to_speech(const char* name, const ProgramData& pdata, const Ima
 		" "   + std::to_string(idata.replace_magick_escape_sequences) +
 		" "   + idata.get_imageFormat() +
 
-		" -n \"" + vdata.get_video_replacement_numbers_input() + "\"" + //needs the -n flag, otherwise Python's argparse will treat something like "-3" as an argument and get confused (pretty sure it's allowed because "-3" is a negative number)
+		" -n \"_" + vdata.get_video_replacement_numbers_input() + "\"" + //-n is required if there's no prepended underscore, because otherwise Python's argparse will treat something like "-3" as an argument and get confused; prefer an underscore regardless in case a future argparse version is pickier
 		(vdata.audio_only_option_input ? " -a" : "") +
 
 		" \"" + adata.get_speechEngine() + "\"" +

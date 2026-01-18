@@ -343,7 +343,7 @@ if len(image_text_file_lines) != len(speech_text_file_lines):
 
 
 video_replacement_set = set() # {} is a dictionary
-for nums in args.video_replacement_numbers.split(","):
+for nums in args.video_replacement_numbers[1:].split(","): # Prepended with "_" to please argparse
 	numRange = nums.split("-")
 	if len(numRange) > 2:
 		sys.exit("Bad video replacement list")
