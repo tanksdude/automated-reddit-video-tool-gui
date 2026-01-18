@@ -374,9 +374,9 @@ if len(video_replacement_set) == 0:
 
 
 
-files_count = 0 # for the vid_$.mp4 file; the file number won't match the line number
-replaced_files_count = 0 #TODO: this is a pretty hacky solution
-#print(len([line for line in speech_text_file_lines if len(line) > 1])) #TODO: does this always get the file count?
+files_count = 0            # For the vid_$.mp4 file, as the file number won't match the line number
+replaced_files_count = 0   # Helpful print information
+created_files_count = 0    # Helpful print information
 curr_text_file_read = IMAGE_PARAGRAPH_START
 
 for i in range(len(image_text_file_lines)):
@@ -401,13 +401,17 @@ for i in range(len(image_text_file_lines)):
 		output_file.write(speech_line)
 		output_file.close()
 
+		file_already_exists = os.path.exists(gen_output_wav_file_path(files_count)) if AUDIO_ONLY else None
 		result = text_to_speech_func(gen_output_wav_file_path(files_count), gen_output_wav_file_path(files_count)+".txt")
 		os.remove(gen_output_wav_file_path(files_count)+".txt")
 
 		if result.returncode:
 			sys.exit("ERROR: Could not generate the audio file for video " + str(files_count))
 
-		if not AUDIO_ONLY:
+		if AUDIO_ONLY:
+			replaced_files_count += file_already_exists
+			created_files_count += not file_already_exists
+		else:
 			# Image file:
 			output_file = open(gen_output_img_file_path(files_count)+".txt", "w", encoding="utf8")
 			output_file.write(curr_text_file_read)
@@ -421,6 +425,7 @@ for i in range(len(image_text_file_lines)):
 				sys.exit("ERROR: Could not generate the image file for video " + str(files_count))
 
 			# Video:
+			file_already_exists = os.path.exists(gen_output_vid_file_path(files_count))
 			result = speech_and_image_to_vid_func(gen_output_vid_file_path(files_count), gen_output_wav_file_path(files_count), gen_output_img_file_path(files_count))
 
 			# Cleanup:
@@ -430,15 +435,12 @@ for i in range(len(image_text_file_lines)):
 			if result.returncode:
 				sys.exit("ERROR: Could not generate the video file for video " + str(files_count))
 
-		replaced_files_count += 1
+			replaced_files_count += file_already_exists
+			created_files_count += not file_already_exists
 
 
 
 ### FINISH ###
 
 end_time = time.time()
-if replaced_files_count == files_count:
-	print(f"Made {files_count} videos in {(end_time - start_time):.3f}s")
-else:
-	print(f"Replaced {replaced_files_count} videos in {(end_time - start_time):.3f}s")
-	#TODO: state which videos were replaced?
+print(f"Created {created_files_count} videos and replaced {replaced_files_count} videos in {(end_time - start_time):.3f}s")
