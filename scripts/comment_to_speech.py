@@ -306,7 +306,7 @@ def gen_output_img_file_path(num):
 start_time = time.time()
 
 try:
-	input_image_text_file = open(input_image_text_file_path, "r", encoding="utf8")
+	input_image_text_file = open(input_image_text_file_path, "r", encoding="utf-8")
 except FileNotFoundError:
 	sys.exit("File \"" + input_image_text_file_path + "\" not found!")
 except IsADirectoryError:
@@ -314,7 +314,7 @@ except IsADirectoryError:
 except PermissionError:
 	sys.exit("Could not read \"" + input_image_text_file_path + "\" due to permissions granted!")
 except Exception as e:
-	sys.exit("Other error while reading file \"" + input_image_text_file_path + "\": ", e)
+	sys.exit("Other error while reading file \"" + input_image_text_file_path + "\": " + str(e))
 
 image_text_file_lines = input_image_text_file.readlines()
 input_image_text_file.close()
@@ -322,7 +322,7 @@ input_image_text_file.close()
 speech_text_file_lines = None
 if input_speech_text_file_path != None:
 	try:
-		input_speech_text_file = open(input_speech_text_file_path, "r", encoding="utf8")
+		input_speech_text_file = open(input_speech_text_file_path, "r", encoding="utf-8")
 	except FileNotFoundError:
 		sys.exit("File \"" + input_speech_text_file_path + "\" not found!")
 	except IsADirectoryError:
@@ -330,7 +330,7 @@ if input_speech_text_file_path != None:
 	except PermissionError:
 		sys.exit("Could not read \"" + input_speech_text_file_path + "\" due to permissions granted!")
 	except Exception as e:
-		sys.exit("Other error while reading file \"" + input_speech_text_file_path + "\":", e)
+		sys.exit("Other error while reading file \"" + input_speech_text_file_path + "\": " + str(e))
 
 	speech_text_file_lines = input_speech_text_file.readlines()
 	input_speech_text_file.close()
@@ -397,7 +397,7 @@ for i in range(len(image_text_file_lines)):
 
 	if files_count in video_replacement_set:
 		# Speech file:
-		output_file = open(gen_output_wav_file_path(files_count)+".txt", "w", encoding="utf8")
+		output_file = open(gen_output_wav_file_path(files_count)+".txt", "w", encoding="utf-8")
 		output_file.write(speech_line)
 		output_file.close()
 
@@ -413,7 +413,7 @@ for i in range(len(image_text_file_lines)):
 			created_files_count += not file_already_exists
 		else:
 			# Image file:
-			output_file = open(gen_output_img_file_path(files_count)+".txt", "w", encoding="utf8")
+			output_file = open(gen_output_img_file_path(files_count)+".txt", "w", encoding="utf-8")
 			output_file.write(curr_text_file_read)
 			output_file.close()
 

@@ -24,7 +24,7 @@ output_file_path = args.output_comment_file
 start_time = time.time()
 
 try:
-	input_file = open(input_file_path, "r", encoding="utf8")
+	input_file = open(input_file_path, "r", encoding="utf-8")
 except FileNotFoundError:
 	sys.exit("File \"" + input_file_path + "\" not found!")
 except IsADirectoryError:
@@ -32,7 +32,7 @@ except IsADirectoryError:
 except PermissionError:
 	sys.exit("Could not read \"" + input_file_path + "\" due to permissions granted!")
 except Exception as e:
-	sys.exit("Other error while reading file \"" + input_file_path + "\":", e)
+	sys.exit("Other error while reading file \"" + input_file_path + "\": " + str(e))
 
 file_text = input_file.read().rstrip()
 input_file.close()
@@ -75,7 +75,7 @@ for line in file_lines:
 
 # Write each line to the output file:
 
-output_file = open(output_file_path, "w", encoding="utf8")
+output_file = open(output_file_path, "w", encoding="utf-8")
 for line in file_sentences:
 	for sentence in line:
 		output_file.write(sentence + "\n")

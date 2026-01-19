@@ -93,7 +93,7 @@ def text_to_image_func(img_file_name, text_file_name):
 start_time = time.time()
 
 try:
-	input_image_text_file = open(input_image_text_file_path, "r", encoding="utf8")
+	input_image_text_file = open(input_image_text_file_path, "r", encoding="utf-8")
 except FileNotFoundError:
 	sys.exit("File \"" + input_image_text_file_path + "\" not found!")
 except IsADirectoryError:
@@ -101,7 +101,7 @@ except IsADirectoryError:
 except PermissionError:
 	sys.exit("Could not read \"" + input_image_text_file_path + "\" due to permissions granted!")
 except Exception as e:
-	sys.exit("Other error while reading file \"" + input_image_text_file_path + "\":", e)
+	sys.exit("Other error while reading file \"" + input_image_text_file_path + "\": " + str(e))
 
 image_text_file_lines = input_image_text_file.readlines()
 input_image_text_file.close()
@@ -121,7 +121,7 @@ for line in image_text_file_lines:
 		line = line.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 	curr_file_read += line
 
-output_file = open(output_img_file_path+".txt", "w", encoding="utf8")
+output_file = open(output_img_file_path+".txt", "w", encoding="utf-8")
 output_file.write(curr_file_read)
 output_file.close()
 
