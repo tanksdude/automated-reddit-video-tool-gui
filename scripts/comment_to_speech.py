@@ -23,7 +23,7 @@ elif platform.system() == "Linux" or platform.system() in ["FreeBSD", "OpenBSD",
 		"eSpeak":    "espeak",
 		"eSpeak NG": "espeak-ng",
 	}
-	MAGICK_CMD = "convert"
+	MAGICK_CMD = "magick"
 else:
 	# Jython and mobile devices
 	sys.exit("Unknown/unsupported platform")

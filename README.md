@@ -35,7 +35,7 @@ Mac OS: Not supported. Source code is right here though, so feel free to try you
 Note that these programs must be accessible from a plain command line, meaning they must be local to wherever this program is running or be on the system PATH.
 
 * Python 3.8+
-* ImageMagick (Ubuntu: see below for issues)
+* ImageMagick 7 (Ubuntu: see below for issues)
 * a text-to-speech program
 	* Windows: Balabolka, eSpeak, [wsay](https://github.com/p-groarke/wsay)
 	* Linux: eSpeak
@@ -74,7 +74,7 @@ Seems to work on all distributions and desktop environments. Only regularly test
 
 ### Ubuntu ImageMagick woes
 
-I have spent many hours trying to get ImageMagick to work. If you want something that "just works", you should [compile from source](https://imagemagick.org/script/install-source.php#linux), as you won't have to worry about all sorts of stupid permission issues. If you want to use Ubuntu's pre-built package, this is the best I could come up with:
+I have spent many hours trying to get ImageMagick to work. Because I just couldn't figure out all the permission issues, this program's official requirement for ImageMagick includes [compiling it from source](https://imagemagick.org/script/install-source.php#linux) (on Ubuntu, other distros are fine). *ImageMagick's [provided AppImage](https://imagemagick.org/script/download.php#linux) will not work because it doesn't contain Pango, which is used to render the text to the image.* If you want to use Ubuntu's pre-built package, this is the best I could come up with:
 
 * Edit `/etc/ImageMagick-<6 or 7 or whatever>/policy.xml` with the following changes:
 * add: `<policy domain="coder" rights="read|write" pattern="{GIF,JPEG,PNG,WEBP,TXT}" />`
@@ -86,6 +86,10 @@ I have spent many hours trying to get ImageMagick to work. If you want something
 * In ImageMagick 6, this doesn't actually work, despite what documentation I could find saying this should be more than enough. In ImageMagick 7, the background color works just fine, but not the text color.
 
 If you know how to get it working, please do share, because you would probably be the only person on the Internet that knows how to fix this issue. Which I find exceedingly strange no one has documented a fix for this, because if ImageMagick is truly as critical to infrastructure as [this xkcd comic claims (read the alt text)](https://xkcd.com/2347/), then it has to be running on a lot more Linux machines than Windows, so this should be a very-well documented solution. (Though those systems are probably compiling from source and thus using a security policy that works, or not using Ubuntu's security policy.)
+
+#### Tips
+
+Depending on your flavor of Ubuntu (such as Linux Mint), you may need to ensure you have Pango and a library for every image format you plan on using. For example, PNG and Pango would require `sudo apt install libpng-dev libpango1.0-dev` (the `-dev` version probably not necessary).
 
 ## Option list (WIP)
 

@@ -12,7 +12,7 @@ if platform.system() == "Windows":
 elif platform.system() == "Darwin":
 	sys.exit("Mac OS not supported")
 elif platform.system() == "Linux" or platform.system() in ["FreeBSD", "OpenBSD", "NetBSD"]:
-	MAGICK_CMD = "convert"
+	MAGICK_CMD = "magick"
 else:
 	# Jython and mobile devices
 	sys.exit("Unknown/unsupported platform")
