@@ -7,6 +7,7 @@ struct ProgramData {
 #ifdef _WIN32
 	static const std::array<const char*, 3> pythonCmdArray;
 	int pythonCmdArray_current = 0;
+	bool spawn_debug_console = false;
 #else
 	static const std::array<const char*, 3> pythonCmdArray;
 	int pythonCmdArray_current = 1;

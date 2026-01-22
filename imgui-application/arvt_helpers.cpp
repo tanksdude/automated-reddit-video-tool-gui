@@ -128,6 +128,15 @@ int system_helper(const char* command, bool no_cmd) {
 	#endif
 }
 
+int SpawnDebugConsole() {
+	#ifdef _WIN32
+	return !AllocConsole();
+	#else
+	//TODO
+	return 1;
+	#endif
+}
+
 int copyFileToCStr(const char* path, char* dest, int buf_size) {
 	//note: this vvv call can throw
 	if (!std::filesystem::exists(path)) {

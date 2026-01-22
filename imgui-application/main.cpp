@@ -225,6 +225,16 @@ int main(int, char**) {
 	ARVT::Fill_AudioData(adata, ini_object, pdata.useExtraCodecs);
 	ARVT::Fill_VideoData(vdata, ini_object, pdata.useExtraCodecs);
 
+	#ifdef _WIN32
+	if (pdata.spawn_debug_console) {
+		if (ARVT::SpawnDebugConsole()) {
+			std::cerr << "ERROR: could not spawn console" << std::endl;
+		}
+	}
+	#else
+	//TODO
+	#endif
+
 	// If the user didn't set a speech engine in the INI, then fill its
 	// available voices. (If the user did, then the values are already filled.)
 	if (ini_object.get("AUDIO").get("SpeechEngine").empty()) {

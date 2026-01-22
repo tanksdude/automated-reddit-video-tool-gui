@@ -34,6 +34,7 @@ void CreateDefaultIniIfNeeded(const std::string& path) {
 	"\n"
 	"; Windows:\n"
 	";CmdPython = python\n"
+	";SpawnDebugConsole = false\n"
 	"; Linux:\n"
 	";CmdPython = python3\n"
 	";CmdFileManager = Nautilus\n"
@@ -695,6 +696,23 @@ void Fill_ProgramData(ProgramData& pdata, const mINI::INIStructure& ini_object) 
 			}
 		}
 	}
+
+	#ifdef _WIN32
+	if (ini_object.get("APPLICATION").has("SpawnDebugConsole")) {
+		std::string get = ini_object.get("APPLICATION").get("SpawnDebugConsole");
+		if (!get.empty()) {
+			if (get == "true" || get == "True" || get == "TRUE" || get == "1") {
+				pdata.spawn_debug_console = true;
+			} else if (get == "false" || get == "False" || get == "FALSE" || get == "0") {
+				pdata.spawn_debug_console = false;
+			} else {
+				std::cerr << ("Unknown value for [APPLICATION].SpawnDebugConsole: \"" + get + "\"") << std::endl;
+			}
+		}
+	}
+	#else
+	//TODO
+	#endif
 
 	#ifdef _WIN32
 	//explorer.exe is enough

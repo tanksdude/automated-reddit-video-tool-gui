@@ -57,5 +57,6 @@ std::string inputFileName_toCommentToSpeechPath_getFileExplorerName(const char* 
 std::string inputFileName_toVideoSettingsPath(const char* name);
 
 int system_helper(const char* command, bool no_cmd);
+int SpawnDebugConsole();
 
 } // namespace ARVT
