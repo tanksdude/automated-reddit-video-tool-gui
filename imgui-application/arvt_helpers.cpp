@@ -12,6 +12,8 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <Windows.h>
+#else
+#include <thread> //maybe <spawn.h>
 #endif
 
 namespace ARVT {
@@ -207,7 +209,13 @@ int revealFileExplorer(const char* path, const ProgramData& pdata) {
 		temp_path = temp_path.substr(0, pos);
 		return system_helper((fileExplorerCmd + " \"" + temp_path + "\"").c_str(), true);
 	} else {
-		return system_helper((fileExplorerCmd + " \"" + path + "\"").c_str(), true);
+		// On some distros/DEs/file managers, this is blocking, so do it on a new thread just in case
+		std::string cmd = fileExplorerCmd + " \"" + path + "\"";
+		std::thread t([cmd] { //just [=] works too
+			ARVT::system_helper(cmd.c_str(), true);
+		});
+		t.detach();
+		return 0; //assume it worked
 	}
 
 	#endif
