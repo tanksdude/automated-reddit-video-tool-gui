@@ -36,6 +36,7 @@ int copyFileToCStr(const char* path, char* dest, int buf_size);
 
 int copy_file(const char* path, const char* newPath);
 int revealFileExplorer(const char* path, const ProgramData& pdata); //note: this also checks for existence using <filesystem>
+int revealFileExplorer_folderBackup(const char* path, const ProgramData& pdata); //opens on the folder if the file wasn't found
 
 int getListOfOldFiles(const char* dir, int hourCount, std::vector<std::string>& deleteFileList);
 int deleteAllOldFiles(const std::vector<std::string>& fileList); //no undo!

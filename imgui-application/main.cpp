@@ -868,9 +868,8 @@ int main(int, char**) {
 						}
 
 						if (ImGui::Button("Reveal in File Explorer##Final Video", ImVec2(-FLT_MIN, 0.0f))) {
-							//TODO: this should open in the folder if the file doesn't exist
 							//yes it's *kinda* a hack to open on just the first video, but it's better than iterating through every file in the folder and checking what's available
-							int result = ARVT::revealFileExplorer(ARVT::inputFileName_toCommentToSpeechPath_getFileExplorerName(pdata.the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current], vdata.audio_only_option_input).c_str(), pdata);
+							int result = ARVT::revealFileExplorer_folderBackup(ARVT::inputFileName_toCommentToSpeechPath_getFileExplorerName(pdata.the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current], vdata.audio_only_option_input).c_str(), pdata);
 							if (result) {
 								global_log.AddLog("[warn]", "File Explorer", "Some error");
 							}
