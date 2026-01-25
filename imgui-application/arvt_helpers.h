@@ -21,6 +21,10 @@ const std::string COMMAND_QUOTE = "\'";
 
 // Public methods:
 
+template <int buf_size = 64>
+int readPipeIntoString(const char* cmd, std::vector<std::string>& lines); 
+// Templates can be declared in headers if you define *every* instantiation in the source file
+
 void CreateApplicationFoldersIfNeeded();
 
 void copyEvaluatedFileName_toCommentSplitterPath(const char* name, char* dest, size_t buf_size);

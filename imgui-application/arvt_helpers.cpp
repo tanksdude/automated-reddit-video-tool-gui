@@ -3,7 +3,7 @@
 #include <cstring> //strncpy
 #include <fstream>
 #include <filesystem>
-#include <algorithm> //replace()
+#include <algorithm> //std::replace, std::remove
 #include <vector>
 #include <utility>
 #include <iostream>
@@ -15,8 +15,42 @@
 #else
 #include <thread> //maybe <spawn.h>
 #endif
+#include <cstdio> //popen/pclose, fgets
 
 namespace ARVT {
+
+template <int buf_size>
+int readPipeIntoString(const char* cmd, std::vector<std::string>& lines) {
+	#ifdef _WIN32
+	FILE* pipe = _popen(cmd, "rt");
+	#else
+	FILE* pipe = popen(cmd, "r");
+	#endif
+	if (pipe == NULL) {
+		return 1;
+	}
+
+	lines.push_back("");
+	char buf[buf_size];
+	while (fgets(buf, sizeof(buf), pipe) != NULL) { //reads until newline or EOF
+		lines[lines.size()-1] += std::string(buf);
+		if (strlen(buf) > 0 && buf[strlen(buf)-1] == '\n') {
+			std::string& lastLine = lines[lines.size()-1];
+			lastLine.erase(std::remove(lastLine.begin(), lastLine.end(), '\r'), lastLine.end());
+			lastLine.erase(std::remove(lastLine.begin(), lastLine.end(), '\n'), lastLine.end());
+			lines.push_back("");
+		}
+	}
+
+	#ifdef _WIN32
+	_pclose(pipe);
+	#else
+	pclose(pipe);
+	#endif
+	return 0;
+}
+template int readPipeIntoString<64>(const char* cmd, std::vector<std::string>& lines);
+template int readPipeIntoString<2>(const char* cmd, std::vector<std::string>& lines);
 
 void CreateApplicationFoldersIfNeeded() {
 	//TODO: filesystem errors
