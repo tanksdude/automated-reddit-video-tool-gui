@@ -126,25 +126,8 @@ void AudioData::getVoiceListFromExe_Espeak(std::vector<std::string>& file_lines,
 void AudioData::getVoiceListFromExe_Wsay(std::vector<std::string>& file_lines, std::vector<std::string>& voiceList) {
 	// Selecting the voice uses the number but displaying should have the name...
 	// so it's not going to be displayed nicely but oh well
-	// One voice per line (with some empty lines), so this is really easy...
-	// except the dumped file was UTF-16...
 
-	//TODO: make this not incredibly hacky
-	//might require std::codecvt from <locale>, might require reading the input file using a separate function
-
-	bool firstLine = true;
 	for (std::string& l : file_lines) {
-		if (l.size() <= 3) [[unlikely]] {
-			continue;
-		}
-
-		int start = firstLine ? 1 : 0;
-		firstLine = false;
-
-		for (int i = start; i < l.size(); i++) {
-			l.erase(l.begin() + i);
-		}
-
 		if (!l.empty()) [[likely]] {
 			voiceList.push_back(l);
 		}
@@ -153,28 +136,26 @@ void AudioData::getVoiceListFromExe_Wsay(std::vector<std::string>& file_lines, s
 
 int AudioData::update_voiceArray() {
 	// Step 1: poll available voices
-	int result = ARVT::system_helper((getExeForUpdatingVoiceList() + " > temp.txt").c_str(), false);
 
-	//temp.txt will be created even if the executable doesn't exist (on most systems)
-	//most systems return an error code if piping to a file fails
+	std::vector<std::string> file_lines;
+	int result;
+	#ifdef _WIN32
+	if (speechEngineArray_current == 3) {
+		// wsay needs to be captured byte-by-byte because it outputs in UTF-16-LE
+		// Yes this is hacky, but the alternative is it not working
+		result = ARVT::readPipeIntoString<2>(getExeForUpdatingVoiceList().c_str(), file_lines);
+	} else {
+		result = ARVT::readPipeIntoString(getExeForUpdatingVoiceList().c_str(), file_lines);
+	}
+	#else
+	result = ARVT::readPipeIntoString(getExeForUpdatingVoiceList().c_str(), file_lines);
+	#endif
+
 	if (result) {
-		if (std::filesystem::exists("temp.txt")) [[likely]] {
-			std::filesystem::remove("temp.txt");
-		}
 		voiceArray_free();
 		voiceArray_setToBlank();
 		return 1;
 	}
-
-	std::vector<std::string> file_lines;
-	std::string line;
-	std::ifstream exe_output("temp.txt");
-
-	while (std::getline(exe_output, line)) {
-		file_lines.push_back(line);
-	}
-	exe_output.close();
-	std::filesystem::remove("temp.txt"); //TODO: this can throw, also technically it's possible for it to get deleted earlier but whatever
 
 	// Step 2: read the available voices
 
