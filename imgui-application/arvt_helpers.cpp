@@ -14,6 +14,7 @@
 #include <Windows.h>
 #else
 #include <thread> //maybe <spawn.h>
+#include "program_data.h" //findIdxOfAutoFileExplorerCmd()
 #endif
 #include <cstdio> //popen/pclose, fgets
 
@@ -232,11 +233,20 @@ int revealFileExplorer(const char* path, const ProgramData& pdata) {
 
 	#else
 
-	const std::string fileExplorerCmd = std::string(ProgramData::fileExplorerCmdArray_exe[pdata.fileExplorerCmdArray_current]);
-	if (pdata.fileExplorerCmdArray_current == 0) {
-		//TODO: xdg-mime query default inode/directory
-		return system_helper((fileExplorerCmd + " \"" + path + "\"").c_str(), true);
-	} else if (pdata.fileExplorerCmdArray_current == 1) {
+	int cmd_idx = pdata.fileExplorerCmdArray_current;
+	if (cmd_idx == 0) {
+		cmd_idx = ProgramData::findIdxOfAutoFileExplorerCmd();
+		if (cmd_idx < 0) {
+			cmd_idx = 1; //xdg-open
+		}
+	}
+
+	const std::string fileExplorerCmd = std::string(ProgramData::fileExplorerCmdArray_exe[cmd_idx]);
+	if (cmd_idx == 0) [[unlikely]] {
+		// Shouldn't happen due to above condition, but just in case:
+		system_helper((fileExplorerCmd + " \"" + path + "\"").c_str(), true);
+		return 1;
+	} else if (cmd_idx == 1) {
 		// Open on the folder
 		std::string temp_path = std::string(path);
 		size_t pos = temp_path.find_last_of("/");

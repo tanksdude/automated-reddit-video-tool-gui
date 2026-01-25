@@ -7,10 +7,62 @@ const std::array<const char*, 3> ProgramData::pythonCmdArray = { "python", "pyth
 #else
 const std::array<const char*, 3> ProgramData::pythonCmdArray = { "python", "python3", "py" }; //"py" is only used by people who explicitly made a symlink/alias
 //"auto" queries the system, xdg-open opens on the folder (feels like a hack), then the rest are the default file managers: GNOME, KDE Plasma, Xfce, Cinnamon, MATE
-const std::array<const char*, 7> ProgramData::fileExplorerCmdArray           = { "auto (NOT SUPPORTED)", "xdg-open (folder only)", "Nautilus (GNOME Files)", "Dolphin",          "Thunar", "Nemo", "Caja" };
-const std::array<const char*, 7> ProgramData::fileExplorerCmdArray_iniValues = { "auto",                 "xdg-open",               "Nautilus",               "Dolphin",          "Thunar", "Nemo", "Caja" };
-const std::array<const char*, 7> ProgramData::fileExplorerCmdArray_exe       = { "echo",                 "xdg-open",               "nautilus",               "dolphin --select", "thunar", "nemo", "caja --select" };
+const std::array<const char*, 7> ProgramData::fileExplorerCmdArray           = { "auto", "xdg-open (folder only)", "Nautilus (GNOME Files)", "Dolphin",          "Thunar", "Nemo", "Caja" };
+const std::array<const char*, 7> ProgramData::fileExplorerCmdArray_iniValues = { "auto", "xdg-open",               "Nautilus",               "Dolphin",          "Thunar", "Nemo", "Caja" };
+const std::array<const char*, 7> ProgramData::fileExplorerCmdArray_exe       = { "echo", "xdg-open",               "nautilus",               "dolphin --select", "thunar", "nemo", "caja --select" };
 //others: LXDE/LXQt's PCManFM(-Qt) behaves like xdg-open
+
+#include "arvt_helpers.h"
+#include <algorithm> //std::find
+int ProgramData::findIdxOfAutoFileExplorerCmd() {
+	// 1. Run process
+	std::vector<std::string lines;
+	int result = ARVT::readPipeIntoString("xdg-mime query default inode/directory", lines);
+	if (result || lines.empty()) {
+		return -1;
+	}
+
+	// 2. Extract the file manager's name
+	// The output always seems to be "A.B.C.D", where:
+	// * C is the file manager
+	// * D is "desktop"
+	// * A.B sometimes exists (GNOME and KDE Plasma only: "org.gnome" or "org.kde")
+	std::string fileManager = lines[0];
+	size_t end = fileManager.find_last_of(".");
+	if (end != std::string::npos) [[likely]] {
+		fileManager.erase(end);
+		size_t start = fileManager.find_last_of(".");
+		if (start != std::string::npos) {
+			fileManager = fileManager.substr(start+1);
+		}
+	}
+
+	// 3. Standardize the string
+	// Nautilus is capitalized, everything else isn't, but robustness says to handle the possibility
+	if (fileManager == "Nautilus" || fileManager == "nautilus" || fileManager == "NAUTILUS") {
+		fileManager = "Nautilus";
+	} else if (fileManager == "dolphin" || fileManager == "Dolphin" || fileManager == "DOLPHIN") {
+		fileManager = "Dolphin";
+	} else if (fileManager == "nemo" || fileManager == "Nemo" || fileManager == "NEMO") {
+		fileManager = "Nemo";
+	} else if (fileManager == "thunar" || fileManager == "Thunar" || fileManager == "THUNAR") {
+		fileManager = "Thunar";
+	} else if (fileManager == "caja-folder-handler") { // Caja doesn't follow the others
+		fileManager = "Caja";
+	} else {
+		// unsupported/unknown
+		fileManager = "";
+	}
+
+	// 4. Translate the string to the index
+	//copied from ini_helper.cpp
+	size_t index = std::distance(ProgramData::fileExplorerCmdArray_iniValues.begin(), std::find(ProgramData::fileExplorerCmdArray_iniValues.begin(), ProgramData::fileExplorerCmdArray_iniValues.end(), fileManager));
+	if (index != ProgramData::fileExplorerCmdArray_iniValues.size()) {
+		return index;
+	} else {
+		return -1;
+	}
+}
 #endif
 
 const std::array<const char*, 6> ProgramData::fileDeleteAgeList = { "0 seconds", "1 hour", "24 hours", "2 weeks", "1 month", "6 months" };

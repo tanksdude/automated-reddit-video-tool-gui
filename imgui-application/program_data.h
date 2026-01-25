@@ -14,7 +14,8 @@ struct ProgramData {
 	static const std::array<const char*, 7> fileExplorerCmdArray;
 	static const std::array<const char*, 7> fileExplorerCmdArray_iniValues;
 	static const std::array<const char*, 7> fileExplorerCmdArray_exe;
-	int fileExplorerCmdArray_current = 1;
+	int fileExplorerCmdArray_current = 0;
+	static int findIdxOfAutoFileExplorerCmd(); // Returns -1 if unknown/unsupported
 #endif
 	inline std::string get_pythonCmd() const { return std::string(pythonCmdArray[pythonCmdArray_current]); }
 
