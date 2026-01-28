@@ -432,7 +432,7 @@ int main(int, char**) {
 			const ImVec2 ImageButtonSize = { ImGui::GetTextLineHeight(), ImGui::GetTextLineHeight() };
 
 			if (ImGui::BeginTabBar("MainTabBar", 0)) {
-				ImGuiTabItemFlags tab_flags[5] = { 0, 0, 0, 0, 0 };
+				ImGuiTabItemFlags tab_flags[5] = { 0, 0, 0 };
 				if (set_startup_tab) [[unlikely]] {
 					//instead of clamping, set to zero on a bad value, because that's more obvious (maybe Help or About would be better?):
 					const int idx = (pdata.startup_tab_idx >= IM_ARRAYSIZE(tab_flags) || pdata.startup_tab_idx < 0) ? 0 : pdata.startup_tab_idx;
@@ -1225,18 +1225,24 @@ int main(int, char**) {
 					ImGui::Text("TODO");
 					ImGui::EndTabItem();
 				}
-				*/
 
 				if (ImGui::BeginTabItem("Help", nullptr, tab_flags[2])) {
-					ImGui::Text("TODO");
+					ImGui::Text("Requirements: TODO");
+					//TODO: list detected programs
 					ImGui::EndTabItem();
 				}
+				*/
 
-				if (ImGui::BeginTabItem("About", nullptr, tab_flags[3])) {
+				if (ImGui::BeginTabItem("About", nullptr, tab_flags[2])) {
 					ImGui::Text("License: GNU General Public License v3.0");
 					ImGui::Text("SPDX-License-Identifier: GPL-3.0-only");
 					ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
 					ImGui::TextLinkOpenURL("GitHub link", "https://github.com/tanksdude/automated-reddit-video-tool-gui");
+
+					ImGui::NewLine();
+					if (ImGui::Button("Close Application")) {
+						glfwSetWindowShouldClose(window, GLFW_TRUE);
+					}
 					ImGui::EndTabItem();
 				}
 
