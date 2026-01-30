@@ -927,8 +927,17 @@ int main(int, char**) {
 						ImGui::PopItemWidth();
 						ImGui::Unindent();
 
+						const bool voiceArray_unset = (adata.voiceArray_current < 0);
+						if (voiceArray_unset) {
+							ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 2.0f);
+							ImGui::PushStyleColor(ImGuiCol_Border, { 1.0f, 0.0f, 0.0f, 1.0f });
+						}
 						ImGui::Combo("Voice", &adata.voiceArray_current, adata.voiceArray, adata.voiceArray_length);
-						//TODO: some kind of visual indicator when one isn't selected
+						if (voiceArray_unset) {
+							ImGui::PopStyleColor();
+							ImGui::PopStyleVar();
+						}
+
 						ImGui::SameLine();
 						if (ImGui::Button("Refresh")) {
 							if (adata.update_voiceArray()) {
