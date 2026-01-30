@@ -16,7 +16,7 @@ const std::array<const char*, 7> ProgramData::fileExplorerCmdArray_exe       = {
 #include <algorithm> //std::find
 int ProgramData::findIdxOfAutoFileExplorerCmd() {
 	// 1. Run process
-	std::vector<std::string lines;
+	std::vector<std::string> lines;
 	int result = ARVT::readPipeIntoString("xdg-mime query default inode/directory", lines);
 	if (result || lines.empty()) {
 		return -1;
