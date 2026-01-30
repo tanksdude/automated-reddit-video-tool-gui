@@ -351,17 +351,14 @@ int main(int, char**) {
 	bool filenameIsLocked = false;
 	bool ret;
 
-	int lock_icon_width = 0;
-	int lock_icon_height = 0;
-	GLuint lock_icon_texture = 0;
-	ret = ImGuiHelpers::LoadTextureFromFile("../res/locked_1f512.png", &lock_icon_texture, &lock_icon_width, &lock_icon_height);
+	GLuint lock_icon_texture = 0, unlock_icon_texture = 0;
+	ret = ImGuiHelpers::LoadTextureFromFile("../res/locked_1f512.png", &lock_icon_texture, NULL, NULL);
+	IM_ASSERT(ret);
+	ret = ImGuiHelpers::LoadTextureFromFile("../res/unlocked_1f513.png", &unlock_icon_texture, NULL, NULL);
 	IM_ASSERT(ret);
 
-	int unlock_icon_width = 0;
-	int unlock_icon_height = 0;
-	GLuint unlock_icon_texture = 0;
-	ret = ImGuiHelpers::LoadTextureFromFile("../res/unlocked_1f513.png", &unlock_icon_texture, &unlock_icon_width, &unlock_icon_height);
-	IM_ASSERT(ret);
+	GLuint file_folder_texture = 0;
+	ret = ImGuiHelpers::LoadTextureFromFile("../res/file-folder_1f4c1.png", &file_folder_texture, NULL, NULL);
 
 	GLuint recommended_awful, recommended_okay, recommended_good, recommended_best, recommended_noopinion;
 	ret = ImGuiHelpers::LoadTextureFromFile("../res/cross-mark_274c.png", &recommended_awful, NULL, NULL);
@@ -454,14 +451,30 @@ int main(int, char**) {
 						if (THREAD_IS_WORKING) { ImGui::BeginDisabled(); }
 
 						if (filenameIsLocked) { ImGui::BeginDisabled(); }
+						ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 1.5f*style.ItemInnerSpacing.x);
 						ImGui::SetCursorPosY(ImGui::GetCursorPosY() + style.FramePadding.y); // Because an InputText doesn't exist yet, Text will not be y-aligned with it
-						//ImGui::PushStyleVarX(ImGuiStyleVar_ItemSpacing, style.ItemSpacing.x * .5f); //unsure
 						ImGui::Text("File Name:");
 						ImGui::SameLine();
 
 						ImGui::SetCursorPosY(ImGui::GetCursorPosY() - style.FramePadding.y); // "Correct" the cursor pos back to where it "should" be
+						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.7f);
 						ImGui::InputText("##Main Input Comment", pdata.the_file_input_name, IM_ARRAYSIZE(pdata.the_file_input_name), ImGuiInputTextFlags_CallbackCharFilter, filenameCleaningFunc_inputFile);
-						//ImGui::PopStyleVar();
+						ImGui::PopItemWidth();
+						ImGui::SameLine();
+
+						ImGui::SetCursorPosY(ImGui::GetCursorPosY() - style.FramePadding.y); // Again
+						if (ImGui::ImageButton("##Folder Icon", file_folder_texture, ImageButtonSize)) {
+							int result = ARVT::revealFileExplorer_folderOnly(ARVT::INPUT_COMMENTS.c_str());
+							if (result) {
+								global_log.AddLog("[warn]", "File Explorer", "Some error");
+							}
+						}
+						if (ImGui::BeginItemTooltip()) {
+							ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+							ImGui::TextUnformatted(filenameIsLocked ? "Don't modify it!" : "Open the folder");
+							ImGui::PopTextWrapPos();
+							ImGui::EndTooltip();
+						}
 						if (filenameIsLocked) { ImGui::EndDisabled(); }
 						ImGui::SameLine();
 

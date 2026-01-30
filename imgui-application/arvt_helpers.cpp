@@ -269,30 +269,36 @@ int revealFileExplorer_folderBackup(const char* path, const ProgramData& pdata) 
 	if (std::filesystem::exists(path)) {
 		return revealFileExplorer(path, pdata);
 	} else {
-		std::string folderpath = std::string(path);
-		size_t pos = folderpath.find_last_of('/');
-		folderpath.erase(pos);
-
-		//see revealFileExplorer() for comments
-
-		#ifdef _WIN32
-
-		std::string windows_stupid_backslash_requirement = std::string(folderpath);
-		std::replace(windows_stupid_backslash_requirement.begin(), windows_stupid_backslash_requirement.end(), '/', '\\');
-		std::string command = "explorer \"" + windows_stupid_backslash_requirement + "\""; //no /select
-		system_helper(command.c_str(), true);
+		revealFileExplorer_folderOnly(path);
 		return 1;
-		(void)pdata;
-
-		#else
-
-		const std::string fileExplorerCmd = std::string(ProgramData::fileExplorerCmdArray_exe[1]); //xdg-open
-		system_helper((fileExplorerCmd + " \"" + folderpath + "\"").c_str(), true);
-		return 1;
-		(void)pdata;
-
-		#endif
 	}
+}
+
+int revealFileExplorer_folderOnly(const char* path) {
+	std::string folderpath = std::string(path);
+	size_t pos = folderpath.find_last_of('/');
+	folderpath.erase(pos);
+
+	if (!std::filesystem::is_directory(folderpath)) {
+		return 1;
+	}
+
+	//see revealFileExplorer() for comments
+
+	#ifdef _WIN32
+
+	std::string windows_stupid_backslash_requirement = std::string(folderpath);
+	std::replace(windows_stupid_backslash_requirement.begin(), windows_stupid_backslash_requirement.end(), '/', '\\');
+	std::string command = "explorer \"" + windows_stupid_backslash_requirement + "\""; //no /select
+	system_helper(command.c_str(), true);
+	return 0;
+
+	#else
+
+	const std::string fileExplorerCmd = std::string(ProgramData::fileExplorerCmdArray_exe[1]); //xdg-open
+	return system_helper((fileExplorerCmd + " \"" + folderpath + "\"").c_str(), true);
+
+	#endif
 }
 
 int getListOfOldFiles(const char* dir, int hourCount, std::vector<std::string>& deleteFileList) {
