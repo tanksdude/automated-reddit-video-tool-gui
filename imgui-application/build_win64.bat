@@ -10,12 +10,16 @@ setlocal
 @REM NOTE: if building with IMGUI_DISABLE_WIN32_FUNCTIONS, then add to the line above: user32.lib
 
 Taskkill /IM %OUT_EXE%.exe /F
+
 if not exist "%OUT_DIR%" (
 	mkdir "%OUT_DIR%"
 )
 
+@set ICON=icon.res
+rc /nologo /fo %OUT_DIR%\%ICON% arvt.rc
+
 @REM NOTE: If you are building this for your own use, you should replace "/Zi" with "/O2" on the line below
-cl /std:c++20 /nologo /Zi /MD /MP /utf-8 %INCLUDES% %SOURCES% /Fe%OUT_DIR%\%OUT_EXE%.exe /Fo%OUT_DIR%\ /link %LIBS% /SUBSYSTEM:windows /ENTRY:mainCRTStartup
+cl /std:c++20 /nologo /Zi /MD /MP /utf-8 %INCLUDES% %SOURCES% /Fe%OUT_DIR%\%OUT_EXE%.exe /Fo%OUT_DIR%\ /link %OUT_DIR%\%ICON% %LIBS% /SUBSYSTEM:windows /ENTRY:mainCRTStartup
 
 endlocal
 @REM endlocal is technically not required
