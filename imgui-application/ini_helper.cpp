@@ -77,6 +77,8 @@ void CreateDefaultIniIfNeeded(const std::string& path) {
 
 	"[VIDEO]\n"
 	"\n"
+	"UseSeparateSpeechText = false\n"
+	"\n"
 	"VideoEncoder = H.264\n"
 	"VideoPreset1 = default\n"
 	"VideoPreset2 = default\n"
@@ -351,6 +353,19 @@ void Fill_AudioData(AudioData& adata, const mINI::INIStructure& ini_object, bool
 void Fill_VideoData(VideoData& vdata, const mINI::INIStructure& ini_object, bool useExtraCodecs) {
 	if (!ini_object.has("VIDEO")) {
 		return;
+	}
+
+	if (ini_object.get("VIDEO").has("UseSeparateSpeechText")) {
+		std::string get = ini_object.get("VIDEO").get("UseSeparateSpeechText");
+		if (!get.empty()) {
+			if (get == "true" || get == "True" || get == "TRUE" || get == "1") {
+				vdata.use_speech_text = true;
+			} else if (get == "false" || get == "False" || get == "FALSE" || get == "0") {
+				vdata.use_speech_text = false;
+			} else {
+				std::cerr << ("Unknown value for [VIDEO].UseSeparateSpeechText: \"" + get + "\"") << std::endl;
+			}
+		}
 	}
 
 	if (ini_object.get("VIDEO").has("VideoEncoder")) {
@@ -760,6 +775,8 @@ void CopySettingsToIni(mINI::INIStructure& ini_object, const ImageData& idata, c
 	ini_object["AUDIO"]["AudioPreset"]  = adata.get_audioPreset1_currentValue();
 
 	ini_object["AUDIO"]["AudioBitrateKbps"] = std::to_string(adata.audio_bitrate_v); //no need to check if lossless
+
+	ini_object["VIDEO"]["UseSeparateSpeechText"] = std::to_string(vdata.use_speech_text);
 
 	ini_object["VIDEO"]["VideoEncoder"] = vdata.get_videoEncoder()->internalName;
 	ini_object["VIDEO"]["VideoPreset1"] = vdata.get_videoPreset1_currentValue();
