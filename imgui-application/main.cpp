@@ -1262,6 +1262,21 @@ int main(int, char**) {
 					ImGui::TextLinkOpenURL("GitHub link", "https://github.com/tanksdude/automated-reddit-video-tool-gui");
 
 					ImGui::NewLine();
+					if (ImGui::TreeNodeEx("Extra Buttons", ImGuiTreeNodeFlags_FramePadding)) {
+						if (ImGui::Button("Toggle window decorations (title bar & outline)")) {
+							glfwSetWindowAttrib(window, GLFW_DECORATED, !glfwGetWindowAttrib(window, GLFW_DECORATED));
+						}
+						if (ImGui::Button("Maximize window")) {
+							glfwMaximizeWindow(window);
+						}
+						if (ImGui::Button("Un-maximize window")) {
+							glfwRestoreWindow(window);
+						}
+						if (ImGui::Button("Minimize window")) {
+							glfwIconifyWindow(window);
+						}
+						ImGui::TreePop();
+					}
 					if (ImGui::Button("Close Application")) {
 						glfwSetWindowShouldClose(window, GLFW_TRUE);
 					}
