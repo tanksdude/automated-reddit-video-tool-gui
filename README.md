@@ -6,7 +6,7 @@ This program does not automate the entire process of making a "Reddit reading" v
 
 ## Usage
 
-![readme video](readme-video-alpha.gif)
+![readme video](readme-video.gif)
 
 1. Obtain the comment you want to make a video for as a .txt file. Put that file in the `arvt_input_comments` folder.
 1. Type in the file name in the "File Name" section. Click "Preview File" to make sure you got the right file.
