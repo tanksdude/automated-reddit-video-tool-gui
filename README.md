@@ -91,24 +91,61 @@ If you know how to get it working, please do share, because you would probably b
 
 Depending on your flavor of Ubuntu (such as Linux Mint), you may need to ensure you have Pango and a library for every image format you plan on using. For example, PNG and Pango would require `sudo apt install libpng-dev libpango1.0-dev` (the `-dev` version probably not necessary).
 
-## Option list (WIP)
+## Option list
 
-By default, this program uses H.264 and AAC codecs in an MP4 container by default for high compatibility, however these are not the "recommended" codecs. You will probably want lossless codecs, especially when the filesize increase is rather small. For video, I recommend changing H.264 to FFV1, or Ut Video if your video editor does not support FFV1; both require changing the container to MKV. For audio, I recommend changing AAC to FLAC, or copy if decode speed is vital.
+### Foreword
 
-## TODO list
+Video settings: By default, this program uses H.264 and AAC codecs in an MP4 container for high compatibility, however these are not the "recommended" codecs. You will probably want lossless codecs, especially when the filesize increase is rather small. For video, I recommend changing H.264 to FFV1, or Ut Video if your video editor does not support FFV1; both require changing the container to MKV. For audio, I recommend changing AAC to FLAC, or copy if decode speed is vital.
 
-* ~~make all the options do something~~
-* ~~*robustness*~~
-* handle cmd errors and python errors
-* ~~ImGui window fullscreen~~
-* support for other platforms and compilers
-* ClangFormat
-* Doxygen
-* ~~an INI file for saving and loading settings~~
-* support for SSH-ing into a virtual machine (don't count on it) (transfer files by zip/tar)
-* option to embed subtitles in the videos (would anyone use it?) (supposedly needs a .mkv but it seems to work in a .mp4)
-* unit tests (GTest)
-* ~~other font options~~
+### Execute tab
+
+![execute 1](examples/arvt-execute-1.png)
+
+* Click the folder icon to open the folder where the comment should go.
+* Click the lock icon to access the rest of the application.
+
+![execute 2](examples/arvt-execute-2.png)
+
+* Click "Reveal in File Explorer" to open the folder on the file. This is useful if you want to edit the text.
+* "Preview File" will load the file for you to view. This will happen automatically in some cases, but if you edit the file then the changes won't show up until you click the button.
+* Click "↓ Make Copy ↓" to copy the "text" file to a "speech" file. Useful for the next bullet point.
+* "Use Speech Text" when you want the text on the screen to be different from the text being said. Mainly useful for when the TTS voice encounters strange symbols, or the very many things it doesn't know how to pronounce properly.
+
+![execute 3](examples/arvt-execute-3.png)
+
+* Image and font parameters should be self-explanatory. It's probably faster for you to edit them and see what they change.
+* Under "Additional Options":
+	* "Font Name" changes the font used for the image/video. Some fonts are part of a font family, so you may need to enable "Font is a family". Find the supported fonts by running `magick -list font`.
+	* "Skip line with lone '\n'" will create a blank line if said line only has the string "\n" on it. Useful for when you want to manually add extra newlines, for instance setting "Newline Count" to 1 and adding "\n" where you want a blank line.
+* "Replace ImageMagick escape sequences" is extremely useful. ImageMagick's Pango renderer (used to render text) has an HTML-like markup language. This means `& < >` needs to be replaced by `&amp; &lt; &gt;`, otherwise it will get confused. By leaving this checked (default on), the text will be replaced in Python before sending it to ImageMagick (without modifying the file). Highly recommend you keep this on. Do note that some TTS voices will also get confused, so you may have to edit the text/speech yourself.
+* "Video Replacement" is for when you only want to replace some specific videos. Useful in audio-only mode, because then you can replace just the clips needed, but in normal video mode you would also have to replace every clip after the desired one to fix the video's text.
+* Click "Settings" to either write the current settings or import them. Useful for archiving your video in case you need to recreate it later.
+
+### Configure tab
+
+![configure audio](examples/arvt-configure-audio.png)
+
+* "Speech Engine" is the program that generates the TTS speech. Windows and Linux support different speech engines.
+	* "Voice Language" is for filtering the voices of the speech engine. Only supported by eSpeak.
+* Each audio encoder has different options available for fine-tuning. Lossy codecs will have a bitrate slider. Some codecs have other options like compression level.
+	* Audio encoders are not used in audio-only mode.
+
+![configure video](examples/arvt-configure-video.png)
+
+* "FPS" can use the dropdown for common values or "Custom FPS" to enter something more specific.
+* Each video encoder has different options available for fine-tuning. *Most* lossy codecs will have a bitrate slider. Some codecs have other options, most of which are compression/quality levels.
+* "Container" is the file format to be used for the video. `.mkv` supports everything, if you're unsure about what to pick.
+	* `-movflags=+faststart` is available for some containers, such as `.mp4`. It's not necessary.
+	* In audio-only mode, the container will be `.wav`.
+* This whole column is not used in audio-only mode for obvious reasons.
+
+*[Configure Other: TODO]*
+
+![configure delete](examples/arvt-configure-delete.png)
+
+* Note that this will *permanently* delete files. But if you need to clear out old images and videos, this can be helpful. Completely optional, provided for convenience.
+* "Clear queried files" will remove all the files from the deletion list. With no files in the list, nothing can get deleted.
+* "Delete queried files" will delete the files. You will get one last chance to confirm, but after that the files will be deleted.
 
 ## Audio-only note
 
@@ -116,7 +153,38 @@ By default, this program uses H.264 and AAC codecs in an MP4 container by defaul
 
 ## Example usage
 
-TODO
+1. Obtaining the comment: For this example, I will be using the "GNU/Linux Interjection" copypasta. (If the `arvt_input_comments` folder doesn't exist, either create it yourself or start up the program and it will create the folder.)
+
+![comment 1](examples/arvt-example-comment-1.png)
+
+2. Split the text: This will standardize the text to one sentence per line, with extra newlines meaning a new paragraph. (Remember to click the lock icon first!)
+
+![comment 2](examples/arvt-example-comment-2.png)
+![split 1](examples/arvt-example-split-1.png)
+
+3. (Optional) Edit the splits as desired: You may want to merge sentences or add extra splits to sentences.
+
+![split 2](examples/arvt-example-split-2.png)
+
+4. (Optional) Create a separate speech text file if desired: TTS voices are not a fan of text that isn't meant to be said. You can also add extra text to spice up the text on screen without harming the speech.
+
+![split 3](examples/arvt-example-split-3.png)
+
+5. Edit the image parameters: This will be the video's size as well. Change to your heart's content.
+
+![image 1](examples/arvt-example-image-1.png)
+![image 2](examples/arvt-example-image-2.png)
+![image 3](examples/arvt-example-image-3.png)
+
+6. Make the videos
+
+![video 1](examples/arvt-example-video-1.png)
+
+7. Create your "Reddit Reading" video: This is where you put the clips into a video editor and edit.
+
+![video 2](examples/arvt-example-video-2.png)
+
+8. You're done!
 
 ## License
 
