@@ -13,7 +13,7 @@
 * mostly complete Linux support
 * preliminary INI settings
 * added more codecs, added comments on the various codecs
-* the Unicode arrows now render correctly
+* the Unicode arrows now render correctly (on Windows, using specific fonts)
 * the ImGui window is now fullscreen
 * renamed the executable
 
@@ -31,4 +31,4 @@
 * works if you know what you're doing and are very careful with inputs
 * Windows-only
 
-GitHub: https://github.com/tanksdude/automated-reddit-video-tool-gui
+GitHub: https://github.com/khuiqel/automated-reddit-video-tool-gui

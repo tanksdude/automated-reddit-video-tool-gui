@@ -6,10 +6,11 @@
 // * codec crf/bitrate ranges sometimes obtained empirically
 // * Kdenlive CRF range (generally not used):
 //   * H.264:   { 23, 15, 45, ... }
-//   * H.265:   { 23, 15, 45, ... }
+//   * H.265:   { 28, 15, 45, ... }
 //   * VP8:     { 15,  5, 45, ... }
 //   * VP9:     { 25, 15, 45, ... }
-//   * AV1:     { 25, 15, 45, ... }
+//   * AV1:     { 25, 15, 45, ... } (libaom-av1)
+//   * AV1:     { 32,  5, 45, ... } (libsvtav1)
 
 const GenericCodecPreset PRESET_AUDIO_AAC_encoding = {
 	.displayTerm = "Encoding Method",

@@ -177,10 +177,10 @@ int SpawnDebugConsole() {
 int copyFileToCStr(const char* path, char* dest, int buf_size) {
 	//note: this vvv call can throw
 	if (!std::filesystem::exists(path)) {
-		return 2;
+		return 1;
 	}
 	if (!std::filesystem::is_regular_file(path)) {
-		return 2;
+		return 1;
 	}
 
 	std::ifstream input_file;
@@ -199,7 +199,7 @@ int copyFileToCStr(const char* path, char* dest, int buf_size) {
 	} else {
 		//error
 		//input_file.close();
-		return 3;
+		return 1;
 	}
 }
 
@@ -304,7 +304,10 @@ int revealFileExplorer_folderOnly(const char* path) {
 int getListOfOldFiles(const char* dir, int hourCount, std::vector<std::string>& deleteFileList) {
 	auto nowTime = std::chrono::file_clock::now();
 	for (const auto& file : std::filesystem::directory_iterator(dir)) {
-		//TODO: not sure what to do about directories
+		if (!std::filesystem::is_regular_file(file)) [[unlikely]] {
+			continue;
+		}
+
 		std::filesystem::file_time_type ftime = std::filesystem::last_write_time(file);
 		auto duration = nowTime - ftime;
 		if (duration > std::chrono::hours(hourCount)) {

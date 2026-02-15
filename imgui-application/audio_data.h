@@ -12,7 +12,7 @@ struct AudioData {
 
 #ifdef _WIN32
 	static const std::array<const char*, 4> speechEngineArray;
-	int speechEngineArray_current = 0;
+	int speechEngineArray_current = 2;
 #else
 	static const std::array<const char*, 2> speechEngineArray;
 	int speechEngineArray_current = 1;

@@ -1,5 +1,6 @@
 #include "ini_helper.h"
 #include <cstring> //strcpy, memcpy
+#include <algorithm> //std::find
 #include <filesystem>
 #include <fstream>
 #include <iostream>

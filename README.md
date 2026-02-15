@@ -37,20 +37,20 @@ Note that these programs must be accessible from a plain command line, meaning t
 * Python 3.8+
 * ImageMagick 7 (Ubuntu: see below for issues)
 * a text-to-speech program
-	* Windows: Balabolka, eSpeak, [wsay](https://github.com/p-groarke/wsay)
+	* Windows: Balabolka, eSpeak, [wsay (EXPERIMENTAL SUPPORT)](https://github.com/p-groarke/wsay)
 	* Linux: eSpeak
 * FFmpeg 4.4+ (corresponds to Ubuntu 22.04 (Jammy Jellyfish) or higher), older versions likely work but are not officially supported
 
 ### Compiling from source (Windows)
 
-Currently only Windows x64 with MSVC 2022 is officially supported.
+Currently only MSVC 2022 is officially supported.
 
 1. Enable the MSVC environment variables in your command prompt: `"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"`
 1. `cd imgui-application`
 1. `build_win64.bat`
 1. Executable: `"Debug/arvt-gui.exe"` (don't `cd`)
 
-[Pre-compiled executables](https://github.com/tanksdude/automated-reddit-video-tool-gui/releases) are provided for Windows.
+[Pre-compiled executables](https://github.com/khuiqel/automated-reddit-video-tool-gui/releases) are provided for Windows.
 
 MSYS2 can work, but I've also tried doing these same steps and it failing. Hopefully it will work for you:
 
@@ -139,7 +139,12 @@ Video settings: By default, this program uses H.264 and AAC codecs in an MP4 con
 	* In audio-only mode, the container will be `.wav`.
 * This whole column is not used in audio-only mode for obvious reasons.
 
-*[Configure Other: TODO]*
+![configure other](examples/arvt-configure-other.png)
+
+* To load a new font, enter its filepath and click "Load". To switch between loaded fonts, use "Font Selector".
+* "Extra Codecs" will enable the use of the much rarer audio/video codecs. You probably won't want them.
+* Change "Python Command" if you need to. Windows tends to use `python` or `py -3` while Linux tends to use `python3`.
+* [Linux] "File Explorer" is the program to use when clicking "Reveal in File Explorer". `auto` will detect your system's default file manager and use that.
 
 ![configure delete](examples/arvt-configure-delete.png)
 

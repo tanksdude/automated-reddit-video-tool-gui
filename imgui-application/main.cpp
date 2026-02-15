@@ -202,6 +202,7 @@ void thread_func_speech(const ProgramData* pdata, const ImageData* idata, const 
 	thread_func_speech_working.store(false);
 	//return result;
 
+	// Logging here is a race condition... but it doesn't really matter
 	if (result) {
 		global_log.AddLog("[error]", "Video", "Encountered an error when making the videos");
 	} else {
@@ -213,7 +214,7 @@ static void glfw_error_callback(int error, const char* description) {
 	fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
-// Main code
+
 int main(int, char**) {
 	ARVT::CreateDefaultIniIfNeeded("../arvt.ini");
 	mINI::INIFile ini_file("../arvt.ini");
@@ -429,7 +430,7 @@ int main(int, char**) {
 			const ImVec2 ImageButtonSize = { ImGui::GetTextLineHeight(), ImGui::GetTextLineHeight() };
 
 			if (ImGui::BeginTabBar("MainTabBar", 0)) {
-				ImGuiTabItemFlags tab_flags[5] = { 0, 0, 0 };
+				ImGuiTabItemFlags tab_flags[3] = { 0, 0, 0 };
 				if (set_startup_tab) [[unlikely]] {
 					//instead of clamping, set to zero on a bad value, because that's more obvious (maybe Help or About would be better?):
 					const int idx = (pdata.startup_tab_idx >= IM_ARRAYSIZE(tab_flags) || pdata.startup_tab_idx < 0) ? 0 : pdata.startup_tab_idx;
@@ -813,6 +814,7 @@ int main(int, char**) {
 								mINI::INIFile video_settings_file(pdata.evaluated_video_settings_path);
 								mINI::INIStructure video_settings_object;
 								bool result = video_settings_file.read(video_settings_object);
+								//TODO: shouldn't this reset unset settings to default?
 
 								if (!result) {
 									global_log.AddLog("[error]", "Settings", "Encountered an error when reading settings");
@@ -910,7 +912,6 @@ int main(int, char**) {
 						ImGui::TableNextRow();
 						ImGui::TableSetColumnIndex(0);
 
-						//to align text to the left: use a table
 						if (ImGui::Combo("Speech Engine", &adata.speechEngineArray_current, adata.speechEngineArray.data(), adata.speechEngineArray.size())) {
 							//there was a change
 							if (adata.update_voiceArray()) {
@@ -1054,7 +1055,7 @@ int main(int, char**) {
 
 						ImGui::Unindent();
 
-						//TODO: probably move to main settings, think about non-wav containers for audio-only mode
+						//TODO: think about non-wav containers for audio-only mode
 						ImGui::Combo("Container", &vdata.videoContainerArray_current, vdata.videoContainerArray.data(), vdata.videoContainerArray.size());
 
 						ImGui::Indent();
@@ -1259,7 +1260,7 @@ int main(int, char**) {
 					ImGui::Text("License: GNU General Public License v3.0");
 					ImGui::Text("SPDX-License-Identifier: GPL-3.0-only");
 					ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-					ImGui::TextLinkOpenURL("GitHub link", "https://github.com/tanksdude/automated-reddit-video-tool-gui");
+					ImGui::TextLinkOpenURL("GitHub link", "https://github.com/khuiqel/automated-reddit-video-tool-gui");
 
 					ImGui::NewLine();
 					if (ImGui::TreeNodeEx("Extra Buttons", ImGuiTreeNodeFlags_FramePadding)) {

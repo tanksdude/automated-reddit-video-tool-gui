@@ -13,11 +13,6 @@ const std::string INPUT_SPLITS = "../arvt_input_splits/";
 const std::string TEST_IMAGES = "../arvt_test_images/";
 const std::string OUTPUT_SPEECH = "../arvt_output_speech/";
 const std::string VIDEO_SETTINGS = "../arvt_video_settings/";
-#ifdef _WIN32
-const std::string COMMAND_QUOTE = "\""; //TODO: actually use
-#else
-const std::string COMMAND_QUOTE = "\'";
-#endif
 
 // Public methods:
 
@@ -34,8 +29,6 @@ void copyEvaluatedFileName_toCommentTestImagePath_TestImage(const char* name, co
 void copyEvaluatedFileName_toCommentToSpeechPath(const char* name, const VideoData& vd, char* dest, size_t buf_size);
 void copyEvaluatedFileName_toVideoSettingsPath(const char* name, char* dest, size_t buf_size);
 
-//returns 0 if no errors; does not have to completely fill the buffer
-//1: some error; 2: does not exist or is not a file; 3: reading error
 int copyFileToCStr(const char* path, char* dest, int buf_size);
 int copy_file(const char* path, const char* newPath);
 

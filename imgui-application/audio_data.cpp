@@ -69,7 +69,7 @@ void AudioData::getVoiceListFromExe_Balabolka(std::vector<std::string>& file_lin
 			continue;
 		}
 		if (l[0] == ' ') {
-			// scrub whitespace
+			// Scrub whitespace
 			pos = l.find_last_not_of(" \r\n");
 			if (pos+1 < l.size()) {
 				l.erase(pos+1);
@@ -79,7 +79,7 @@ void AudioData::getVoiceListFromExe_Balabolka(std::vector<std::string>& file_lin
 				l.erase(0, pos);
 			}
 
-			// push to list
+			// Push to list
 			if (!l.empty()) {
 				voiceList.push_back(l);
 			}
@@ -97,7 +97,7 @@ void AudioData::getVoiceListFromExe_Espeak(std::vector<std::string>& file_lines,
 	// When specifying a VoiceName to eSpeak, the underscores have to be replaced back by spaces, so do it here because this part is visible to the user
 	// Theoretically there could be a voice that has underscores *and* spaces, but that let's say that's user error because that's above my pay grade to handle
 
-	file_lines.erase(file_lines.begin()); //remove formatting information
+	file_lines.erase(file_lines.begin()); // Remove formatting information
 	for (std::string& l : file_lines) {
 		while (!l.empty() && l[0] == ' ') {
 			l.erase(0, 1);
@@ -107,17 +107,17 @@ void AudioData::getVoiceListFromExe_Espeak(std::vector<std::string>& file_lines,
 			continue;
 		}
 
-		//find start and end of VoiceName column (TODO: would regex be easier? basically ([^\s]+[\s]+){3} to get the start of the name)
+		// Find start and end of VoiceName column (TODO: would regex be easier? basically ([^\s]+[\s]+){3} to get the start of the name)
 		size_t pos = l.find_first_of(" ");
-		pos = l.find_first_not_of(" ", pos); //Language column
+		pos = l.find_first_not_of(" ", pos); // "Language" column
 		pos = l.find_first_of(" ", pos);
-		pos = l.find_first_not_of(" ", pos); //Age/Gender column
+		pos = l.find_first_not_of(" ", pos); // "Age/Gender" column
 		pos = l.find_first_of(" ", pos);
-		pos = l.find_first_not_of(" ", pos); //VoiceName column
+		pos = l.find_first_not_of(" ", pos); // "VoiceName" column
 		size_t endPos = l.find_first_of(" ", pos);
 		std::string voice = l.substr(pos, endPos - pos);
 
-		//replace and push to list
+		// Replace and push to list
 		std::replace(voice.begin(), voice.end(), '_', ' ');
 		voiceList.push_back(voice);
 	}
@@ -135,7 +135,7 @@ void AudioData::getVoiceListFromExe_Wsay(std::vector<std::string>& file_lines, s
 }
 
 int AudioData::update_voiceArray() {
-	// Step 1: poll available voices
+	// Step 1: Poll available voices
 
 	std::vector<std::string> file_lines;
 	int result;
@@ -157,9 +157,10 @@ int AudioData::update_voiceArray() {
 		return 1;
 	}
 
-	// Step 2: read the available voices
+	// Step 2: Read the available voices
 
 	std::vector<std::string> voiceList;
+	//TODO: probably need a failsafe for when the voices have quotes in them
 
 	switch (speechEngineArray_current) {
 	#ifdef _WIN32
@@ -186,7 +187,7 @@ int AudioData::update_voiceArray() {
 	#endif
 	}
 
-	// Step 3: update internals
+	// Step 3: Update internals
 
 	voiceArray_free();
 
