@@ -926,6 +926,45 @@ int main(int, char**) {
 						ImGui::SameLine();
 						ImGuiHelpers::HelpMarker("Not all speech engines support filtering by language.\nCan leave this blank.");
 						ImGui::PopItemWidth();
+
+						#if 0
+						const bool opened_advanced_options_speech_engine = ImGui::TreeNodeEx("Advanced Speech Options##Speech Engine", ImGuiTreeNodeFlags_FramePadding);
+						if (opened_advanced_options_speech_engine) {
+							//TODO: checkmark before each one to enable it
+							ImGui::Unindent(style.IndentSpacing);
+							//balcon:
+							ImGui::SliderScalar("-s Speech Rate", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max); //-10 to 10
+							ImGui::SliderScalar("-p Speech Pitch", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max); //-10 to 10
+							ImGui::SliderScalar("-v Volume", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max); //0 to 100
+							ImGui::SliderScalar("-e Pause between sentences (ms)", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max);
+							//ImGui::SliderScalar("-a Pause between paragraphs (ms)", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max);
+							ImGui::SliderScalar("-sb Pause at the beginning (ms)", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max);
+							ImGui::SliderScalar("-se Pause at the end (ms)", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max);
+							ImGui::SliderScalar("-fr Frequency", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max); //8 to 48
+							//others: -bt audio bit depth (8 or 16), ignore text options
+
+							//espeak-ng:
+							ImGui::SliderScalar("-a Amplitude", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max); //0 to 200 default 100
+							ImGui::SliderScalar("-g Pause between words (10ms)", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max);
+							ImGui::SliderScalar("-p Pitch adjustment", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max); //0 to 99 default 50
+							ImGui::SliderScalar("-P Pitch range adjustment", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max); //0 to 99 default 50
+							ImGui::SliderScalar("-s WPM", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max); //default 175
+							//others: -z no final sentence pause at end of text
+
+							//wsay:
+							ImGui::SliderScalar("--P, --pitch <value>", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max); //0 to 20 default 10
+							ImGui::SliderScalar("-s, --speed <value>", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max); //0 to 100 default 50
+							ImGui::SliderScalar("-V, --volume <value>", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max); //0 to 100
+							ImGui::SliderScalar("--fxradio <value>", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max); //1 to 6
+							ImGui::SliderScalar("--fxradio_nonoise", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max);
+							ImGui::SliderScalar("--paragraph_pause <value>", ImGuiDataType_S16, &adata.audio_bitrate_v, &adata.audio_bitrate_min, &adata.audio_bitrate_max); //0 to big
+							//others: --nospeechxml
+
+							ImGui::Indent(style.IndentSpacing);
+							ImGui::TreePop();
+						}
+						#endif
+
 						ImGui::Unindent();
 
 						const bool voiceArray_unset = (adata.voiceArray_current < 0);
