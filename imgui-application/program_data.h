@@ -32,10 +32,28 @@ struct ProgramData {
 	char evaluated_output_speech_path[1024];
 	char evaluated_video_settings_path[1024];
 
+	char input_comments_path[1024];
+	char input_splits_path[1024];
+	char test_images_path[1024];
+	char output_speech_path[1024];
+	char video_settings_path[1024];
+	char temporary_file_path[1024];
+	void ResetFilePaths(); // (not including the font)
+
+	std::string get_input_comments_path() const;
+	std::string get_input_splits_path() const;
+	std::string get_test_images_path() const;
+	std::string get_output_speech_path() const;
+	std::string get_video_settings_path() const;
+	std::string get_temporary_file_path() const;
+	static bool valid_filepath_for_scripts(const char* path); // Returns true if empty or last character is '/'
+	static void clean_filepath(char* path); // Used by the INI file when loading paths
+
 	char application_font_path[1024];
 	float application_font_size;
 	bool application_scale_to_monitor;
 
+	bool useCustomPaths = false;
 	//bool input_comment_word_wrap = true; //TODO: word wrap doesn't affect TextMultiline for some reason
 	bool useExtraCodecs = false; //used for VideoData/AudioData
 	int startup_tab_idx = 0; //*not* clamped to valid range

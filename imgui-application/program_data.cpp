@@ -1,5 +1,7 @@
 #include "program_data.h"
-#include <cstring> //strcpy
+#include <cstring> //strcpy, strlen
+#include <algorithm> //std::replace, std::remove
+#include "arvt_helpers.h" //default file paths
 
 #ifdef _WIN32
 const std::array<const char*, 3> ProgramData::pythonCmdArray = { "python", "python3", "py -3" };
@@ -85,6 +87,59 @@ ProgramData::ProgramData() {
 	// accessed; they are always written to (using the_file_input_name)
 	// before being used or sent to ImGui.
 
+	ResetFilePaths();
+
 	strcpy(application_font_path, "../res/NotoSans-Regular.otf");
 	application_font_size = 24.0f;
+}
+
+void ProgramData::ResetFilePaths() {
+	strcpy(input_comments_path, ARVT::DEFAULT_INPUT_COMMENTS.c_str());
+	strcpy(input_splits_path,   ARVT::DEFAULT_INPUT_SPLITS.c_str());
+	strcpy(test_images_path,    ARVT::DEFAULT_TEST_IMAGES.c_str());
+	strcpy(output_speech_path,  ARVT::DEFAULT_OUTPUT_SPEECH.c_str());
+	strcpy(video_settings_path, ARVT::DEFAULT_VIDEO_SETTINGS.c_str());
+	strcpy(temporary_file_path, "");
+}
+
+bool ProgramData::valid_filepath_for_scripts(const char* path) {
+	int len = strlen(path);
+	if (len == 0) {
+		return true;
+	}
+	if (path[len-1] == '/') {
+		return true;
+	}
+	return false;
+}
+
+std::string ProgramData::get_input_comments_path() const {
+	return (useCustomPaths && valid_filepath_for_scripts(input_comments_path)) ? std::string(input_comments_path) : ARVT::DEFAULT_INPUT_COMMENTS;
+}
+std::string ProgramData::get_input_splits_path() const {
+	return (useCustomPaths && valid_filepath_for_scripts(input_splits_path))   ? std::string(input_splits_path)   : ARVT::DEFAULT_INPUT_SPLITS;
+}
+std::string ProgramData::get_test_images_path() const {
+	return (useCustomPaths && valid_filepath_for_scripts(test_images_path))    ? std::string(test_images_path)    : ARVT::DEFAULT_TEST_IMAGES;
+}
+std::string ProgramData::get_output_speech_path() const {
+	return (useCustomPaths && valid_filepath_for_scripts(output_speech_path))  ? std::string(output_speech_path)  : ARVT::DEFAULT_OUTPUT_SPEECH;
+}
+std::string ProgramData::get_video_settings_path() const {
+	return (useCustomPaths && valid_filepath_for_scripts(video_settings_path)) ? std::string(video_settings_path) : ARVT::DEFAULT_VIDEO_SETTINGS;
+}
+std::string ProgramData::get_temporary_file_path() const {
+	return (useCustomPaths && valid_filepath_for_scripts(temporary_file_path)) ? std::string(temporary_file_path) : "";
+}
+
+void ProgramData::clean_filepath(char* path) {
+	// Character list copied from filepathCleaningFunc() in main.cpp
+	constexpr char charList[] = { '*', '\"', '?', '<', '>', '|' };
+	std::replace(path, path + strlen(path), '\\', '/');
+
+	std::string str(path);
+	for (size_t i = 0; i < sizeof(charList)/sizeof(*charList); i++) {
+		str.erase(std::remove(str.begin(), str.end(), charList[i]), str.end());
+	}
+	strcpy(path, str.c_str());
 }

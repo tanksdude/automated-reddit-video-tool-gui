@@ -8,11 +8,11 @@
 
 namespace ARVT {
 
-const std::string INPUT_COMMENTS = "../arvt_input_comments/";
-const std::string INPUT_SPLITS = "../arvt_input_splits/";
-const std::string TEST_IMAGES = "../arvt_test_images/";
-const std::string OUTPUT_SPEECH = "../arvt_output_speech/";
-const std::string VIDEO_SETTINGS = "../arvt_video_settings/";
+const std::string DEFAULT_INPUT_COMMENTS = "../arvt_input_comments/";
+const std::string DEFAULT_INPUT_SPLITS   = "../arvt_input_splits/";
+const std::string DEFAULT_TEST_IMAGES    = "../arvt_test_images/";
+const std::string DEFAULT_OUTPUT_SPEECH  = "../arvt_output_speech/";
+const std::string DEFAULT_VIDEO_SETTINGS = "../arvt_video_settings/";
 
 // Public methods:
 
@@ -22,12 +22,12 @@ int readPipeIntoString(const char* cmd, std::vector<std::string>& lines);
 
 void CreateApplicationFoldersIfNeeded();
 
-void copyEvaluatedFileName_toCommentSplitterPath(const char* name, char* dest, size_t buf_size);
-void copyEvaluatedFileName_toCommentTestImagePath_Text(const char* name, char* dest, size_t buf_size);
-void copyEvaluatedFileName_toCommentTestImagePath_Speech(const char* name, char* dest, size_t buf_size);
-void copyEvaluatedFileName_toCommentTestImagePath_TestImage(const char* name, const ImageData& id, char* dest, size_t buf_size);
-void copyEvaluatedFileName_toCommentToSpeechPath(const char* name, const VideoData& vd, char* dest, size_t buf_size);
-void copyEvaluatedFileName_toVideoSettingsPath(const char* name, char* dest, size_t buf_size);
+void copyEvaluatedFileName_toCommentSplitterPath(ProgramData& pdata);
+void copyEvaluatedFileName_toCommentTestImagePath_Text(ProgramData& pdata);
+void copyEvaluatedFileName_toCommentTestImagePath_Speech(ProgramData& pdata);
+void copyEvaluatedFileName_toCommentTestImagePath_TestImage(ProgramData& pdata, const ImageData& id);
+void copyEvaluatedFileName_toCommentToSpeechPath(ProgramData& pdata, const VideoData& vd);
+void copyEvaluatedFileName_toVideoSettingsPath(ProgramData& pdata);
 
 int copyFileToCStr(const char* path, char* dest, int buf_size);
 int copy_file(const char* path, const char* newPath);
@@ -39,21 +39,21 @@ int revealFileExplorer_folderOnly(const char* path); //requires the folder name 
 int getListOfOldFiles(const char* dir, int hourCount, std::vector<std::string>& deleteFileList);
 int deleteAllOldFiles(const std::vector<std::string>& fileList); //no undo!
 
-int call_comment_splitter(const char* name, const ProgramData& pdata);
-int call_comment_test_image(const char* name, const ProgramData& pdata, const ImageData& idata);
-int call_comment_to_speech(const char* name, const ProgramData& pdata, const ImageData& idata, const AudioData& adata, const VideoData& vdata);
+int call_comment_splitter(const ProgramData& pdata);
+int call_comment_test_image(const ProgramData& pdata, const ImageData& idata);
+int call_comment_to_speech(const ProgramData& pdata, const ImageData& idata, const AudioData& adata, const VideoData& vdata);
 
 
 
 // Internal use:
 
-std::string inputFileName_toCommentSplitterPath(const char* name);
-std::string inputFileName_toCommentTestImagePath_Text(const char* name);
-std::string inputFileName_toCommentTestImagePath_Speech(const char* name);
-std::string inputFileName_toCommentTestImagePath_TestImage(const char* name, const char* format);
-std::string inputFileName_toCommentToSpeechPath(const char* name, const char* container, bool audio_only);
-std::string inputFileName_toCommentToSpeechPath_getFileExplorerName(const char* name, const char* container, bool audio_only);
-std::string inputFileName_toVideoSettingsPath(const char* name);
+std::string inputFileName_toCommentSplitterName(const char* name);
+std::string inputFileName_toCommentTestImageName_Text(const char* name);
+std::string inputFileName_toCommentTestImageName_Speech(const char* name);
+std::string inputFileName_toCommentTestImageName_TestImage(const char* name, const char* format);
+std::string inputFileName_toCommentToSpeechName(const char* name, const char* container, bool audio_only);
+std::string inputFileName_toCommentToSpeechName_getFileExplorerName(const char* name, const char* container, bool audio_only);
+std::string inputFileName_toVideoSettingsName(const char* name);
 
 int system_helper(const char* command, bool no_cmd);
 int SpawnDebugConsole();

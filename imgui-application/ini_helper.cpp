@@ -16,7 +16,7 @@ void CreateDefaultIniIfNeeded(const std::string& path) {
 
 	"[APPLICATION]\n"
 	"\n"
-	";ApplicationFont = C:\\Windows\\Fonts\\NotoSans-Regular.ttf\n"
+	";ApplicationFont = C:/Windows/Fonts/NotoSans-Regular.ttf\n"
 	";ApplicationFont = /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc\n"
 	";ApplicationFont = /usr/share/fonts/google-noto/NotoSans-Regular.ttf\n"
 	";ApplicationFont = /usr/share/fonts/noto/NotoSans-Regular.ttf\n"
@@ -32,6 +32,14 @@ void CreateDefaultIniIfNeeded(const std::string& path) {
 	"\n"
 	"UseExtraCodecs = false\n"
 	"InitialOpenTab = 0\n"
+	"\n"
+	"EnableCustomPaths = false\n"
+	";InputCommentsFolder = ../arvt_input_comments/\n"
+	";InputSplitsFolder   = ../arvt_input_splits/\n"
+	";TestImagesFolder    = ../arvt_test_images/\n"
+	";OutputVideoFolder   = ../arvt_output_speech/\n"
+	";VideoSettingsFolder = ../arvt_video_settings/\n"
+	";TempFilesFolder     =\n"
 	"\n"
 	"; Windows:\n"
 	";CmdPython = python\n"
@@ -516,6 +524,7 @@ void Fill_ProgramData(ProgramData& pdata, const mINI::INIStructure& ini_object) 
 		std::string get = ini_object.get("APPLICATION").get("ApplicationFont");
 		if (!get.empty()) {
 			copyUserStringToCharBuffer(pdata.application_font_path, sizeof(pdata.application_font_path)/sizeof(*pdata.application_font_path), get.c_str(), get.size());
+			ProgramData::clean_filepath(pdata.application_font_path);
 		}
 	}
 
@@ -698,6 +707,64 @@ void Fill_ProgramData(ProgramData& pdata, const mINI::INIStructure& ini_object) 
 			catch (const std::exception&) {
 				std::cerr << ("Unable to parse [APPLICATION].InitialOpenTab: \"" + get + "\"") << std::endl;
 			}
+		}
+	}
+
+	if (ini_object.get("APPLICATION").has("EnableCustomPaths")) {
+		std::string get = ini_object.get("APPLICATION").get("EnableCustomPaths");
+		if (!get.empty()) {
+			if (get == "true" || get == "True" || get == "TRUE" || get == "1") {
+				pdata.useCustomPaths = true;
+			} else if (get == "false" || get == "False" || get == "FALSE" || get == "0") {
+				pdata.useCustomPaths = false;
+			} else {
+				std::cerr << ("Unknown value for [APPLICATION].EnableCustomPaths: \"" + get + "\"") << std::endl;
+			}
+		}
+	}
+
+	//don't check pdata.useCustomPaths before doing this; paths should still be copied regardless
+	//blank paths are technically supported, but don't copy those
+	if (ini_object.get("APPLICATION").has("InputCommentsFolder")) {
+		std::string get = ini_object.get("APPLICATION").get("InputCommentsFolder");
+		if (!get.empty()) {
+			copyUserStringToCharBuffer(pdata.input_comments_path, sizeof(pdata.input_comments_path)/sizeof(*pdata.input_comments_path), get.c_str(), get.size());
+			ProgramData::clean_filepath(pdata.input_comments_path);
+		}
+	}
+	if (ini_object.get("APPLICATION").has("InputSplitsFolder")) {
+		std::string get = ini_object.get("APPLICATION").get("InputSplitsFolder");
+		if (!get.empty()) {
+			copyUserStringToCharBuffer(pdata.input_splits_path, sizeof(pdata.input_splits_path)/sizeof(*pdata.input_splits_path), get.c_str(), get.size());
+			ProgramData::clean_filepath(pdata.input_splits_path);
+		}
+	}
+	if (ini_object.get("APPLICATION").has("TestImagesFolder")) {
+		std::string get = ini_object.get("APPLICATION").get("TestImagesFolder");
+		if (!get.empty()) {
+			copyUserStringToCharBuffer(pdata.test_images_path, sizeof(pdata.test_images_path)/sizeof(*pdata.test_images_path), get.c_str(), get.size());
+			ProgramData::clean_filepath(pdata.test_images_path);
+		}
+	}
+	if (ini_object.get("APPLICATION").has("OutputVideoFolder")) {
+		std::string get = ini_object.get("APPLICATION").get("OutputVideoFolder");
+		if (!get.empty()) {
+			copyUserStringToCharBuffer(pdata.output_speech_path, sizeof(pdata.output_speech_path)/sizeof(*pdata.output_speech_path), get.c_str(), get.size());
+			ProgramData::clean_filepath(pdata.output_speech_path);
+		}
+	}
+	if (ini_object.get("APPLICATION").has("VideoSettingsFolder")) {
+		std::string get = ini_object.get("APPLICATION").get("VideoSettingsFolder");
+		if (!get.empty()) {
+			copyUserStringToCharBuffer(pdata.video_settings_path, sizeof(pdata.video_settings_path)/sizeof(*pdata.video_settings_path), get.c_str(), get.size());
+			ProgramData::clean_filepath(pdata.video_settings_path);
+		}
+	}
+	if (ini_object.get("APPLICATION").has("TempFilesFolder")) {
+		std::string get = ini_object.get("APPLICATION").get("TempFilesFolder");
+		if (!get.empty()) {
+			copyUserStringToCharBuffer(pdata.temporary_file_path, sizeof(pdata.temporary_file_path)/sizeof(*pdata.temporary_file_path), get.c_str(), get.size());
+			ProgramData::clean_filepath(pdata.temporary_file_path);
 		}
 	}
 

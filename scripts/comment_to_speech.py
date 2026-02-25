@@ -131,10 +131,13 @@ videoExtraArgsLookup = {
 
 #print(sys.argv[1:]);
 parser = argparse.ArgumentParser()
-parser.add_argument("input_text_file", help="text to show on screen")
-parser.add_argument("-s", "--input_speech_file", metavar="input_speech_file", required=False, help="text to read aloud")
-parser.add_argument("output_mp4_files", help="output video files (needs a '$' in its name)")
-parser.add_argument("-a", "--audio_only", required=False, help="only output audio files, no video", action="store_true")
+parser.add_argument("input_text_folder")
+parser.add_argument("input_text_filename")
+parser.add_argument("-s", "--input_speech_filename", metavar="input_speech_filename", required=False) # Same folder as text
+parser.add_argument("output_mp4_folder")
+parser.add_argument("output_mp4_filenames")
+parser.add_argument("-temp", "--temp_folder", required=False)
+parser.add_argument("-a", "--audio_only", required=False, action="store_true")
 
 parser.add_argument("image_width_input")
 parser.add_argument("image_height_input")
@@ -152,7 +155,7 @@ parser.add_argument("skip_lf_line")
 parser.add_argument("replace_escape_sequences")
 parser.add_argument("imageFormat")
 
-parser.add_argument("-n", "--video_replacement_numbers", metavar="video_replacement_numbers", required=False, help="update/generate a specific video")
+parser.add_argument("-n", "--video_replacement_numbers", metavar="video_replacement_numbers", required=False)
 parser.add_argument("speechEngine")
 parser.add_argument("voiceName")
 parser.add_argument("audioEncoder")
@@ -166,6 +169,15 @@ parser.add_argument("fps")
 parser.add_argument("faststart_flag")
 
 args = parser.parse_args()
+
+if len(args.input_text_folder) > 0 and args.input_text_folder[-1] != '/':
+	sys.exit("Bad input_text_folder")
+if len(args.output_mp4_folder) > 0 and args.output_mp4_folder[-1] != '/':
+	sys.exit("Bad output_mp4_folder")
+if args.temp_folder != None and len(args.temp_folder) > 0 and args.temp_folder[-1] != '/':
+	sys.exit("Bad temp_folder")
+if args.output_mp4_filenames.find('$') == -1:
+	sys.exit("Bad output vid file names")
 
 
 
@@ -208,11 +220,10 @@ VIDEO_VID_EXTRA_ARGS = videoExtraArgsLookup[VIDEO_VID_CODEC_name]
 VIDEO_VID_FASTSTART = int(args.faststart_flag) # Must be int() because bool("0") is True
 
 # File paths:
-input_image_text_file_path = args.input_text_file
-output_vid_file_path = args.output_mp4_files
-if output_vid_file_path.find('$') == -1:
-	sys.exit("Bad output vid file names")
-input_speech_text_file_path = args.input_speech_file
+input_image_text_file_path = args.input_text_folder + args.input_text_filename
+output_vid_temp_file_path = (args.output_mp4_folder if (args.temp_folder == None) else args.temp_folder) + args.output_mp4_filenames
+output_vid_file_path = args.output_mp4_folder + args.output_mp4_filenames
+input_speech_text_file_path = None if (args.input_speech_filename == None) else (args.input_text_folder + args.input_speech_filename)
 AUDIO_ONLY = args.audio_only
 
 # ImageMagick command arguments:
@@ -292,12 +303,18 @@ def gen_output_vid_file_path(num):
 def gen_output_wav_file_path_audio_only(num):
 	return output_vid_file_path.replace("$", str(num)) # if it's audio-only, then ".wav" is already in the file path
 def gen_output_wav_file_path_regular(num):
-	return output_vid_file_path.replace("$", str(num)) + ".wav"
+	return output_vid_temp_file_path.replace("$", str(num)) + ".wav"
+
+def gen_output_wav_temp_file_path_audio_only(num):
+	return output_vid_temp_file_path.replace("$", str(num))
+def gen_output_wav_temp_file_path_regular(num):
+	return output_vid_temp_file_path.replace("$", str(num)) + ".wav"
 
 gen_output_wav_file_path = gen_output_wav_file_path_audio_only if AUDIO_ONLY else gen_output_wav_file_path_regular
+gen_output_wav_temp_file_path = gen_output_wav_temp_file_path_audio_only if AUDIO_ONLY else gen_output_wav_temp_file_path_regular
 
 def gen_output_img_file_path(num):
-	return output_vid_file_path.replace("$", str(num)) + IMAGE_FORMAT
+	return output_vid_temp_file_path.replace("$", str(num)) + IMAGE_FORMAT
 
 
 
@@ -397,13 +414,13 @@ for i in range(len(image_text_file_lines)):
 
 	if files_count in video_replacement_set:
 		# Speech file:
-		output_file = open(gen_output_wav_file_path(files_count)+".txt", "w", encoding="utf-8")
+		output_file = open(gen_output_wav_temp_file_path(files_count)+".txt", "w", encoding="utf-8")
 		output_file.write(speech_line)
 		output_file.close()
 
 		file_already_exists = os.path.exists(gen_output_wav_file_path(files_count)) if AUDIO_ONLY else None
-		result = text_to_speech_func(gen_output_wav_file_path(files_count), gen_output_wav_file_path(files_count)+".txt")
-		os.remove(gen_output_wav_file_path(files_count)+".txt")
+		result = text_to_speech_func(gen_output_wav_file_path(files_count), gen_output_wav_temp_file_path(files_count)+".txt")
+		os.remove(gen_output_wav_temp_file_path(files_count)+".txt")
 
 		if result.returncode:
 			sys.exit("ERROR: Could not generate the audio file for video " + str(files_count))
@@ -433,6 +450,9 @@ for i in range(len(image_text_file_lines)):
 			os.remove(gen_output_img_file_path(files_count))
 
 			if result.returncode:
+				# Possible for the video and image (and maybe audio) files to get created on error; not sure if they should be removed
+				#if os.path.exists(gen_output_vid_file_path(files_count)):
+				#	os.remove(gen_output_vid_file_path(files_count))
 				sys.exit("ERROR: Could not generate the video file for video " + str(files_count))
 
 			replaced_files_count += file_already_exists

@@ -11,13 +11,20 @@ SPLIT_REGEX = "[" + SPLIT_CHARS + r"]+\S*\s+"
 ### ARGPARSE ###
 
 parser = argparse.ArgumentParser()
-parser.add_argument("input_comment_file", help="comment to split")
-parser.add_argument("output_comment_file", help="output split comment file")
+parser.add_argument("input_comment_folder")
+parser.add_argument("input_comment_filename")
+parser.add_argument("output_comment_folder")
+parser.add_argument("output_comment_filename")
 
 args = parser.parse_args()
 
-input_file_path = args.input_comment_file
-output_file_path = args.output_comment_file
+if len(args.input_comment_folder) > 0 and args.input_comment_folder[-1] != '/':
+	sys.exit("Bad input_comment_folder")
+if len(args.output_comment_folder) > 0 and args.output_comment_folder[-1] != '/':
+	sys.exit("Bad output_comment_folder")
+
+input_file_path = args.input_comment_folder + args.input_comment_filename
+output_file_path = args.output_comment_folder + args.output_comment_filename
 
 ### START SCRIPT ###
 

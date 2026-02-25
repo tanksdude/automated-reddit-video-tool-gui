@@ -30,8 +30,11 @@ textAlignmentArgsLookup = {
 ### ARGPARSE ###
 
 parser = argparse.ArgumentParser()
-parser.add_argument("input_split_comment_file", help="split comment input")
-parser.add_argument("output_image_file", help="output image file")
+parser.add_argument("input_split_comment_folder")
+parser.add_argument("input_split_comment_filename")
+parser.add_argument("output_image_folder")
+parser.add_argument("output_image_filename")
+parser.add_argument("-temp", "--temp_folder", required=False)
 
 parser.add_argument("image_width_input")
 parser.add_argument("image_height_input")
@@ -49,6 +52,13 @@ parser.add_argument("skip_lf_line")
 parser.add_argument("replace_escape_sequences")
 
 args = parser.parse_args()
+
+if len(args.input_split_comment_folder) > 0 and args.input_split_comment_folder[-1] != '/':
+	sys.exit("Bad input_split_comment_folder")
+if len(args.output_image_folder) > 0 and args.output_image_folder[-1] != '/':
+	sys.exit("Bad output_image_folder")
+if args.temp_folder != None and len(args.temp_folder) > 0 and args.temp_folder[-1] != '/':
+	sys.exit("Bad temp_folder")
 
 # Image parameters:
 IMAGE_W_BORDER = int(args.image_w_border_input)
@@ -70,8 +80,9 @@ IMAGE_SIZE = str(IMAGE_WIDTH) + "x" + str(IMAGE_HEIGHT)
 IMAGE_SIZE_EXTENDED = str(IMAGE_WIDTH + 2*IMAGE_W_BORDER) + "x" + str(IMAGE_HEIGHT + 2*IMAGE_H_BORDER)
 
 # File paths:
-input_image_text_file_path = args.input_split_comment_file
-output_img_file_path = args.output_image_file
+input_image_text_file_path = args.input_split_comment_folder + args.input_split_comment_filename
+output_img_temp_file_path = (args.output_image_folder if (args.temp_folder == None) else args.temp_folder) + args.output_image_filename
+output_img_file_path = args.output_image_folder + args.output_image_filename
 
 # ImageMagick command arguments:
 text_to_image_command_args = [MAGICK_CMD, "-size", IMAGE_SIZE, "-background", IMAGE_BACKGROUND_COLOR, "-fill", IMAGE_FONT_COLOR, "-pointsize", IMAGE_FONT_SIZE]
@@ -121,12 +132,12 @@ for line in image_text_file_lines:
 		line = line.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 	curr_file_read += line
 
-output_file = open(output_img_file_path+".txt", "w", encoding="utf-8")
+output_file = open(output_img_temp_file_path+".txt", "w", encoding="utf-8")
 output_file.write(curr_file_read)
 output_file.close()
 
-result = text_to_image_func(output_img_file_path, output_img_file_path+".txt")
-os.remove(output_img_file_path+".txt")
+result = text_to_image_func(output_img_file_path, output_img_temp_file_path+".txt")
+os.remove(output_img_temp_file_path+".txt")
 
 if result.returncode:
 	sys.exit("ERROR: Could not generate the test image " + output_img_file_path)

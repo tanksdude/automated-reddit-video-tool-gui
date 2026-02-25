@@ -139,6 +139,11 @@ Video settings: By default, this program uses H.264 and AAC codecs in an MP4 con
 	* In audio-only mode, the container will be `.wav`.
 * This whole column is not used in audio-only mode for obvious reasons.
 
+![configure paths](examples/arvt-configure-paths.png)
+
+* If you would rather use a custom location for the folders used by this application, then you can set them here.
+* Some files are created in the process of this application and get immediately deleted. If you desire, you could change the temp files location to a RAM disk to avoid writes to your drive. (Though modern operating systems have so many layers of caching so who knows if the write would even get flushed.)
+
 ![configure other](examples/arvt-configure-other.png)
 
 * To load a new font, enter its filepath and click "Load". To switch between loaded fonts, use "Font Selector".

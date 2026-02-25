@@ -67,58 +67,58 @@ void CreateApplicationFoldersIfNeeded() {
 		}
 	};
 
-	create_dir(INPUT_COMMENTS);
-	create_dir(INPUT_SPLITS);
-	create_dir(TEST_IMAGES);
-	create_dir(OUTPUT_SPEECH);
-	create_dir(VIDEO_SETTINGS);
+	create_dir(DEFAULT_INPUT_COMMENTS);
+	create_dir(DEFAULT_INPUT_SPLITS);
+	create_dir(DEFAULT_TEST_IMAGES);
+	create_dir(DEFAULT_OUTPUT_SPEECH);
+	create_dir(DEFAULT_VIDEO_SETTINGS);
 }
 
-void copyEvaluatedFileName_toCommentSplitterPath(const char* name, char* dest, size_t buf_size) {
-	strncpy(dest, inputFileName_toCommentSplitterPath(name).c_str(), buf_size);
+void copyEvaluatedFileName_toCommentSplitterPath(ProgramData& pdata) {
+	strncpy(pdata.evaluated_input_file_name,     (pdata.get_input_comments_path() + inputFileName_toCommentSplitterName(pdata.the_file_input_name)).c_str(), sizeof(pdata.evaluated_input_file_name)/sizeof(*pdata.evaluated_input_file_name));
 }
-void copyEvaluatedFileName_toCommentTestImagePath_Text(const char* name, char* dest, size_t buf_size) {
-	strncpy(dest, inputFileName_toCommentTestImagePath_Text(name).c_str(), buf_size);
+void copyEvaluatedFileName_toCommentTestImagePath_Text(ProgramData& pdata) {
+	strncpy(pdata.evaluated_input_split_1,       (pdata.get_input_splits_path()   + inputFileName_toCommentTestImageName_Text(pdata.the_file_input_name)).c_str(), sizeof(pdata.evaluated_input_split_1)/sizeof(*pdata.evaluated_input_split_1));
 }
-void copyEvaluatedFileName_toCommentTestImagePath_Speech(const char* name, char* dest, size_t buf_size) {
-	strncpy(dest, inputFileName_toCommentTestImagePath_Speech(name).c_str(), buf_size);
+void copyEvaluatedFileName_toCommentTestImagePath_Speech(ProgramData& pdata) {
+	strncpy(pdata.evaluated_input_split_2,       (pdata.get_input_splits_path()   + inputFileName_toCommentTestImageName_Speech(pdata.the_file_input_name)).c_str(), sizeof(pdata.evaluated_input_split_2)/sizeof(*pdata.evaluated_input_split_2));
 }
-void copyEvaluatedFileName_toCommentTestImagePath_TestImage(const char* name, const ImageData& id, char* dest, size_t buf_size) {
-	strncpy(dest, inputFileName_toCommentTestImagePath_TestImage(name, id.get_imageFormat().c_str()).c_str(), buf_size);
+void copyEvaluatedFileName_toCommentTestImagePath_TestImage(ProgramData& pdata, const ImageData& id) {
+	strncpy(pdata.evaluated_test_image_path,     (pdata.get_test_images_path()    + inputFileName_toCommentTestImageName_TestImage(pdata.the_file_input_name, id.get_imageFormat().c_str())).c_str(), sizeof(pdata.evaluated_test_image_path)/sizeof(*pdata.evaluated_test_image_path));
 }
-void copyEvaluatedFileName_toCommentToSpeechPath(const char* name, const VideoData& vd, char* dest, size_t buf_size) {
-	strncpy(dest, inputFileName_toCommentToSpeechPath(name, vd.get_videoContainer().c_str(), vd.audio_only_option_input).c_str(), buf_size);
+void copyEvaluatedFileName_toCommentToSpeechPath(ProgramData& pdata, const VideoData& vd) {
+	strncpy(pdata.evaluated_output_speech_path,  (pdata.get_output_speech_path()  + inputFileName_toCommentToSpeechName(pdata.the_file_input_name, vd.get_videoContainer().c_str(), vd.audio_only_option_input)).c_str(), sizeof(pdata.evaluated_output_speech_path)/sizeof(*pdata.evaluated_output_speech_path));
 }
-void copyEvaluatedFileName_toVideoSettingsPath(const char* name, char* dest, size_t buf_size) {
-	strncpy(dest, inputFileName_toVideoSettingsPath(name).c_str(), buf_size);
+void copyEvaluatedFileName_toVideoSettingsPath(ProgramData& pdata) {
+	strncpy(pdata.evaluated_video_settings_path, (pdata.get_video_settings_path() + inputFileName_toVideoSettingsName(pdata.the_file_input_name)).c_str(), sizeof(pdata.evaluated_video_settings_path)/sizeof(*pdata.evaluated_video_settings_path));
 }
 
-std::string inputFileName_toCommentSplitterPath(const char* name) {
-	return INPUT_COMMENTS + std::string(name) + ".txt";
+std::string inputFileName_toCommentSplitterName(const char* name) {
+	return std::string(name) + ".txt";
 }
-std::string inputFileName_toCommentTestImagePath_Text(const char* name) {
-	return INPUT_SPLITS + std::string(name) + "_text.txt";
+std::string inputFileName_toCommentTestImageName_Text(const char* name) {
+	return std::string(name) + "_text.txt";
 }
-std::string inputFileName_toCommentTestImagePath_Speech(const char* name) {
-	return INPUT_SPLITS + std::string(name) + "_speech.txt";
+std::string inputFileName_toCommentTestImageName_Speech(const char* name) {
+	return std::string(name) + "_speech.txt";
 }
-std::string inputFileName_toCommentTestImagePath_TestImage(const char* name, const char* format) {
-	return TEST_IMAGES + std::string(name) + "_image" + std::string(format);
+std::string inputFileName_toCommentTestImageName_TestImage(const char* name, const char* format) {
+	return std::string(name) + "_image" + std::string(format);
 }
-std::string inputFileName_toCommentToSpeechPath(const char* name, const char* container, bool audio_only) {
+std::string inputFileName_toCommentToSpeechName(const char* name, const char* container, bool audio_only) {
 	if (audio_only) {
-		return OUTPUT_SPEECH + std::string(name) + "_$.wav";
+		return std::string(name) + "_$.wav";
 	} else {
-		return OUTPUT_SPEECH + std::string(name) + "_$" + std::string(container);
+		return std::string(name) + "_$" + std::string(container);
 	}
 }
-std::string inputFileName_toCommentToSpeechPath_getFileExplorerName(const char* name, const char* container, bool audio_only) {
-	std::string path = inputFileName_toCommentToSpeechPath(name, container, audio_only);
+std::string inputFileName_toCommentToSpeechName_getFileExplorerName(const char* name, const char* container, bool audio_only) {
+	std::string path = inputFileName_toCommentToSpeechName(name, container, audio_only);
 	std::replace(path.begin(), path.end(), '$', '1');
 	return path;
 }
-std::string inputFileName_toVideoSettingsPath(const char* name) {
-	return VIDEO_SETTINGS + std::string(name) + ".ini";
+std::string inputFileName_toVideoSettingsName(const char* name) {
+	return std::string(name) + ".ini";
 }
 
 //helper function using WinAPI to not spawn a new command prompt
@@ -302,6 +302,10 @@ int revealFileExplorer_folderOnly(const char* path) {
 }
 
 int getListOfOldFiles(const char* dir, int hourCount, std::vector<std::string>& deleteFileList) {
+	if (!std::filesystem::is_directory(dir)) {
+		return 1;
+	}
+
 	auto nowTime = std::chrono::file_clock::now();
 	for (const auto& file : std::filesystem::directory_iterator(dir)) {
 		if (!std::filesystem::is_regular_file(file)) [[unlikely]] {
@@ -332,17 +336,37 @@ int deleteAllOldFiles(const std::vector<std::string>& fileList) {
 
 
 
-int call_comment_splitter(const char* name, const ProgramData& pdata) {
-	const std::string input_path = inputFileName_toCommentSplitterPath(name);
-	const std::string output_path = inputFileName_toCommentTestImagePath_Text(name);
-	const std::string command = pdata.get_pythonCmd() + " ../scripts/comment_splitter.py \"" + input_path + "\" \"" + output_path + "\"";
+int call_comment_splitter(const ProgramData& pdata) {
+	const std::string input_folder = pdata.get_input_comments_path();
+	const std::string output_folder = pdata.get_input_splits_path();
+
+	const std::string command = pdata.get_pythonCmd() + " ../scripts/comment_splitter.py" +
+		" \"" + input_folder + "\"" +
+		" \"" + inputFileName_toCommentSplitterName(pdata.the_file_input_name) + "\"" +
+		" \"" + output_folder + "\"" +
+		" \"" + inputFileName_toCommentTestImageName_Text(pdata.the_file_input_name) + "\"";
+
+	#ifdef _WIN32
+	if (command.size() > 4000) {
+		std::cout << "Extremely long command for comment_splitter.py, possibly erroring" << std::endl;
+	}
+	#endif
+
 	return system_helper(command.c_str(), true);
 }
 
-int call_comment_test_image(const char* name, const ProgramData& pdata, const ImageData& idata) {
-	const std::string text_path = inputFileName_toCommentTestImagePath_Text(name);
-	const std::string image_path = inputFileName_toCommentTestImagePath_TestImage(name, idata.get_imageFormat().c_str());
-	const std::string command = pdata.get_pythonCmd() + " ../scripts/comment_test_image.py \"" + std::string(text_path) + "\" \"" + std::string(image_path) + "\"" +
+int call_comment_test_image(const ProgramData& pdata, const ImageData& idata) {
+	const std::string input_folder = pdata.get_input_splits_path();
+	const std::string output_folder = pdata.get_test_images_path();
+	const std::string temp_folder = pdata.get_temporary_file_path();
+
+	const std::string command = pdata.get_pythonCmd() + " ../scripts/comment_test_image.py" +
+		" \"" + input_folder + "\"" +
+		" \"" + inputFileName_toCommentTestImageName_Text(pdata.the_file_input_name) + "\"" +
+		" \"" + output_folder + "\"" +
+		" \"" + inputFileName_toCommentTestImageName_TestImage(pdata.the_file_input_name, idata.get_imageFormat().c_str()) + "\"" +
+		(temp_folder.empty() ? "" : (" -temp \"" + temp_folder + "\"")) +
+
 		" "   + idata.get_image_width_input() +
 		" "   + idata.get_image_height_input() +
 		" "   + idata.get_image_w_border_input() +
@@ -367,12 +391,19 @@ int call_comment_test_image(const char* name, const ProgramData& pdata, const Im
 	return system_helper(command.c_str(), false);
 }
 
-int call_comment_to_speech(const char* name, const ProgramData& pdata, const ImageData& idata, const AudioData& adata, const VideoData& vdata) {
-	const std::string text_path = inputFileName_toCommentTestImagePath_Text(name);
-	const std::string speech_path = inputFileName_toCommentTestImagePath_Speech(name);
-	const std::string video_path = inputFileName_toCommentToSpeechPath(name, vdata.get_videoContainer().c_str(), vdata.audio_only_option_input);
-	const std::string command = pdata.get_pythonCmd() + " ../scripts/comment_to_speech.py \"" + std::string(text_path) + "\" \"" + std::string(video_path) + "\"" +
-		(vdata.use_speech_text ? (" -s \"" + std::string(speech_path) + "\"") : "") +
+int call_comment_to_speech(const ProgramData& pdata, const ImageData& idata, const AudioData& adata, const VideoData& vdata) {
+	const std::string input_folder = pdata.get_input_splits_path();
+	const std::string output_folder = pdata.get_output_speech_path();
+	const std::string temp_folder = pdata.get_temporary_file_path();
+
+	const std::string command = pdata.get_pythonCmd() + " ../scripts/comment_to_speech.py" +
+		" \"" + input_folder + "\"" +
+		" \"" + inputFileName_toCommentTestImageName_Text(pdata.the_file_input_name) + "\"" +
+		(vdata.use_speech_text ? (" -s \"" + inputFileName_toCommentTestImageName_Speech(pdata.the_file_input_name) + "\"") : "") +
+		" \"" + output_folder + "\"" +
+		" \"" + inputFileName_toCommentToSpeechName(pdata.the_file_input_name, vdata.get_videoContainer().c_str(), vdata.audio_only_option_input) + "\"" +
+		(temp_folder.empty() ? "" : (" -temp \"" + temp_folder + "\"")) +
+
 		" "   + idata.get_image_width_input() +
 		" "   + idata.get_image_height_input() +
 		" "   + idata.get_image_w_border_input() +

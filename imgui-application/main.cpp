@@ -126,8 +126,9 @@ auto filenameCleaningFunc_inputFile = [] (ImGuiInputTextCallbackData* data) {
 	return filenameCleaningFunc(data);
 };
 auto filepathCleaningFunc = [] (ImGuiInputTextCallbackData* data) {
-	//identical to filenameCleaningFunc but allows slashes (and colons)
-	if (data->EventChar == '*'  ||
+	//identical to filenameCleaningFunc but allows forward slashes (and colons)
+	if (data->EventChar == '\\' ||
+	    data->EventChar == '*'  ||
 	    data->EventChar == '\"' ||
 	    data->EventChar == '?'  ||
 	    data->EventChar == '<'  ||
@@ -198,7 +199,7 @@ std::atomic_bool thread_func_speech_working = false;
  * threads exit on program exit...
  */
 void thread_func_speech(const ProgramData* pdata, const ImageData* idata, const AudioData* adata, const VideoData* vdata) {
-	int result = ARVT::call_comment_to_speech((*pdata).the_file_input_name, *pdata, *idata, *adata, *vdata);
+	int result = ARVT::call_comment_to_speech(*pdata, *idata, *adata, *vdata);
 	thread_func_speech_working.store(false);
 	//return result;
 
@@ -465,7 +466,7 @@ int main(int, char**) {
 
 						ImGui::SetCursorPosY(ImGui::GetCursorPosY() - style.FramePadding.y); // Again
 						if (ImGui::ImageButton("##Folder Icon", file_folder_texture, ImageButtonSize)) {
-							int result = ARVT::revealFileExplorer_folderOnly(ARVT::INPUT_COMMENTS.c_str());
+							int result = ARVT::revealFileExplorer_folderOnly(pdata.get_input_comments_path().c_str());
 							if (result) {
 								global_log.AddLog("[warn]", "File Explorer", "Some error");
 							}
@@ -485,7 +486,7 @@ int main(int, char**) {
 							filenameIsLocked = !filenameIsLocked;
 						}
 
-						ARVT::copyEvaluatedFileName_toCommentSplitterPath(pdata.the_file_input_name, pdata.evaluated_input_file_name, IM_ARRAYSIZE(pdata.evaluated_input_file_name));
+						ARVT::copyEvaluatedFileName_toCommentSplitterPath(pdata);
 						ImGui::InputText("##Input Comment Path", pdata.evaluated_input_file_name, IM_ARRAYSIZE(pdata.evaluated_input_file_name), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 						ImGui::SameLine();
 
@@ -545,8 +546,8 @@ int main(int, char**) {
 
 						ImGui::SeparatorText("Image Text");
 
-						ARVT::copyEvaluatedFileName_toCommentTestImagePath_Text(pdata.the_file_input_name, pdata.evaluated_input_split_1, IM_ARRAYSIZE(pdata.evaluated_input_split_1));
-						ARVT::copyEvaluatedFileName_toCommentTestImagePath_Speech(pdata.the_file_input_name, pdata.evaluated_input_split_2, IM_ARRAYSIZE(pdata.evaluated_input_split_2));
+						ARVT::copyEvaluatedFileName_toCommentTestImagePath_Text(pdata);
+						ARVT::copyEvaluatedFileName_toCommentTestImagePath_Speech(pdata);
 
 						ImGui::InputText("##Input Split 1 Path", pdata.evaluated_input_split_1, IM_ARRAYSIZE(pdata.evaluated_input_split_1), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 						ImGui::SameLine();
@@ -682,11 +683,11 @@ int main(int, char**) {
 						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
 						ImGui::Combo("Image Format", &idata.imageFormatArray_current, idata.imageFormatArray.data(), idata.imageFormatArray.size());
 						ImGui::PopItemWidth();
-						ARVT::copyEvaluatedFileName_toCommentTestImagePath_TestImage(pdata.the_file_input_name, idata, pdata.evaluated_test_image_path, IM_ARRAYSIZE(pdata.evaluated_test_image_path));
+						ARVT::copyEvaluatedFileName_toCommentTestImagePath_TestImage(pdata, idata);
 						ImGui::InputText("##Test Image Path", pdata.evaluated_test_image_path, IM_ARRAYSIZE(pdata.evaluated_test_image_path), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 
 						if (ImGui::Button("Create " ICON_FA_ARROW_RIGHT, ImVec2(-FLT_MIN, 0.0f))) {
-							int result = ARVT::call_comment_test_image(pdata.the_file_input_name, pdata, idata);
+							int result = ARVT::call_comment_test_image(pdata, idata);
 							if (result) {
 								global_log.AddLog("[error]", "Image", "Encountered an error when making the test image");
 								global_state.createdTestImage_texture = global_state.createdTestImage_width = global_state.createdTestImage_height = 0;
@@ -710,7 +711,7 @@ int main(int, char**) {
 						ImGui::PopItemWidth();
 						ImGui::Checkbox("Audio Only", &vdata.audio_only_option_input);
 
-						ARVT::copyEvaluatedFileName_toCommentToSpeechPath(pdata.the_file_input_name, vdata, pdata.evaluated_output_speech_path, IM_ARRAYSIZE(pdata.evaluated_output_speech_path));
+						ARVT::copyEvaluatedFileName_toCommentToSpeechPath(pdata, vdata);
 						ImGui::InputText("##Output Videos Path", pdata.evaluated_output_speech_path, IM_ARRAYSIZE(pdata.evaluated_output_speech_path), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 
 						if (!filenameIsLocked) { ImGui::EndDisabled(); }
@@ -762,14 +763,14 @@ int main(int, char**) {
 						if (!filenameIsLocked) { ImGui::BeginDisabled(); }
 
 						if (ImGui::Button("Split!", ImVec2(-FLT_MIN, 0.0f))) {
-							int result = ARVT::call_comment_splitter(pdata.the_file_input_name, pdata);
+							int result = ARVT::call_comment_splitter(pdata);
 							if (result) {
 								strcpy(pdata.input_split_1_data, "error");
 								global_state.input_split_1_data_is_bad = true;
 								global_log.AddLog("[error]", "Splitter", "Encountered an error when splitting the input file");
 							} else {
 								global_log.AddLog("[info]", "Splitter", ("Successfully split " + std::string(pdata.evaluated_input_file_name)).c_str());
-								int result = ARVT::copyFileToCStr(ARVT::inputFileName_toCommentTestImagePath_Text(pdata.the_file_input_name).c_str(), pdata.input_split_1_data, IM_ARRAYSIZE(pdata.input_split_1_data));
+								int result = ARVT::copyFileToCStr((pdata.get_input_splits_path() + ARVT::inputFileName_toCommentTestImageName_Text(pdata.the_file_input_name)).c_str(), pdata.input_split_1_data, IM_ARRAYSIZE(pdata.input_split_1_data));
 								if (result) {
 									strcpy(pdata.input_split_1_data, "error reading");
 									global_state.input_split_1_data_is_bad = true;
@@ -790,7 +791,7 @@ int main(int, char**) {
 
 						const float write_settings_width = ImGui::GetContentRegionAvail().x * .75f;
 						if (ImGui::BeginPopup("Settings")) {
-							ARVT::copyEvaluatedFileName_toVideoSettingsPath(pdata.the_file_input_name, pdata.evaluated_video_settings_path, IM_ARRAYSIZE(pdata.evaluated_video_settings_path));
+							ARVT::copyEvaluatedFileName_toVideoSettingsPath(pdata);
 							ImGui::PushItemWidth(write_settings_width);
 							ImGui::InputText("##Settings File Path", pdata.evaluated_video_settings_path, IM_ARRAYSIZE(pdata.evaluated_video_settings_path), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
 							ImGui::PopItemWidth();
@@ -884,7 +885,7 @@ int main(int, char**) {
 
 						if (ImGui::Button("Reveal in File Explorer##Final Video", ImVec2(-FLT_MIN, 0.0f))) {
 							//yes it's *kinda* a hack to open on just the first video, but it's better than iterating through every file in the folder and checking what's available
-							int result = ARVT::revealFileExplorer_folderBackup(ARVT::inputFileName_toCommentToSpeechPath_getFileExplorerName(pdata.the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current], vdata.audio_only_option_input).c_str(), pdata);
+							int result = ARVT::revealFileExplorer_folderBackup((pdata.get_output_speech_path() + ARVT::inputFileName_toCommentToSpeechName_getFileExplorerName(pdata.the_file_input_name, vdata.videoContainerArray[vdata.videoContainerArray_current], vdata.audio_only_option_input)).c_str(), pdata);
 							if (result) {
 								global_log.AddLog("[warn]", "File Explorer", "Some error");
 							}
@@ -904,9 +905,10 @@ int main(int, char**) {
 
 					if (THREAD_IS_WORKING) { ImGui::BeginDisabled(); }
 
-					if (ImGui::BeginTable("Configure##table1", 3, table_flags)) {
+					if (ImGui::BeginTable("Configure##table1", 4, table_flags)) {
 						ImGui::TableSetupColumn("Audio");
 						ImGui::TableSetupColumn("Video");
+						ImGui::TableSetupColumn("Paths");
 						ImGui::TableSetupColumn("Other");
 						ImGui::TableHeadersRow();
 						ImGui::TableNextRow();
@@ -1108,6 +1110,26 @@ int main(int, char**) {
 
 						ImGui::TableNextColumn();
 
+						ImGui::Checkbox("Enable custom paths", &pdata.useCustomPaths);
+						if (ImGui::Button("Reset##Main Paths")) {
+							pdata.ResetFilePaths();
+						}
+						ImGuiHelpers::HelpMarker("Paths MUST end in '/'.");
+
+						// These should probably be disabled when the lock icon is locked...
+						if (!pdata.useCustomPaths) { ImGui::BeginDisabled(); }
+						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.5f);
+						ImGui::InputText("Input Comments",        pdata.input_comments_path, IM_ARRAYSIZE(pdata.input_comments_path), ImGuiInputTextFlags_CallbackCharFilter, filepathCleaningFunc);
+						ImGui::InputText("Splits",                pdata.input_splits_path,   IM_ARRAYSIZE(pdata.input_splits_path),   ImGuiInputTextFlags_CallbackCharFilter, filepathCleaningFunc);
+						ImGui::InputText("Test Images",           pdata.test_images_path,    IM_ARRAYSIZE(pdata.test_images_path),    ImGuiInputTextFlags_CallbackCharFilter, filepathCleaningFunc);
+						ImGui::InputText("Output Videos",         pdata.output_speech_path,  IM_ARRAYSIZE(pdata.output_speech_path),  ImGuiInputTextFlags_CallbackCharFilter, filepathCleaningFunc);
+						ImGui::InputText("Video Settings",        pdata.video_settings_path, IM_ARRAYSIZE(pdata.video_settings_path), ImGuiInputTextFlags_CallbackCharFilter, filepathCleaningFunc);
+						ImGui::InputText("Temp files (optional)", pdata.temporary_file_path, IM_ARRAYSIZE(pdata.temporary_file_path), ImGuiInputTextFlags_CallbackCharFilter, filepathCleaningFunc);
+						ImGui::PopItemWidth();
+						if (!pdata.useCustomPaths) { ImGui::EndDisabled(); }
+
+						ImGui::TableNextColumn();
+
 						ImGui::SeparatorText("Application");
 
 						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.5f);
@@ -1160,10 +1182,6 @@ int main(int, char**) {
 							}
 						}
 
-						ImGui::SeparatorText("Paths");
-						ImGui::Text("TODO: three main dirs and a temp dir");
-						//other TODO: display what the commands will be (though maybe this should be in the main section?)
-
 						ImGui::SeparatorText("Misc");
 
 						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.5f);
@@ -1200,11 +1218,11 @@ int main(int, char**) {
 						if (ImGui::Button("Query images")) {
 							deleteFileList.clear();
 							deleteFileLogger.Clear();
-							int result = ARVT::getListOfOldFiles(ARVT::TEST_IMAGES.c_str(), pdata.fileDeleteAgeList_values[pdata.fileDeleteAgeList_current], deleteFileList);
+							int result = ARVT::getListOfOldFiles(pdata.get_test_images_path().c_str(), pdata.fileDeleteAgeList_values[pdata.fileDeleteAgeList_current], deleteFileList);
 							if (result) {
 								global_log.AddLog("[error]", "Query Files", "Encountered an error when querying images");
 							} else {
-								global_log.AddLog("[info]", "Query Files", ("Successfully queried " + ARVT::TEST_IMAGES).c_str());
+								global_log.AddLog("[info]", "Query Files", ("Successfully queried " + pdata.get_test_images_path()).c_str());
 								deleteFileLogger.AddLogSpecific("Found %d files that are more than %s old:\n", deleteFileList.size(), pdata.fileDeleteAgeList[pdata.fileDeleteAgeList_current]);
 								for (const auto& f : deleteFileList) {
 									deleteFileLogger.AddLogSpecific("%s\n", f.c_str());
@@ -1215,11 +1233,11 @@ int main(int, char**) {
 						if (ImGui::Button("Query videos")) {
 							deleteFileList.clear();
 							deleteFileLogger.Clear();
-							int result = ARVT::getListOfOldFiles(ARVT::OUTPUT_SPEECH.c_str(), pdata.fileDeleteAgeList_values[pdata.fileDeleteAgeList_current], deleteFileList);
+							int result = ARVT::getListOfOldFiles(pdata.get_output_speech_path().c_str(), pdata.fileDeleteAgeList_values[pdata.fileDeleteAgeList_current], deleteFileList);
 							if (result) {
 								global_log.AddLog("[error]", "Query Files", "Encountered an error when querying videos");
 							} else {
-								global_log.AddLog("[info]", "Query Files", ("Successfully queried " + ARVT::OUTPUT_SPEECH).c_str());
+								global_log.AddLog("[info]", "Query Files", ("Successfully queried " + pdata.get_output_speech_path()).c_str());
 								deleteFileLogger.AddLogSpecific("Found %d files that are more than %s old:\n", deleteFileList.size(), pdata.fileDeleteAgeList[pdata.fileDeleteAgeList_current]);
 								for (const auto& f : deleteFileList) {
 									deleteFileLogger.AddLogSpecific("%s\n", f.c_str());
