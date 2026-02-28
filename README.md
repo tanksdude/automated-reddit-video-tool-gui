@@ -197,10 +197,6 @@ Video settings: By default, this program uses H.264 and AAC codecs in an MP4 con
 
 8. You're done!
 
-## License
-
-GNU General Public License v3.0
-
 ## Contributing
 
 Feel free to!
@@ -208,6 +204,10 @@ Feel free to!
 This program is not intended to be complex, so don't submit/request huge features.
 
 Development is inconsistent and may cease at any moment, so don't count on your requests getting answered.
+
+## License
+
+GNU General Public License v3.0
 
 ### Externals' licenses
 
