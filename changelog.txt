@@ -1,3 +1,21 @@
+1.0.0 "full release"
+* main highlights:
+	* custom folder locations
+	* include a default font and fix the arrows
+	* async video creation
+	* better logger messages
+	* more efficient polling of available voices
+	* [Linux] support most file managers
+	* [Windows] experimental support for wsay
+	* added an application icon, also [Windows] added an executable icon
+* INI: renamed "VoiceEngine" to "SpeechEngine"
+* option to set Python command
+* old file deletion button
+* color "error" text in preview boxes
+* compressed asset images
+* changed default window size to 16:10
+* renamed the executable again
+
 0.5.0
 * organization: renamed the main folders to start with "arvt_" and moved the Python scripts to their own folder
 * fixed eSpeak voice names

@@ -286,7 +286,7 @@ int main(int, char**) {
 	glfwWindowHint(GLFW_SCALE_TO_MONITOR, pdata.application_scale_to_monitor ? GLFW_TRUE : GLFW_FALSE);
     // Create window with graphics context
     float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()); // Valid on GLFW 3.3+ only
-    GLFWwindow* window = glfwCreateWindow(pdata.initial_windowWidth, pdata.initial_windowHeight, "Automated Reddit Video Tool GUI v0.5.0", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(pdata.initial_windowWidth, pdata.initial_windowHeight, "Automated Reddit Video Tool GUI v1.0.0", nullptr, nullptr);
     if (window == nullptr)
         return 1;
     glfwMakeContextCurrent(window);
@@ -380,7 +380,7 @@ int main(int, char**) {
 
 	refreshApplicationFontSize();
 	refreshApplicationFontName(true);
-	style.Colors[ImGuiCol_WindowBg] = pdata.window_color; //TODO: have the color selector be for pdata.window_color, so the style is updated every frame
+	style.Colors[ImGuiCol_WindowBg] = pdata.window_color;
 
 	global_log.AddLog("[info]", "Startup");
 
@@ -485,6 +485,10 @@ int main(int, char**) {
 							clear_input_data(filenameIsLocked, global_state);
 							filenameIsLocked = !filenameIsLocked;
 						}
+
+						// #if _DEBUG
+						// ImGui::Checkbox("Demo Window", &show_demo_window);
+						// #endif
 
 						ARVT::copyEvaluatedFileName_toCommentSplitterPath(pdata);
 						ImGui::InputText("##Input Comment Path", pdata.evaluated_input_file_name, IM_ARRAYSIZE(pdata.evaluated_input_file_name), ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_ElideLeft);
@@ -1152,7 +1156,7 @@ int main(int, char**) {
 								ImGui::EndCombo();
 							}
 						}
-						if (ImGui::DragFloat("Font Size", &pdata.application_font_size, 0.20f, 8.0f, 60.0f, "%.0f")) {
+						if (ImGui::DragFloat("Font Size", &pdata.application_font_size, 0.20f, 8.0f, 60.0f, "%.0f")) { // 20 is the "default" size, <=0 not accepted
 							refreshApplicationFontSize();
 						}
 						ImGui::InputText("New Font Path", pdata.application_font_path, IM_ARRAYSIZE(pdata.application_font_path), ImGuiInputTextFlags_CallbackCharFilter, filepathCleaningFunc);
@@ -1169,7 +1173,7 @@ int main(int, char**) {
 						ImGui::PopItemWidth();
 
 						ImGui::ColorEdit3("Background Color", (float*)&pdata.background_color);
-						ImGui::ColorEdit4("Window Color", (float*)&style.Colors[ImGuiCol_WindowBg]); //TODO
+						ImGui::ColorEdit4("Window Color", (float*)&style.Colors[ImGuiCol_WindowBg]);
 
 						if (ImGui::Checkbox("Extra Codecs", &pdata.useExtraCodecs)) {
 							if (!pdata.useExtraCodecs) {
@@ -1193,7 +1197,7 @@ int main(int, char**) {
 						#endif
 						ImGui::PopItemWidth();
 
-						#if 1
+						#if _DEBUG
 						ImGui::Checkbox("Demo Window", &show_demo_window);
 						#endif
 
@@ -1252,7 +1256,7 @@ int main(int, char**) {
 
 						ImGui::SeparatorText("Delete");
 
-						//only allowed to delete what's in the list: if something new suddenly meets the cutoff, it's spared; if something old gets its modified time changed, it's gone
+						// Only allowed to delete what's in the list: if something new suddenly meets the cutoff, it's spared; if something old gets its modified time changed, it's gone
 						if (ImGui::BeginPopup("Delete queried files")) {
 							//centering the text or buttons:
 							//const float text_size = ImGui::CalcTextSize("Are you sure? This cannot be undone.").x;
@@ -1363,8 +1367,10 @@ int main(int, char**) {
 			ImGui::PopStyleVar(); //ImGuiStyleVar_WindowBorderSize
 		}
 
+		#if _DEBUG
 		if (show_demo_window)
 			ImGui::ShowDemoWindow(&show_demo_window);
+		#endif
 
 		/* start ImGui code */
 

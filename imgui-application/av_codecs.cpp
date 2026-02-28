@@ -309,7 +309,7 @@ const VideoCodecData CODEC_VIDEO_VP9 = {
 	.isLossless    = false,
 	.supportsAlpha = true,
 	.information_text = "About the same quality as HEVC with faster encode times. "
-	                    "(Though it has very poor support for multithreading, so outside of this application it will probably be slower so you might perfer HEVC.)\n\n"
+	                    "(Though it has very poor support for multithreading, so outside of this application it will probably be slower so you might prefer HEVC.)\n\n"
 	                    "This application does 1-pass encoding, though the codec was designed with 2-pass in mind."
 };
 

@@ -175,7 +175,6 @@ int SpawnDebugConsole() {
 }
 
 int copyFileToCStr(const char* path, char* dest, int buf_size) {
-	//note: this vvv call can throw
 	if (!std::filesystem::exists(path)) {
 		return 1;
 	}
@@ -204,7 +203,6 @@ int copyFileToCStr(const char* path, char* dest, int buf_size) {
 }
 
 int copy_file(const char* path, const char* newPath) {
-	//TODO: this can throw
 	if (( std::filesystem::exists(path)    && std::filesystem::is_regular_file(path)) &&
 	    (!std::filesystem::exists(newPath) || std::filesystem::is_regular_file(newPath))) {
 		std::filesystem::copy_file(path, newPath, std::filesystem::copy_options::overwrite_existing);
@@ -216,7 +214,6 @@ int copy_file(const char* path, const char* newPath) {
 
 //note: this also checks for existence using <filesystem>
 int revealFileExplorer(const char* path, const ProgramData& pdata) {
-	//TODO: this can throw
 	if (!std::filesystem::is_regular_file(path)) {
 		return 1;
 	}

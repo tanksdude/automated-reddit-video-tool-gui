@@ -17,7 +17,7 @@ const std::string DEFAULT_VIDEO_SETTINGS = "../arvt_video_settings/";
 // Public methods:
 
 template <int buf_size = 64>
-int readPipeIntoString(const char* cmd, std::vector<std::string>& lines); 
+int readPipeIntoString(const char* cmd, std::vector<std::string>& lines);
 // Templates can be declared in headers if you define *every* instantiation in the source file
 
 void CreateApplicationFoldersIfNeeded();

@@ -91,4 +91,4 @@ output_file.close()
 ### FINISH ###
 
 end_time = time.time()
-print(f"Wrote {output_file_path} in {(end_time - start_time):.3f}s")
+print(f"Split text in {(end_time - start_time):.3f}s")

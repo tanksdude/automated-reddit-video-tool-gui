@@ -133,8 +133,9 @@ Video settings: By default, this program uses H.264 and AAC codecs in an MP4 con
 ![configure video](examples/arvt-configure-video.png)
 
 * "FPS" can use the dropdown for common values or "Custom FPS" to enter something more specific.
-* Each video encoder has different options available for fine-tuning. *Most* lossy codecs will have a bitrate slider. Some codecs have other options, most of which are compression/quality levels.
+* Each video encoder has different options available for fine-tuning. *Most* lossy codecs will have a quality (CRF) slider. Some codecs have other options, most of which are compression/quality levels.
 * "Container" is the file format to be used for the video. `.mkv` supports everything, if you're unsure about what to pick.
+	* The videos will fail to be created if the container does not support the codecs.
 	* `-movflags=+faststart` is available for some containers, such as `.mp4`. It's not necessary.
 	* In audio-only mode, the container will be `.wav`.
 * This whole column is not used in audio-only mode for obvious reasons.
@@ -199,6 +200,14 @@ Video settings: By default, this program uses H.264 and AAC codecs in an MP4 con
 ## License
 
 GNU General Public License v3.0
+
+## Contributing
+
+Feel free to!
+
+This program is not intended to be complex, so don't submit/request huge features.
+
+Development is inconsistent and may cease at any moment, so don't count on your requests getting answered.
 
 ### Externals' licenses
 
